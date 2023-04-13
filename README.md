@@ -1,92 +1,424 @@
-# webcore 10 
+## Webcore Platform
+
+### Single Platform can be used for Admin Panel or Web CMS (built according to your needs)
+
+Documentation in https://dandisy.github.io
+
+## 1. Webcore
+### Installation
+
+Copy, paste and hit the Enter key in console line by line
+
+* Using Git
+
+        git clone https://github.com/dandisy/webcore.git
+
+        cd webcore
+
+        composer install
+
+        cp .env.example .env
+
+Make sure your server, create "webcore" database, edit .env using your favorite editor, 
+for example using nano editor, run this in console
+
+    sudo nano .env
+
+then
+
+    php artisan key:generate
+
+* Using Composer
+
+        composer create-project dandisy/webcore {your-project-name}
+
+        cd {your-project-name}
+
+then
+
+    php artisan migrate --seed
+
+    php artisan storage:link
+
+now get its all on your favorite browser
+
+    http://localhost/webcore/public
+
+    and
+
+    http://localhost/webcore/public/admin
+
+Default users are
+
+    - superadminstrator@app.com
+    - administrator@app.com
+    - user@app.com
+
+    with default password is password
+
+--OPTIONAL--
+
+if you want to activate oauth,
+
+edit the uri oauth in vue files in resources/assets/js/components/passport
+
+    php artisan passport:keys
+
+    npm install
+
+    npm run dev
+
+then you can access oauth admin panel 
+to manage your oauth client in 
+
+    http://localhost/webcore/public/oauth-admin
+
+### Usage
+
+* As Admin Panel (no public site in frontend)
+
+#### run these artisan commands in your console
+
+if you have schema model file, change YourModel to the name of model to be generate 
+
+    php artisan generate:api_scaffold YourModel --fieldsFile=YourModel.json --datatables=true
+
+or if you want to specify field interactively in console
+
+    php artisan generate:api_scaffold YourModel --datatables=true
+
+* As Web CMS :
+
+#### Concept
+
+    Admin Page - UI Component - Front Page
+
+1.  Backend Page (Admin)
+    
+    Scope of Admin Page :    
+    provide content management, presentation management, asset management and configuration
+    
+2. UI Component (just a part of page)
+
+    Scope of UI Component (widget) :    
+    provide reusable part of UI (widget) to be used in template of page (with layout positions),
+    (*and provide tracking of user interaction for personalization)
+         
+    Scope of Page :    
+    layouting and styling UI Component globaly as a Page by incorporating a template
+    
+3. Frontend Page
+
+    Scope of Front Page :    
+    provide User Experience with content personalization
+
+#### run these artisan commands in your console
+
+    php artisan generate:api_scaffold Page --fieldsFile=Page.json --datatables=true --prefix=admin --logs
+
+    php artisan generate:api_scaffold Post --fieldsFile=Post.json --datatables=true --prefix=admin --logs
+
+then run
+
+    composer require dandisy/webcore-page:dev-master
+
+    php artisan vendor:publish --provider="Webcore\Page\PageServiceProvider" --tag=config
+
+if you want Webcore Front Page System themes & components sample code
+
+download it in https://github.com/dandisy/themes (please don't clone!)
+
+then extract to your project root directory
+
+see https://github.com/dandisy/webcore-page for more info
+
+then
+
+    composer require dandisy/webcore-menu:dev-master
+
+    php artisan vendor:publish --provider="Harimayco\Menu\MenuServiceProvider"
+
+    php artisan vendor:publish --provider="Webcore\Menu\MenuServiceProvider" --tag=models
+
+    php artisan migrate
+
+see https://github.com/dandisy/webcore-menu for more info
+
+for tidiness, you can arrange Admin Page side menu in resources/views/layouts/menu.blade.php
+
+### Ready to Use
+
+If you still confused with above usage instruction you can explore your self and try to install ready to use webcore sample as website cms
+
+download it in https://github.com/dandisy/webcore-sample
+
+or for better user experience CMS structure, with https://github.com/dandisy/elogui or https://github.com/dandisy/webcore-presentation
+
+download it in https://github.com/dandisy/webcore-cms
+
+### Features
+
+1. Admin Template
+
+    ![AdminLTE](https://camo.githubusercontent.com/e3bbc646d6ff473da2dd6cede2c968846a6982a6/68747470733a2f2f61646d696e6c74652e696f2f41646d696e4c5445322e706e67)
+
+2. File Manager
+
+    ![File Manager](https://cloud.githubusercontent.com/assets/74367/15646143/77016990-265c-11e6-9ecc-d82ae2c74f71.png)
+
+3. Menu Manager
+
+    ![Menu Manager](https://raw.githubusercontent.com/harimayco/wmenu-builder/master/screenshot.png)
+
+4. Image Manipulation
+
+    to manipulate image use 
+    
+        http://localhost/webcore/public/img/{path}?{param=value}
+
+    default {path} is configured relative to public_path, see .env for FILESYSTEM_DRIVER and config/filesystems.php
+        
+    see Glide documentation in http://glide.thephpleague.com for manual guide
+
+5. Laravel Generator based on http://labs.infyom.com/laravelgenerator with Additional features
+
+    - Date Time Picker (htmltype = date-picker, time-picker or datetime-picker)
+    - Select2 (all select input will be select2, for multiple use htmltype = multi-select)
+    - Two side Multiple Select (htmltype = two-side-select)
+    - HTML Text Editor (htmltype = text-editor)
+    - File Manager (htmltype = file-manager or files-manager)
+    - Nullable field in migration (console option = n, or in json schema file using dbNullable = true)
+    - Log fields : created_by and updated_by (artisan command option = --logs)
+    - Related Dropdown (in console, use --relations option) : add view model in controller, and relational input form in view (htmltype = select,relation:{view-model}={field-to-show}={field-as-value})
+    - Related Form (in console, use --relations option) : add view model in controller, and relational input form in view (dbtype = table and htmltype = related-form,related-field1,related-field2,related-field3,...)
+    - Component and theme directory reader generator (htmltype = select,component or select,theme)
+    - Model directory reader generator (htmltype = select,model)
+
+see sample model schema files in resources/model_schemas
+
+6. Front Page System (support themes, template position and view components)
+
+    Sample code can be download in https://github.com/dandisy/themes
+
+7. Reusable Component
+
+    - Using Webcore Component Presentation System for Font Page Component 
+
+        Code Sample can be download in https://github.com/dandisy/themes
+
+    - Using Widget (Widget Class & Widget View) using arrilot/laravel-widgets for UI Component
+
+        as much as possible the widget should have a loose coupled, bring data on the fly, avoid directly include / use in widget class
+
+        webcore include a widget, with this you able to use shortcode on Page description field
+        to get datasource from models, use syntax :
+        [source=ModelName,where=some_field_name:value,position:some_theme_position,widget=some_widget_view]
+
+    - Using Laravel Package
+
+        webcore include dandisy/elorest package at package/webcore folder which can be used as an example
+
+8. Pre Configured Oauth using Laravel Passport
+
+    with Elorest as Laravel eloquent RESTAPI package see https://github.com/dandisy/elorest
+
+    - to login (password grant) use http://localhost/webcore/public/oauth/token
+
+            with params :
+
+                - client_id
+                - client_secret
+                - grant_type
+                - username
+                - password
+                - scope
+
+    - to get resources example http://localhost/webcore/public/api/product
+
+            with header Authorization = Bearer {your-token}
+            
+9. EloREST
+
+    REST API using the Laravel's Eloquest Syntax (methods & params)
+    
+    Example API queries :
+    
+        https://your-domain-name/api/elorest/Models/Post?leftJoin=comments,posts.id,comments.post_id&whereIn=category_id,[2,4,5]&select=*&get=
+        https://your-domain-name/api/elorest/Models/Post?join[]=authors,posts.id,authors.author_id&join[]=comments,posts.id,comments.post_id&whereIn=category_id,[2,4,5]&select=posts.*,authors.name as author_name,comments.title as comment_title&get=
+        https://your-domain-name/api/elorest/Models/Post?&with=author,comment&get=*
+        https://your-domain-name/api/elorest/Models/Post?&with=author(where=name,like,%dandisy%),comment&get=*
+        
+        multi first nested closure deep
+        https://your-domain-name/api/elorest/Models/Post?&with=author(where=name,like,%dandisy%)(where=nick,like,%dandisy%),comment&get=*
+        
+        second nested closure deep
+        https://your-domain-name/api/elorest/Models/Post?&with=author(with=city(where=name,like,%jakarta%)),comment&get=*
+        
+        https://your-domain-name/api/elorest/Models/Post?&with[]=author(where=name,like,%dandisy%)&with[]=comment(where=title,like,%test%)&get=*
+        https://your-domain-name/api/elorest/Models/Post?paginate=10&page=1
+
+### Dependency
+
+    * dandisy/adminlte-templates based on infyomlabs/adminlte-templates
+    * dandisy/laravel-generator based on infyomlabs/laravel-generator
+    * dandisy/swagger-generator based on infyomlabs/swagger-generator
+    * dandisy/filemanager based on infinety-es/filemanager
+
+    * dandisy/webcore-page
+    * dandisy/webcore-menu
+
+    * arrilot/laravel-widgets
+    * barryvdh/laravel-debugbar
+    * league/glide-laravel
+    * santigarcor/laratrust
+    * harimayco/laravel-menu
+    * atayahmet/laravel-nestable
+
+    * ixudra/curl or guzzlehttp/guzzle
+
+    If you use laravel passport :
+    * spatie/laravel-cors
+
+    * barryvdh/laravel-dompdf or seguce92/laravel-dompdf
+    * phpoffice/phpspreadsheet or maatwebsite/excel
+    
+    * pragmarx/tracker or jeremykenedy/laravel-logger
+    * spatie/laravel-activitylog
+
+    * fireguard/report or jimmyjs/laravel-report-generator
+
+    * khill/lavacharts or consoletvs/charts
+
+//------------------------------------------------#
 
 
+### More Screenshots
 
-## Getting started
+Webcore CMS using https://github.com/dandisy/elogui or https://github.com/dandisy/webcore-presentation
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+Download Webcore CMS in https://github.com/dandisy/webcore-cms
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+* Sample front page
 
-## Add your files
+![sample front page](https://github.com/dandisy/webcore-screenshots/blob/master/sample%20front%20page.png)
 
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/ee/gitlab-basics/add-file.html#add-a-file-using-the-command-line) or push an existing Git repository with the following command:
+* Login page
 
-```
-cd existing_repo
-git remote add origin https://dev.redtech.co.id/ict-redtech/webcore-10.git
-git branch -M main
-git push -uf origin main
-```
+![login page](https://github.com/dandisy/webcore-screenshots/blob/master/login%20page.png)
 
-## Integrate with your tools
+* Admin page
 
-- [ ] [Set up project integrations](https://dev.redtech.co.id/ict-redtech/webcore-10/-/settings/integrations)
+![Webcore Admin Dashboard](https://github.com/dandisy/webcore-screenshots/blob/master/webcore-admin-dashboard.jpg)
 
-## Collaborate with your team
+![Webcore Page Presentation](https://github.com/dandisy/webcore-screenshots/blob/master/webcore-admin-page-presentation.jpg)
 
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Automatically merge when pipeline succeeds](https://docs.gitlab.com/ee/user/project/merge_requests/merge_when_pipeline_succeeds.html)
+![Webcore Datasource Elogui](https://github.com/dandisy/webcore-screenshots/blob/master/webcore-admin-datasource-elogui.jpg)
 
-## Test and Deploy
+//------------------------------------------------#
 
-Use the built-in continuous integration in GitLab.
 
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/index.html)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing(SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
+## 2. Laravel Generator
 
-***
+Webcore use infyomlabs/laravel-generator, by changing the artisan command to be
+more generic :
 
-# Editing this README
+    php artisan generate[.command]:{command} {Model_name} [option]
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thank you to [makeareadme.com](https://www.makeareadme.com/) for this template.
+See infyomlabs/laravel-generator documentation here http://labs.infyom.com/laravelgenerator
 
-## Suggestions for a good README
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+### Perspective :
 
-## Name
-Choose a self-explaining name for your project.
+    HUMAN
+    Interface       -   Tools (Worker)                      -   Executor
+    Commands\*      -   Common\*, Utils\* and helper        -   Generators\* 
+    
+    COMPUTER
+    Interface       -   Tools (Worker)                      -   Executor
+    Generators\*    -   Common\*, Utils\* and helper        -   Commands\*
+    
+### Guidance
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+1. To add additional HTML type definition, add and edit these :
+    * add stub file in adminlte-templates\templates\scaffold\fields
+    * add stub file in adminlte-templates\templates\vuejs\fields
+    * edit Utils\HTMLFieldGenerator
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+    * edit Generators\ViewGenerator
+    * edit Generators\VueJs\ViewGenerator
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+2. To add additional command, command option, or fields option
+    * edit or add Common\\*
+    * edit or add Commands\\* (BaseCommand, etc)
+        
+### Note
 
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+* Commands\\* : 
+    
+    use Common\CommandData, 
+    use Utils\FileUtil,
+    use Generator\\* 
+    
+    base Commands\BaseCommand
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+    - parsing console command
+    - initializing commandData
+    - execute Generators\\* to generating files and migrating database table
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+* Utils\GeneratorFieldsInputUtil : 
+    
+    use Common\GeneratorField
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+    - get fields specification from console command
+    - return field specification by utilizing Common\GeneratorField
 
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
+* Utils\HTMLFieldGenerator : 
+    
+    use Common\GeneratorField
 
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
+    - return fieldTemplate will be used
 
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
+* Common\GeneratorField : 
 
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
+    - parsing parts of fields specification (db type, html input, option)
+    - preparing migration
 
-## License
-For open source projects, say how it is licensed.
+* Common\GeneratorConfig :
+    
+    - load, init and set config
+    - get console command option
 
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+* Common\CommandData : 
+
+    use Utils\GeneratorFieldsInputUtil,
+    use Utils\TableFieldsGenerator
+    
+    - get and set commandData from config, file, and console
+
+* Generators\\* : 
+
+    use Utils\FileUtil,
+    use Common\CommandData,
+    use Utils\HTMLFieldGenerator in Generators\Scaffold\ViewGenerator
+    
+    base Generators\BaseGenerator
+
+    - define generator functionality with data and template parameters to be used
+    - define rollback
+
+//------------------------------------------------#
+
+
+## 3. Roadmap
+
+Versions
+
+    1.0.0 Single Platform
+    1.1.0 Easy Platform
+    1.2.0 In Context Platform
+    1.3.0 Experience Platform
+    1.4.0 Enterprise Platform
+    1.5.0 Digital Solution
+
+
+#
+by dandi@redbuzz.co.id

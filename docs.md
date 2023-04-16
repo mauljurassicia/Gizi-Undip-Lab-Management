@@ -252,7 +252,26 @@ Generate from Table
         "doctrine/dbal": "~2.3"
     }
 
+# Middleware
+
+Sanitazion Input
+
+    ->middleware('sanitazion.input:*')
+
+Note :
+
+    - jika ingin semua inputan maka cukup gunakan * 
+    - jika ingin hanya beberapa inputan, maka masukan request yang dikecualikan misalkan
+        ->middleware('sanitazion.input:email,fullname')
 _
+
+File Upload
+
+    ->middleware('file.upload:doc_ijazah,doc_sertifikat')
+
+Note :
+    - masukan input request file yang diinginkan
+
 
 # Refs
 

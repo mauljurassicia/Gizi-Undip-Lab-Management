@@ -18,6 +18,11 @@ use Illuminate\Http\Request;
 |
 */
 
+Auth::routes();
+Auth::routes(['register' => false]);
+
 Route::get('/', function () {
     return view('welcome');
 });
+
+Route::get('home', 'Webcore/HomeController@index')->name('home');

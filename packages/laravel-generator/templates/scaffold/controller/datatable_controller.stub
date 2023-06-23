@@ -10,10 +10,10 @@ use $NAMESPACE_REPOSITORY$\$MODEL_NAME$Repository;
 use Flash;
 use $NAMESPACE_APP$\Http\Controllers\AppBaseController;
 use Response;
-use Illuminate\Http\Request; // added by dandisy
-use Illuminate\Support\Facades\Auth; // added by dandisy
-use Illuminate\Support\Facades\Storage; // added by dandisy
-use Maatwebsite\Excel\Facades\Excel; // added by dandisy
+use Illuminate\Http\Request; 
+use Illuminate\Support\Facades\Auth; 
+use Illuminate\Support\Facades\Storage; 
+use Maatwebsite\Excel\Facades\Excel; 
 
 class $MODEL_NAME$Controller extends AppBaseController
 {
@@ -50,11 +50,8 @@ class $MODEL_NAME$Controller extends AppBaseController
      */
     public function create()
     {
-        // added by dandisy
         $RELATION_QUERY$$COMPONENT_QUERY$$THEME_QUERY$$MODEL_QUERY$
 
-        // edited by dandisy
-        // return view('$VIEW_PREFIX$$MODEL_NAME_PLURAL_SNAKE$.create');
         return view('$VIEW_PREFIX$$MODEL_NAME_PLURAL_SNAKE$.create')$RELATION_VIEW$$COMPONENT_VIEW$$THEME_VIEW$$MODEL_VIEW$;
     }
 
@@ -72,7 +69,6 @@ class $MODEL_NAME$Controller extends AppBaseController
         $$MODEL_NAME_CAMEL$ = $this->$MODEL_NAME_CAMEL$Repository->create($input);
 
         Flash::success('$MODEL_NAME_HUMAN$ saved successfully.');
-
         return redirect(route('$ROUTE_NAMED_PREFIX$$MODEL_NAME_PLURAL_CAMEL$.index'));
     }
 
@@ -89,7 +85,6 @@ class $MODEL_NAME$Controller extends AppBaseController
 
         if (empty($$MODEL_NAME_CAMEL$)) {
             Flash::error('$MODEL_NAME_HUMAN$ not found');
-
             return redirect(route('$ROUTE_NAMED_PREFIX$$MODEL_NAME_PLURAL_CAMEL$.index'));
         }
 
@@ -105,19 +100,16 @@ class $MODEL_NAME$Controller extends AppBaseController
      */
     public function edit($id)
     {
-        // added by dandisy
+        
         $RELATION_QUERY$$COMPONENT_QUERY$$THEME_QUERY$$MODEL_QUERY$
 
         $$MODEL_NAME_CAMEL$ = $this->$MODEL_NAME_CAMEL$Repository->findWithoutFail($id);
 
         if (empty($$MODEL_NAME_CAMEL$)) {
             Flash::error('$MODEL_NAME_HUMAN$ not found');
-
             return redirect(route('$ROUTE_NAMED_PREFIX$$MODEL_NAME_PLURAL_CAMEL$.index'));
         }
 
-        // edited by dandisy
-        // return view('$VIEW_PREFIX$$MODEL_NAME_PLURAL_SNAKE$.edit')->with('$MODEL_NAME_CAMEL$', $$MODEL_NAME_CAMEL$);
         return view('$VIEW_PREFIX$$MODEL_NAME_PLURAL_SNAKE$.edit')
             ->with('$MODEL_NAME_CAMEL$', $$MODEL_NAME_CAMEL$)$RELATION_VIEW$$COMPONENT_VIEW$$THEME_VIEW$$MODEL_VIEW$;
     }
@@ -136,14 +128,13 @@ class $MODEL_NAME$Controller extends AppBaseController
 
         if (empty($$MODEL_NAME_CAMEL$)) {
             Flash::error('$MODEL_NAME_HUMAN$ not found');
-
             return redirect(route('$ROUTE_NAMED_PREFIX$$MODEL_NAME_PLURAL_CAMEL$.index'));
         }
 
-        $$MODEL_NAME_CAMEL$ = $this->$MODEL_NAME_CAMEL$Repository->update($request->all(), $id);
+        $input = $request->all();
+        $$MODEL_NAME_CAMEL$ = $this->$MODEL_NAME_CAMEL$Repository->update($input, $id);
 
         Flash::success('$MODEL_NAME_HUMAN$ updated successfully.');
-
         return redirect(route('$ROUTE_NAMED_PREFIX$$MODEL_NAME_PLURAL_CAMEL$.index'));
     }
 
@@ -160,14 +151,12 @@ class $MODEL_NAME$Controller extends AppBaseController
 
         if (empty($$MODEL_NAME_CAMEL$)) {
             Flash::error('$MODEL_NAME_HUMAN$ not found');
-
             return redirect(route('$ROUTE_NAMED_PREFIX$$MODEL_NAME_PLURAL_CAMEL$.index'));
         }
 
         $this->$MODEL_NAME_CAMEL$Repository->delete($id);
 
         Flash::success('$MODEL_NAME_HUMAN$ deleted successfully.');
-
         return redirect(route('$ROUTE_NAMED_PREFIX$$MODEL_NAME_PLURAL_CAMEL$.index'));
     }
 
@@ -187,7 +176,6 @@ class $MODEL_NAME$Controller extends AppBaseController
         });
 
         Flash::success('$MODEL_NAME_HUMAN$ saved successfully.');
-
         return redirect(route('$ROUTE_NAMED_PREFIX$$MODEL_NAME_PLURAL_CAMEL$.index'));
     }
 }

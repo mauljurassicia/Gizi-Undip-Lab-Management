@@ -1,30 +1,42 @@
-<!-- Id Field -->
-<div class="form-group">
-    {!! Form::label('id', 'Id:') !!}
-    <p>{!! $permission->id !!}</p>
-</div>
+<div class="col-sm-12">
+    <div class="row">
+        <!-- Name Field -->
+        <div class="form-group col-sm-4">
+            {!! Form::label('name', 'Name:', ['class' => 'd-block tx-bold']) !!}
+            <p>{!! $label->name !!}</p>
+        </div>
 
-<!-- Name Field -->
-<div class="form-group">
-    {!! Form::label('name', 'Name:') !!}
-    <p>{!! $permission->name !!}</p>
+        <!-- Group Field -->
+        <div class="form-group col-sm-4">
+            {!! Form::label('permission_group_id', 'Group:', ['class' => 'd-block tx-bold']) !!}
+            <p>{!! $group->name !!}</p>
+        </div>
+        
+        <!-- Guard Name Field -->
+        <div class="form-group col-sm-2">
+            {!! Form::label('guard_name', 'Guard Name:', ['class' => 'd-block tx-bold']) !!}
+            <p>{!! @$permissions[0]->guard_name !!}</p>
+        </div>
+    </div>
 </div>
-
-<!-- Guard Name Field -->
-<div class="form-group">
-    {!! Form::label('guard_name', 'Guard Name:') !!}
-    <p>{!! $permission->guard_name !!}</p>
-</div>
-
-<!-- Created At Field -->
-<div class="form-group">
-    {!! Form::label('created_at', 'Created At:') !!}
-    <p>{!! $permission->created_at !!}</p>
-</div>
-
-<!-- Updated At Field -->
-<div class="form-group">
-    {!! Form::label('updated_at', 'Updated At:') !!}
-    <p>{!! $permission->updated_at !!}</p>
+<div class="col-sm-6">
+    <table class="table table-border" id="table-permission">
+        <thead class="thead-dark">
+            <tr>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if(@$permissions)
+                @if(@$permissions->count() > 0)
+                    @foreach($permissions as $permission)    
+                        <tr id="tr_{{ @$permission->id }}">
+                            <td>{{ @$permission->name }}</td>
+                        </tr>
+                    @endforeach
+                @endif
+            @endif
+        </tbody>
+    </table>
 </div>
 

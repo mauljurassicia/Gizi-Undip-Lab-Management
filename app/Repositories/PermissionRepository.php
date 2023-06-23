@@ -21,7 +21,8 @@ class PermissionRepository extends BaseRepository
      */
     protected $fieldSearchable = [
         'name',
-        'guard_name'
+        'guard_name',
+        'permissions_label_id'
     ];
 
     /**

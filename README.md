@@ -118,7 +118,11 @@ or if you want to specify field interactively in console
 
     php artisan generate:api_scaffold Post --fieldsFile=Post.json --datatables=true --prefix=admin --logs
 
+### callback if you want delete/ remove 
+    php artisan generate:rollback Page scaffold
+
 then run
+
 
     composer require dandisy/webcore-page:dev-master
 

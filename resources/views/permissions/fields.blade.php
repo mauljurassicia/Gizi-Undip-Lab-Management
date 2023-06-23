@@ -1,16 +1,58 @@
-<!-- Name Field -->
-<div class="form-group col-sm-6">
-    {!! Form::label('name', 'Name:', ['class' => 'd-block']) !!}
-    {!! Form::text('name', null, ['class' => 'form-control']) !!}
+<div class="col-sm-12">
+    <div class="row">
+        <!-- Name Field -->
+        <div class="form-group col-sm-4">
+            {!! Form::label('name', 'Name:', ['class' => 'd-block']) !!}
+            {!! Form::text('name', null, ['class' => 'form-control', 'required']) !!}
+        </div>
+
+        <!-- Group Field -->
+        <div class="form-group col-sm-4">
+            {!! Form::label('permission_group_id', 'Group:', ['class' => 'd-block']) !!}
+            {!! Form::select('permission_group_id', $group->pluck('name', 'id'),null, ['class' => 'form-control select2', 'required']) !!}
+        </div>
+        
+        <!-- Guard Name Field -->
+        <div class="form-group col-sm-2">
+            {!! Form::label('guard_name', 'Guard Name:', ['class' => 'd-block']) !!}
+            {!! Form::text('guard_name', @$permissions[0]->guard_name, ['class' => 'form-control', 'required']) !!}
+        </div>
+    </div>
 </div>
-
-<!-- Guard Name Field -->
-<div class="form-group col-sm-6">
-    {!! Form::label('guard_name', 'Guard Name:', ['class' => 'd-block']) !!}
-    {!! Form::text('guard_name', null, ['class' => 'form-control']) !!}
+<div class="col-sm-6">
+    <table class="table table-border" id="table-permission">
+        <thead class="thead-dark">
+            <tr>
+                <th>Action</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @if(@$permissions)
+                @if(@$permissions->count() > 0)
+                    @foreach($permissions as $permission)    
+                        <tr id="tr_{{ @$permission->id }}">
+                            <td>
+                                {!! Form::hidden('id_permission[]', @$permission->id) !!}
+                                {!! Form::text('name_permission[]', @$permission->name, ['class' => 'form-control', 'required']) !!}
+                            </td>
+                            <td>
+                                <button type="button" class="btn btn-danger btn-xs btn-icon rem-action" data-id="{{ @$permission->id }}"><i class="fas fa-times"></i></button>
+                            </td>
+                        </tr>
+                    @endforeach
+                @endif
+            @endif
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="2">
+                    <button type="button" class="btn btn-dark btn-xs" id="new-action"><i class="fas fa-plus"></i> New Action</button>
+                </td>
+            </tr>
+        </tfoot>
+    </table>
 </div>
-
-
 <div class="clearfix"></div>
 <hr>
 
@@ -21,107 +63,35 @@
 </div>
 
 @section('scripts')
-<!-- Relational Form table -->
 <script>
-    $('.dropify').dropify({
-        messages: {
-            default: 'Drag and drop file here or click',
-            replace: 'Drag and drop file here or click to Replace',
-            remove:  'Remove',
-            error:   'Sorry, the file is too large'
-        }
+    var row = 0;
+
+    $(document).ready(function()
+    {
+        $(".select2").select2();;
     });
-    var editor_config = {
-            path_absolute : "/",
-            selector: 'textarea.my-editor2',
-            height : "250",
-            plugins: [
-                "advlist autolink lists link image charmap print preview hr anchor pagebreak",
-                "searchreplace wordcount visualblocks visualchars code fullscreen",
-                "insertdatetime media nonbreaking save table contextmenu directionality",
-                "emoticons template paste textcolor colorpicker textpattern"
-            ],
-            menubar: false,
-            toolbar: "insertfile undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image media",
-            relative_urls: false,
-            file_browser_callback : function(field_name, url, type, win) {
-                var x = window.innerWidth || document.documentElement.clientWidth || document.getElementsByTagName('body')[0].clientWidth;
-                var y = window.innerHeight|| document.documentElement.clientHeight|| document.getElementsByTagName('body')[0].clientHeight;
-
-                var cmsURL = editor_config.path_absolute + 'filemanager?field_name=' + field_name;
-                    cmsURL = cmsURL + "&type=Files";
-
-                tinyMCE.activeEditor.windowManager.open({
-                    file : cmsURL,
-                    title : 'Filemanager',
-                    width : x * 0.8,
-                    height : y * 0.8,
-                    resizable : "yes",
-                    close_previous : "no"
-                });
-            }
-        }
-        tinymce.init(editor_config);
-    });
-    $('.btn-add-related').on('click', function() {
-        var relation = $(this).data('relation');
-        var index = $(this).parents('.panel').find('tbody tr').length - 1;
-
-        if($('.empty-data').length) {
-            $('.empty-data').hide();
-        }
-
-        // TODO: edit these related input fields (input type, option and default value)
-        var inputForm = '';
-        var fields = $(this).data('fields').split(',');
-        // $.each(fields, function(idx, field) {
-        //     inputForm += `
-        //         <td class="form-group">
-        //             {!! Form::select('`+relation+`[`+relation+index+`][`+field+`]', [], null, ['class' => 'form-control select2', 'style' => 'width:100%']) !!}
-        //         </td>
-        //     `;
-        // })
-        $.each(fields, function(idx, field) {
-            inputForm += `
-                <td class="form-group">
-                    {!! Form::text('`+relation+`[`+relation+index+`][`+field+`]', null, ['class' => 'form-control', 'style' => 'width:100%']) !!}
+    
+    $(document).on('click', '#new-action', function()
+    {
+        $("#table-permission tbody").append(`  
+            <tr id="tr_new`+row+`">
+                <td>
+                    {!! Form::hidden('id_permission[]', null) !!}
+                    {!! Form::text('name_permission[]', null, ['class' => 'form-control', 'required']) !!}
                 </td>
-            `;
-        })
-
-        var relatedForm = `
-            <tr id="`+relation+index+`">
-                `+inputForm+`
-                <td class="form-group" style="text-align:right">
-                    <button type="button" class="btn-delete btn btn-danger btn-xs"><i class="glyphicon glyphicon-trash"></i></button>
+                <td>
+                    <button type="button" class="btn btn-danger btn-xs btn-icon rem-action" data-id="new`+row+`"><i class="fas fa-times"></i></button>
                 </td>
-            </tr>
-        `;
+            </tr>`);
+        row++;
+    })
 
-        $(this).parents('.panel').find('tbody').append(relatedForm);
-
-        $('#'+relation+index+' .select2').select2();
-    });
-
-    $(document).on('click', '.btn-delete', function() {
-        var actionDelete = confirm('Are you sure?');
-        if(actionDelete) {
-            var dom;
-            var id = $(this).data('id');
-            var relation = $(this).data('relation');
-
-            if(id) {
-                dom = `<input class="`+relation+`-delete" type="hidden" name="`+relation+`-delete[]" value="` + id + `">`;
-                $(this).parents('.box-body').append(dom);
-            }
-
-            $(this).parents('tr').remove();
-
-            if(!$('tbody tr').length) {
-                $('.empty-data').show();
-            }
+    $(document).on('click', '.rem-action', function()
+    {
+        let id = $(this).attr('data-id');
+        if(confirm('Sure Remove Action Of Permission?')){
+            $("#tr_" + id).fadeOut().remove();
         }
-    });
+    })
 </script>
-<!-- End Relational Form table -->
 @endsection

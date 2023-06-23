@@ -22,6 +22,8 @@ use Webcore\Generator\Utils\FileUtil;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
 use Spatie\Permission\Models\Permission;
+use App\Models\Permissionlabel;
+use Illuminate\Support\Str;
 
 class BaseCommand extends Command
 {
@@ -125,29 +127,40 @@ class BaseCommand extends Command
         }
 
         if (!$this->isSkip('menu') and $this->commandData->config->getAddOn('menu.enabled')) {
+            $label= Permissionlabel::create([
+                'name' => Str::ucfirst($this->commandData->config->mCamel),	
+                'permission_group_id' => 2
+            ]);
+
             Permission::create([
                 'name' => $this->commandData->config->mCamel.'-create',
-                'guard_name' => 'web'
+                'guard_name' => 'web',
+                'permissions_label_id' => @$label->id
             ]);
             Permission::create([
                 'name' => $this->commandData->config->mCamel.'-show',
-                'guard_name' => 'web'
+                'guard_name' => 'web',
+                'permissions_label_id' => @$label->id
             ]);
             Permission::create([
                 'name' => $this->commandData->config->mCamel.'-edit',
-                'guard_name' => 'web'
+                'guard_name' => 'web',
+                'permissions_label_id' => @$label->id
             ]);
             Permission::create([
                 'name' => $this->commandData->config->mCamel.'-update',
-                'guard_name' => 'web'
+                'guard_name' => 'web',
+                'permissions_label_id' => @$label->id
             ]);
             Permission::create([
                 'name' => $this->commandData->config->mCamel.'-delete',
-                'guard_name' => 'web'
+                'guard_name' => 'web',
+                'permissions_label_id' => @$label->id
             ]);
             Permission::create([
                 'name' => $this->commandData->config->mCamel.'-store',
-                'guard_name' => 'web'
+                'guard_name' => 'web',
+                'permissions_label_id' => @$label->id
             ]);
 
             $menuGenerator = new MenuGenerator($this->commandData);

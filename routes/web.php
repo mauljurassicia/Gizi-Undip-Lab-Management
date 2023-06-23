@@ -21,8 +21,23 @@ use Illuminate\Http\Request;
 Auth::routes();
 Auth::routes(['register' => false]);
 
+Route::get('clear-cache', function () {
+    // Artisan::call('schedule:run');
+    Artisan::call('view:clear');
+    Artisan::call('cache:clear');
+    Artisan::call('config:cache');
+    Artisan::call('config:clear');
+    Artisan::call('route:cache');
+    Artisan::call('route:clear');
+});
+
 Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('home', 'Webcore/HomeController@index')->name('home');
+Route::get('/dashboard', 'Webcore\HomeController@index')->name('dashboard');
+
+Route::resource('permissiongroups', 'Webcore\PermissiongroupController');
+Route::resource('permissions', 'Webcore\PermissionController');
+Route::resource('roles', 'Webcore\RoleController');
+Route::resource('users', 'Webcore\UserController');

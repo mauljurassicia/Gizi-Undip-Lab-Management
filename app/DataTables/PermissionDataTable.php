@@ -3,6 +3,7 @@
 namespace App\DataTables;
 
 use App\Models\Permission;
+use App\Models\Permissionlabel;
 use Yajra\DataTables\Services\DataTable;
 use Yajra\DataTables\EloquentDataTable;
 
@@ -27,7 +28,7 @@ class PermissionDataTable extends DataTable
      * @param \App\Models\Post $model
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function query(Permission $model)
+    public function query(Permissionlabel $model)
     {
         return $model->newQuery();
     }
@@ -47,22 +48,22 @@ class PermissionDataTable extends DataTable
                 'dom'     => 'Bfrtip',
                 'order'   => [[0, 'desc']],
                 'buttons' => [
-                    'create',
                     'export',
-                    'print',
                     'reset',
                     'reload',
                 ],
-                // 'initComplete' => "function() {
-                //     this.api().columns().every(function() {
-                //         var column = this;
-                //         var input = document.createElement(\"input\");
-                //         $(input).appendTo($(column.footer()).empty())
-                //         .on('change', function () {
-                //             column.search($(this).val(), false, false, true).draw();
-                //         });
-                //     });
-                // }",
+                'initComplete' => "function() {
+                    this.api().columns().every(function() {
+                        var column = this;
+                        var input = document.createElement(\"input\");
+                        if($(column.header()).attr('title') !== 'Action'){
+                            $(input).appendTo($(column.header()))
+                            .on('keyup change', function () {
+                                column.search($(this).val(), false, false, true).draw();
+                            });
+                        }
+                    });
+                }",
             ]);
     }
 
@@ -74,9 +75,7 @@ class PermissionDataTable extends DataTable
     protected function getColumns()
     {
         return [
-            'id',
-            'name',
-            'guard_name'
+            'name' => ['name' => 'name', 'title' => 'Name','data' => 'name'],
         ];
     }
 
@@ -85,8 +84,8 @@ class PermissionDataTable extends DataTable
      *
      * @return string
      */
-    protected function filename()
+    protected function filename():string
     {
-        return 'permissionsdatatable_' . time();
+        return 'permissions_' . time();
     }
 }

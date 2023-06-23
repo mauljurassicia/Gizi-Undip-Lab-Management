@@ -1,6 +1,5 @@
 <aside class="aside aside-fixed">
     <div class="aside-header">
-        <!-- <a href="{{ url('/home') }}" class="aside-logo">Web<span>core</span></a> -->
         <a href="{{ url('/home') }}">
             <img src="{{ asset('webcore-logo.png') }}" alt="logo" width="120">
         </a>
@@ -13,17 +12,11 @@
         <div class="aside-loggedin">
             <div class="d-flex align-items-center justify-content-start">
             <a href="" class="avatar">
-                {{--@if(isset(Auth::user()->with('profile')->find(Auth::user()->id)->profile->image))
-                <img src="{{ Auth::user()->with('profile')->find(Auth::user()->id)->profile->image }}"
-                        class="rounded-circle" alt="Avatar"/>
-                @else--}}
                 <img src="https://via.placeholder.com/500" class="rounded-circle" alt="Avatar">
-                {{--@endif--}}
             </a>
             <div class="aside-alert-link">
-                <a href="" class="new" data-toggle="tooltip" title="You have 2 unread messages"><i data-feather="message-square"></i></a>
-                <a href="" class="new" data-toggle="tooltip" title="You have 4 new notifications"><i data-feather="bell"></i></a>
-                <!-- <a href="" data-toggle="tooltip" title="Sign out"><i data-feather="log-out"></i></a> -->
+                {{-- <a href="" class="new" data-toggle="tooltip" title="You have 2 unread messages"><i data-feather="message-square"></i></a>
+                <a href="" class="new" data-toggle="tooltip" title="You have 4 new notifications"><i data-feather="bell"></i></a> --}}
                 <a href="{!! url('/logout') !!}" data-toggle="tooltip" title="Sign out"
                     onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                     <i data-feather="log-out"></i>
@@ -38,7 +31,7 @@
                 <h6 class="tx-semibold mg-b-0">{!! Auth::user()->name !!}</h6>
                 <i data-feather="chevron-down"></i>
             </a>
-            <p class="tx-color-03 tx-12 mg-b-0">Administrator</p>
+            <p class="tx-color-03 tx-12 mg-b-0">{!! @Auth::user()->roles[0]->name !!}</p>
             </div>
             <div class="collapse" id="loggedinMenu">
             <ul class="nav nav-aside mg-b-0">

@@ -74,7 +74,6 @@ class RoleDataTable extends DataTable
     protected function getColumns()
     {
         return [
-            'id',
             'name',
             'guard_name'
         ];
@@ -85,7 +84,7 @@ class RoleDataTable extends DataTable
      *
      * @return string
      */
-    protected function filename()
+    protected function filename():string
     {
         return 'rolesdatatable_' . time();
     }

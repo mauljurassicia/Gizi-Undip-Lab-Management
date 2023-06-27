@@ -1,17 +1,21 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Webcore;
 
-use App\DataTables\UserDataTable\Webcore;
+use App\DataTables\UserDataTable;
 use App\Http\Requests;
-use App\Http\Requests\CreateUserRequest;
-use App\Http\Requests\UpdateUserRequest;
+use App\Http\Requests\Webcore\CreateUserRequest;
+use App\Http\Requests\Webcore\UpdateUserRequest;
 use App\Repositories\UserRepository;
 use Flash;
 use App\Http\Controllers\AppBaseController;
+use App\Models\Permission;
+use App\Models\Permissiongroup;
+use App\Models\Permissionlabel;
 use Response;
 use Spatie\Permission\Models\Role;
 use Illuminate\Http\Request; // added by dandisy
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth; // added by dandisy
 use Illuminate\Support\Facades\Storage; // added by dandisy
 use Maatwebsite\Excel\Facades\Excel; // added by dandisy
@@ -45,9 +49,7 @@ class UserController extends AppBaseController
      */
     public function create()
     {
-        // edited by dandisy
         $roles = Role::all();
-        // return view('users.create');
         return view('users.create')
                     ->with('roles',$roles);
     }
@@ -91,7 +93,26 @@ class UserController extends AppBaseController
             return redirect(route('users.index'));
         }
 
-        return view('users.show')->with('user', $user);
+        $groups = Permissiongroup::all();
+        $permissions = [];
+
+        foreach($groups as $group){
+            $labels = Permissionlabel::where('permission_group_id', $group->id)->get();
+            $arr_label = [];
+            foreach($labels as $label){
+                $arr_label[] = [
+                    'name' => $label->name,
+                    'permissions' => Permission::where('permissions_label_id', $label->id)->select('id', 'name')->get()
+                ];
+            }
+
+            $permissions[] = [
+                'group' => $group->name,
+                'labels' => $arr_label
+            ];
+        }
+
+        return view('users.show')->with('user', $user)->with('permissions', $permissions);
     }
 
     /**
@@ -145,7 +166,21 @@ class UserController extends AppBaseController
         }
         $user = $this->userRepository->update($request->all(), $id);
         Flash::success('User updated successfully.');
+        return redirect(route('users.index'));
+    }
 
+    public function permissions(Request $request){
+
+        $input = $request->except('checkAll');
+        $user = $this->userRepository->findWithoutFail(@$input['id']);
+        
+        if($request->permissions <> ''){
+            $user->syncPermissions($request->permissions);
+        }else{
+            $user->permissions()->detach();
+        }
+
+        Flash::success('User Permissions updated successfully.');
         return redirect(route('users.index'));
     }
 

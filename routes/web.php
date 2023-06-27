@@ -34,10 +34,17 @@ Route::get('clear-cache', function () {
 Route::get('/', function () {
     return view('welcome');
 });
+Route::get('register', function () {
+    return redirect('/');
+});
+Route::post('register', function () {
+    return redirect('/');
+});
 
 Route::get('/dashboard', 'Webcore\HomeController@index')->name('dashboard');
 
 Route::resource('permissiongroups', 'Webcore\PermissiongroupController');
 Route::resource('permissions', 'Webcore\PermissionController');
 Route::resource('roles', 'Webcore\RoleController');
+Route::post('users/permissions', 'Webcore\UserController@permissions')->name('users.permissions');
 Route::resource('users', 'Webcore\UserController');

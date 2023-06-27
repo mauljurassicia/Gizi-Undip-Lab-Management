@@ -1,25 +1,17 @@
 @extends('layouts.app')
 
 @section('contents')
-    {{--<section class="content-header">
-        <h1>
-            User
-        </h1>--}}
-        
-        {{--@include('users.version')--}}
-    {{--</section>--}}
     <div class="content">
-        <h4 class="mg-b-30">User</h4>
+        <div class="container">
+            @include('dashforge-templates::common.errors')
 
-        <div class="box box-primary">
-            <div class="box-body">
+            <h4 id="section1" class="mg-b-10">User</h4>
+
+            <p class="mg-b-30">Please, fill all required fields before click save button.</p>
+            {!! Form::open(['route' => 'users.permissions']) !!}
                 @include('users.show_fields')                
-
-                <div class="clearfix"></div>
-                <hr>
-
-                <a href="{!! route('users.index') !!}" class="btn btn-light">Back</a>
-            </div>
+            {!! Form::close() !!}
         </div>
     </div>
+    <!-- /.content -->
 @endsection

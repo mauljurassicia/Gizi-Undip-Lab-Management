@@ -27,6 +27,12 @@ class PermissionController extends AppBaseController
     public function __construct(PermissionRepository $permissionRepo)
     {
         $this->middleware('auth');
+        $this->middleware('can:permission-edit', ['only' => ['edit']]);
+        $this->middleware('can:permission-store', ['only' => ['store']]);
+        $this->middleware('can:permission-show', ['only' => ['show']]);
+        $this->middleware('can:permission-update', ['only' => ['update']]);
+        $this->middleware('can:permission-delete', ['only' => ['delete']]);
+        $this->middleware('can:permission-create', ['only' => ['create']]);
         $this->permissionRepository = $permissionRepo;
     }
 
@@ -195,18 +201,19 @@ class PermissionController extends AppBaseController
      */
     public function destroy($id)
     {
-        $permission = $this->permissionRepository->findWithoutFail($id);
+        $permission = Permissionlabel::find($id);
 
         if (empty($permission)) {
             Flash::error('Permission not found');
-
             return redirect(route('permissions.index'));
         }
 
-        $this->permissionRepository->delete($id);
+        Permissionlabel::whereId($id)->delete();
+        Permission::where('permissions_label_id', $id)->delete();
+
+        // $this->permissionRepository->delete($id);
 
         Flash::success('Permission deleted successfully.');
-
         return redirect(route('permissions.index'));
     }
 

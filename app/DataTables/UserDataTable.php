@@ -47,22 +47,22 @@ class UserDataTable extends DataTable
                 'dom'     => 'Bfrtip',
                 'order'   => [[0, 'desc']],
                 'buttons' => [
-                    'create',
                     'export',
-                    'print',
                     'reset',
                     'reload',
                 ],
-                // 'initComplete' => "function() {
-                //     this.api().columns().every(function() {
-                //         var column = this;
-                //         var input = document.createElement(\"input\");
-                //         $(input).appendTo($(column.footer()).empty())
-                //         .on('change', function () {
-                //             column.search($(this).val(), false, false, true).draw();
-                //         });
-                //     });
-                // }",
+                'initComplete' => "function() {
+                    this.api().columns().every(function() {
+                        var column = this;
+                        var input = document.createElement(\"input\");
+                        if($(column.header()).attr('title') !== 'Action'){
+                            $(input).appendTo($(column.header()))
+                            .on('keyup change', function () {
+                                column.search($(this).val(), false, false, true).draw();
+                            });
+                        }
+                    });
+                }",
             ]);
     }
 
@@ -74,7 +74,6 @@ class UserDataTable extends DataTable
     protected function getColumns()
     {
         return [
-            'id',
             'name',
             'email',
         ];
@@ -85,7 +84,7 @@ class UserDataTable extends DataTable
      *
      * @return string
      */
-    protected function filename()
+    protected function filename():string
     {
         return 'usersdatatable_' . time();
     }

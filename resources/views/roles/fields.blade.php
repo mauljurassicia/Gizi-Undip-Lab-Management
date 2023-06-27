@@ -1,19 +1,46 @@
-<!-- Name Field -->
-<div class="form-group col-sm-6">
-    {!! Form::label('name', 'Name:', ['class' => 'd-block']) !!}
-    {!! Form::text('name', null, ['class' => 'form-control']) !!}
+<div class="col-sm-12">
+    <div class="row">
+        <!-- Name Field -->
+        <div class="form-group col-sm-4">
+            {!! Form::label('name', 'Name:', ['class' => 'd-block']) !!}
+            {!! Form::text('name', null, ['class' => 'form-control', 'required']) !!}
+        </div>
+        
+        <!-- Guard Name Field -->
+        <div class="form-group col-sm-2">
+            {!! Form::label('guard_name', 'Guard Name:', ['class' => 'd-block']) !!}
+            {!! Form::text('guard_name', null, ['class' => 'form-control', 'required']) !!}
+        </div>
+    </div>
 </div>
 
-<!-- Guard Name Field -->
-<div class="form-group col-sm-6">
-    {!! Form::label('guard_name', 'Guard Name:', ['class' => 'd-block']) !!}
-    {!! Form::text('guard_name', null, ['class' => 'form-control']) !!}
-</div>
-
-<div class="form-group col-sm-6">
+<div class="px-3">
     @foreach ($permissions as $permission)
-        {{Form::checkbox('permissions[]',  $permission->id, @$role->permissions ) }}
-        {{Form::label($permission->name, ucfirst($permission->name)) }}<br>
+        <div class="d-flex justify-content-between align-items-center bg-secondary rounded pl-3 py-2 mb-2 text-white">
+            <span class="tx-bold">{{ $permission['group'] }}</span>
+            <button class="btn text-white btn-hide" type="button">Hide <i class="icon ion-md-arrow-up mg-l-5"></i></button>
+        </div>
+        <div class="mb-3">
+            @foreach ($permission['labels'] as $label)
+            <div class="mb-4 p-2 border rounded group-categories">
+                <div class="d-flex justify-content-between mb-2">
+                    <p class="tx-bold">{{ $label['name'] }}</p>
+                    <div class="custom-control custom-checkbox">
+                        <input type="checkbox" class="custom-control-input check-all">
+                        <label class="custom-control-label tx-bold lebel-check-all">Check All</label>
+                    </div>
+                </div>
+                <div class="row px-3 group-permission">
+                    @foreach ($label['permissions'] as $access)
+                    <div class="col-md-3 custom-control custom-checkbox">
+                        {{Form::checkbox('',  $access->id, !empty(@$role) ? (@$role->hasPermissionTo(@$access->name) ? 'checked' : null) : null, ['class' => 'custom-control-input check-permission'] ) }}
+                        {{Form::label('', ucfirst($access->name), ['class' => 'custom-control-label label-check-permission']) }}
+                    </div>
+                    @endforeach
+                </div>
+            </div>
+            @endforeach
+        </div>
     @endforeach
 </div>
 
@@ -27,107 +54,86 @@
 </div>
 
 @section('scripts')
-<!-- Relational Form table -->
 <script>
-    $('.dropify').dropify({
-        messages: {
-            default: 'Drag and drop file here or click',
-            replace: 'Drag and drop file here or click to Replace',
-            remove:  'Remove',
-            error:   'Sorry, the file is too large'
-        }
-    });
-    var editor_config = {
-            path_absolute : "/",
-            selector: 'textarea.my-editor2',
-            height : "250",
-            plugins: [
-                "advlist autolink lists link image charmap print preview hr anchor pagebreak",
-                "searchreplace wordcount visualblocks visualchars code fullscreen",
-                "insertdatetime media nonbreaking save table contextmenu directionality",
-                "emoticons template paste textcolor colorpicker textpattern"
-            ],
-            menubar: false,
-            toolbar: "insertfile undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image media",
-            relative_urls: false,
-            file_browser_callback : function(field_name, url, type, win) {
-                var x = window.innerWidth || document.documentElement.clientWidth || document.getElementsByTagName('body')[0].clientWidth;
-                var y = window.innerHeight|| document.documentElement.clientHeight|| document.getElementsByTagName('body')[0].clientHeight;
 
-                var cmsURL = editor_config.path_absolute + 'filemanager?field_name=' + field_name;
-                    cmsURL = cmsURL + "&type=Files";
+    let checkedList = []
+    $(document).ready(() => {
+        const categories = $('.check-all')
+        const permissions = $('.check-permission')
 
-                tinyMCE.activeEditor.windowManager.open({
-                    file : cmsURL,
-                    title : 'Filemanager',
-                    width : x * 0.8,
-                    height : y * 0.8,
-                    resizable : "yes",
-                    close_previous : "no"
-                });
+        $.each(categories,(i,category) => {
+            let name = `all-${i + 1}`
+            $('.check-all').eq(i).attr({'name' : name,'id' : name})
+            $('.lebel-check-all').eq(i).attr('for',name)
+            $('.group-permission').eq(i).attr('data-idx-category',i + 1)
+
+            const permission = $(`[data-idx-category='${i+1}']`)[0]
+            const input_permission = permission.querySelectorAll('input')
+
+            if (input_permission.length === [...input_permission].filter((input) => input.checked === true).length) {
+                categories[i].checked = true
+                checkedList.push(i + 1)
             }
-        }
-        tinymce.init(editor_config);
-    });
-    $('.btn-add-related').on('click', function() {
-        var relation = $(this).data('relation');
-        var index = $(this).parents('.panel').find('tbody tr').length - 1;
-
-        if($('.empty-data').length) {
-            $('.empty-data').hide();
-        }
-
-        // TODO: edit these related input fields (input type, option and default value)
-        var inputForm = '';
-        var fields = $(this).data('fields').split(',');
-        // $.each(fields, function(idx, field) {
-        //     inputForm += `
-        //         <td class="form-group">
-        //             {!! Form::select('`+relation+`[`+relation+index+`][`+field+`]', [], null, ['class' => 'form-control select2', 'style' => 'width:100%']) !!}
-        //         </td>
-        //     `;
-        // })
-        $.each(fields, function(idx, field) {
-            inputForm += `
-                <td class="form-group">
-                    {!! Form::text('`+relation+`[`+relation+index+`][`+field+`]', null, ['class' => 'form-control', 'style' => 'width:100%']) !!}
-                </td>
-            `;
         })
 
-        var relatedForm = `
-            <tr id="`+relation+index+`">
-                `+inputForm+`
-                <td class="form-group" style="text-align:right">
-                    <button type="button" class="btn-delete btn btn-danger btn-xs"><i class="glyphicon glyphicon-trash"></i></button>
-                </td>
-            </tr>
-        `;
+        $.each(permissions,(i,permission) => {
+            let name = `permission-${i+1}`
+            $('.check-permission').eq(i).attr({'name' : `permissions[${i+1}]`,'id':name})
+            $('.label-check-permission').eq(i).attr('for',name)
+        })
+    })
 
-        $(this).parents('.panel').find('tbody').append(relatedForm);
+    $(document).on('change','.check-all',(e) => {
+        const id = parseInt(e.target.id.substring(4))
 
-        $('#'+relation+index+' .select2').select2();
-    });
+        const permission = $(`[data-idx-category='${id}']`)[0]
+        const input_permission = permission.querySelectorAll('input')
 
-    $(document).on('click', '.btn-delete', function() {
-        var actionDelete = confirm('Are you sure?');
-        if(actionDelete) {
-            var dom;
-            var id = $(this).data('id');
-            var relation = $(this).data('relation');
+        if (checkedList.includes(id)) {
+            $.each(input_permission,(i,input) => {
+                input_permission[i].checked = false  
+            })
 
-            if(id) {
-                dom = `<input class="`+relation+`-delete" type="hidden" name="`+relation+`-delete[]" value="` + id + `">`;
-                $(this).parents('.box-body').append(dom);
-            }
+            checkedList = checkedList.filter((list) => list !== id)
+        }else{
+            $.each(input_permission,(i,input) => {
+                input_permission[i].checked = true  
+            })
 
-            $(this).parents('tr').remove();
-
-            if(!$('tbody tr').length) {
-                $('.empty-data').show();
-            }
+            checkedList.push(id)
         }
-    });
+    })
+
+    $(document).on('change','.check-permission',(e) => {
+        const category = $(e.target).parent().parent()[0]
+        const input_permission = category.querySelectorAll('input')
+        const idx = parseInt(category.dataset.idxCategory)
+        const check_all = document.getElementById(`all-${idx}`)
+
+        if(checkedList.includes(idx)){
+            check_all.checked = false
+            checkedList = checkedList.filter((list) => list !== idx)
+            return
+        }
+
+        if (input_permission.length === [...input_permission].filter((input) => input.checked === true).length) {
+            check_all.checked = true
+            checkedList.push(idx)
+        }
+        
+    })
+
+    $(document).on('click', '.btn-hide' , (e) => {
+        const row_categories = e.target.parentElement.nextElementSibling
+
+        if ([...row_categories.classList].includes('d-none')) {
+            row_categories.classList.remove('d-none')
+            e.target.innerHTML = 'Hide <i class="icon ion-md-arrow-up mg-l-5"></i>'
+            return
+        }
+
+        row_categories.classList.add('d-none')
+        e.target.innerHTML = 'Show <i class="icon ion-md-arrow-down mg-l-5"></i>'
+    })
 </script>
-<!-- End Relational Form table -->
 @endsection

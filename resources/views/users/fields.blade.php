@@ -1,38 +1,53 @@
-<!-- Name Field -->
-<div class="form-group col-sm-6">
-    {!! Form::label('name', 'Name:', ['class' => 'd-block']) !!}
-    {!! Form::text('name', null, ['class' => 'form-control']) !!}
-</div>
+<div class="row">
+    <div class="col-sm-8">
+        <!-- Name Field -->
+        <div class="form-group col-sm-10">
+            {!! Form::label('name', 'Name:', ['class' => 'd-block']) !!}
+            {!! Form::text('name', null, ['class' => 'form-control']) !!}
+        </div>
 
-<!-- Email Field -->
-<div class="form-group col-sm-6">
-    {!! Form::label('email', 'Email:') !!}
-    {!! Form::email('email', null, ['class' => 'form-control']) !!}
-</div>
+        <!-- Email Field -->
+        <div class="form-group col-sm-10">
+            {!! Form::label('email', 'Email:') !!}
+            {!! Form::email('email', null, ['class' => 'form-control']) !!}
+        </div>
 
-<!-- Email Verified At Field -->
-<div class="form-group col-sm-6">
-    {!! Form::label('email_verified_at', 'Email Verified At:') !!}
-    {!! Form::date('email_verified_at', null, ['class' => 'form-control date']) !!}
-</div>
+        {{-- <!-- Email Verified At Field -->
+        <div class="form-group col-sm-6">
+            {!! Form::label('email_verified_at', 'Email Verified At:') !!}
+            {!! Form::date('email_verified_at', null, ['class' => 'form-control date']) !!}
+        </div> --}}
 
-<!-- Password Field -->
-<div class="form-group col-sm-6">
-    {!! Form::label('password', 'Password:', ['class' => 'd-block']) !!}
-    {!! Form::password('password', ['class' => 'form-control']) !!}
-</div>
+        <!-- Password Field -->
+        <div class="form-group col-sm-10">
+            {!! Form::label('password', 'Password:', ['class' => 'd-block']) !!}
+            {!! Form::password('password', ['class' => 'form-control']) !!}
+        </div>
 
-<!-- Remember Token Field -->
-<div class="form-group col-sm-6">
-    {!! Form::label('remember_token', 'Remember Token:', ['class' => 'd-block']) !!}
-    {!! Form::text('remember_token', null, ['class' => 'form-control']) !!}
-</div>
-
-<div class="form-group col-sm-6">
-    @foreach ($roles as $role)
-        {!! Form::checkbox('roles[]',   $role->id, !empty($user->roles) ? $user->roles : null ) !!}
-        {!! Form::label($role->name, ucfirst($role->name)) !!}<br>
-    @endforeach
+        {{-- <div class="form-group col-sm-10">
+            {!! Form::label('shipper_id', 'Shipper:',['class' => 'd-block']) !!}
+            {!! Form::select('shipper_id', $shipper,null, ['class' => 'form-control select2','id' => 'shipper_id']) !!}
+        </div> --}}
+    </div>
+    
+    <div class="col-sm-4">
+        <table class="table table-border">
+            <thead class="thead-dark">
+                <tr>
+                    <th>#</th>
+                    <th>ROLE/ ACCES AS</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach ($roles as $role)
+                    <tr>
+                        <td>{!! Form::checkbox('roles[]', $role->id, !empty($user->roles) ? $user->roles : null ) !!}</td>
+                        <td>{!! Form::label($role->name, ucfirst($role->name)) !!}</td>
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
+    </div>
 </div>
 
 <div class="clearfix"></div>

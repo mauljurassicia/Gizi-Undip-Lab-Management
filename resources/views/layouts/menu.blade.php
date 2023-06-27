@@ -23,9 +23,7 @@
 </li>
 
 
-<li class="nav-label mg-t-25">Others</li>@can('transaction-show')
-<li class="{{ Request::is('transactions*') ? 'active' : '' }} nav-item">
-    <a class="nav-link" href="{!! route('webcore.transactions.index') !!}"><i data-feather="edit-3"></i><span>Transactions</span></a>
-</li>
-@endcan
+<li class="nav-label mg-t-25">Others</li>
+
+
 

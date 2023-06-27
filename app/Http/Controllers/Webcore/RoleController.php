@@ -4,11 +4,15 @@ namespace App\Http\Controllers\Webcore;
 
 use App\DataTables\RoleDataTable;
 use App\Http\Requests;
-use App\Http\Requests\CreateRoleRequest;
-use App\Http\Requests\UpdateRoleRequest;
+use App\Http\Requests\Webcore\CreateRoleRequest;
+use App\Http\Requests\Webcore\UpdateRoleRequest;
 use App\Repositories\RoleRepository;
 use Flash;
 use App\Http\Controllers\AppBaseController;
+use App\Models\Permission;
+use App\Models\Permissiongroup;
+use App\Models\Permissionlabel;
+use App\User;
 use Response;
 use Illuminate\Http\Request; // added by dandisy
 use Illuminate\Support\Facades\Auth; // added by dandisy
@@ -22,8 +26,13 @@ class RoleController extends AppBaseController
 
     public function __construct(RoleRepository $roleRepo)
     {
-//        $this->middleware('can:roles');
         $this->middleware('auth');
+        $this->middleware('can:role-edit', ['only' => ['edit']]);
+        $this->middleware('can:role-store', ['only' => ['store']]);
+        $this->middleware('can:role-show', ['only' => ['show']]);
+        $this->middleware('can:role-update', ['only' => ['update']]);
+        $this->middleware('can:role-delete', ['only' => ['delete']]);
+        $this->middleware('can:role-create', ['only' => ['create']]);
         $this->roleRepository = $roleRepo;
     }
 
@@ -45,13 +54,27 @@ class RoleController extends AppBaseController
      */
     public function create()
     {
-        // added by dandisy
-        $permissions = \App\Models\Permission::all();
+        $groups = Permissiongroup::all();
+        $permissions = [];
 
+        foreach($groups as $group){
+            $labels = Permissionlabel::where('permission_group_id', $group->id)->get();
+            $arr_label = [];
+            foreach($labels as $label){
+                $arr_label[] = [
+                    'name' => $label->name,
+                    'permissions' => Permission::where('permissions_label_id', $label->id)->select('id', 'name')->get()
+                ];
+            }
 
-        // edited by dandisy
-        // return view('roles.create');
+            $permissions[] = [
+                'group' => $group->name,
+                'labels' => $arr_label
+            ];
+        }
+        
         return view('roles.create')
+            ->with('role', null)
             ->with('permissions', $permissions);
     }
 
@@ -72,7 +95,6 @@ class RoleController extends AppBaseController
         }
 
         Flash::success('Role saved successfully.');
-
         return redirect(route('roles.index'));
     }
 
@@ -89,11 +111,29 @@ class RoleController extends AppBaseController
 
         if (empty($role)) {
             Flash::error('Role not found');
-
             return redirect(route('roles.index'));
         }
 
-        return view('roles.show')->with('role', $role);
+        $groups = Permissiongroup::all();
+        $permissions = [];
+
+        foreach($groups as $group){
+            $labels = Permissionlabel::where('permission_group_id', $group->id)->get();
+            $arr_label = [];
+            foreach($labels as $label){
+                $arr_label[] = [
+                    'name' => $label->name,
+                    'permissions' => Permission::where('permissions_label_id', $label->id)->select('id', 'name')->get()
+                ];
+            }
+
+            $permissions[] = [
+                'group' => $group->name,
+                'labels' => $arr_label
+            ];
+        }
+
+        return view('roles.show')->with('role', $role)->with('permissions', $permissions);
     }
 
     /**
@@ -105,20 +145,32 @@ class RoleController extends AppBaseController
      */
     public function edit($id)
     {
-        // added by dandisy
-        $permissions = \App\Models\Permission::all();
-
-
         $role = $this->roleRepository->findWithoutFail($id);
 
         if (empty($role)) {
             Flash::error('Role not found');
-
             return redirect(route('roles.index'));
         }
 
-        // edited by dandisy
-        // return view('roles.edit')->with('role', $role);
+        $groups = Permissiongroup::all();
+        $permissions = [];
+
+        foreach($groups as $group){
+            $labels = Permissionlabel::where('permission_group_id', $group->id)->get();
+            $arr_label = [];
+            foreach($labels as $label){
+                $arr_label[] = [
+                    'name' => $label->name,
+                    'permissions' => Permission::where('permissions_label_id', $label->id)->select('id', 'name')->get()
+                ];
+            }
+
+            $permissions[] = [
+                'group' => $group->name,
+                'labels' => $arr_label
+            ];
+        }
+        
         return view('roles.edit')
             ->with('role', $role)
             ->with('permissions', $permissions);

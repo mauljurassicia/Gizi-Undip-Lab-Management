@@ -5,6 +5,13 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
+        <!-- Favicon -->
+        <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('apple-touch-icon.png') }}">
+        <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon-32x32.png') }}">
+        <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('favicon-16x16.png') }}">
+        <link rel="shortcut icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
+        {{-- <link rel="manifest" href="site.webmanifest"> --}}
+
         <title>{{ isset($appName) ? $appName : 'Webcore' }}</title>
 
         <!-- Fonts -->
@@ -83,7 +90,7 @@
                         <a href="{{ url('/home') }}">Home</a>
                     @else
                         <a href="{{ route('login') }}">Login</a>
-                        <a href="{{ route('register') }}">Register</a>
+                        {{-- <a href="{{ route('register') }}">Register</a> --}}
                     @endauth
                 </div>
             @endif
@@ -95,11 +102,11 @@
                 </div>
 
                 <div class="links">
-                    <a href="https://dandisy.github.io/1.0.4/documentation.html">Documentation</a>
+                    {{-- <a href="https://dandisy.github.io/1.0.4/documentation.html">Documentation</a>
                     <a href="https://dandisy.github.io/1.0.4/start.html">Quick Start</a>
                     <a href="https://dandisy.github.io/">Site</a>
                     <a href="https://github.com/dandisy/webcore-sample">Sample Backend</a>
-                    <a href="https://github.com/dandisy/webcore-cms">CMS</a>
+                    <a href="https://github.com/dandisy/webcore-cms">CMS</a> --}}
                 </div>
             </div>
         </div>

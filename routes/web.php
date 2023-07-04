@@ -42,6 +42,8 @@ Route::post('register', function () {
 });
 
 Route::get('/dashboard', 'Webcore\HomeController@index')->name('dashboard');
+Route::get('profile', 'Webcore\HomeController@profile')->name('profile');
+Route::post('profile/submit', 'Webcore\HomeController@update_profile')->name('profile.submit');
 
 Route::resource('permissiongroups', 'Webcore\PermissiongroupController');
 Route::resource('permissions', 'Webcore\PermissionController');

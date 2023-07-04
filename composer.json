@@ -56,7 +56,7 @@
             "packages"
         ],
         "files": [
-
+            "app/Http/Helpers.php",
             "packages/laravel-generator/src/helpers.php"
 
         ]

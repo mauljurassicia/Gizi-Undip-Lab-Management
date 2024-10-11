@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\DataTables\RoomDataTable;
+use App\Enums\ResponseCodeEnum;
+use App\Helpers\ResponseJson;
 use App\Http\Requests;
 use App\Http\Requests\CreateRoomRequest;
 use App\Http\Requests\UpdateRoomRequest;
@@ -232,10 +234,23 @@ class RoomController extends AppBaseController
             'type' => 'in:'.implode(',', array_keys(Equipment::$type)).',all',
         ]);
 
-        if ($request->type == 'all') {
-            $equipments = $this->equipmentRepository->all();
+        if($request->query('search') == '' || $request->query('search') == null){
+            return ResponseJson::make(ResponseCodeEnum::STATUS_BAD_REQUEST, 'Search cannot be empty')->send();
+        }
+
+
+
+        if ($request->type == 'all' || !isset($request->type) || $request->type == null) {
+            $equipments = $this->equipmentRepository->where('name', 'like', '%'.$request->query('search').'%')->get();
+
         } else {
             $equipments = $this->equipmentRepository->where('type', $request->type)->get();
         }
+
+        if(count($equipments) == 0){
+            return ResponseJson::make(ResponseCodeEnum::STATUS_NOT_FOUND, 'Equipment not found')->send();
+        }
+
+        return ResponseJson::make(ResponseCodeEnum::STATUS_OK, 'Equipment found', $equipments)->send();
     }
 }

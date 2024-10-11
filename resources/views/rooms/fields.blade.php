@@ -1,7 +1,19 @@
 <!-- Name Field -->
 <div class="form-group col-sm-6">
     {!! Form::label('name', 'Name:') !!}
-    {!! Form::text('name', null, ['class' => 'form-control', 'required']) !!}
+    {!! Form::text('name',@$room->name ?? null, ['class' => 'form-control', 'required']) !!}
+</div>
+
+<!-- Code Field -->
+<div class="form-group col-sm-6">
+    {!! Form::label('code', 'Kode Ruangan:') !!}
+    {!! Form::text('code', @$room->code ?? null, ['class' => 'form-control', 'required']) !!}
+</div>
+
+<!-- Floor Field -->
+<div class="form-group col-sm-6">
+    {!! Form::label('floor', 'Lantai:') !!}
+    {!! Form::select('floor', [1 => '1', 2 => '2', 3 => '3', 4 => '4'], @$room->floor ?? 1, ['class' => 'form-control']) !!}
 </div>
 
 <!-- Image Field -->

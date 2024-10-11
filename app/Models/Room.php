@@ -55,7 +55,9 @@ class Room extends Model
         'volume',
         'status',
         'pic_id',
-        'operational_days'
+        'operational_days',
+        'floor',
+        'code',
     ];
 
     /**

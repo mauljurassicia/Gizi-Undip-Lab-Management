@@ -6,6 +6,8 @@ use League\Glide\ServerFactory;
 use League\Glide\Responses\LaravelResponseFactory;
 use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Auth;
 
 /*
 |--------------------------------------------------------------------------
@@ -50,3 +52,21 @@ Route::resource('permissions', 'Webcore\PermissionController');
 Route::resource('roles', 'Webcore\RoleController');
 Route::post('users/permissions', 'Webcore\UserController@permissions')->name('users.permissions');
 Route::resource('users', 'Webcore\UserController');
+
+
+Route::resource('equipment', 'EquipmentController');
+// Route::post('importEquipment', 'EquipmentController@import');
+
+Route::get('rooms/equipments', 'RoomController@getEquipment')->name('rooms.equipments');
+Route::resource('rooms', 'RoomController');
+
+// Route::post('importRoom', 'RoomController@import');
+
+Route::resource('typeEquipments', 'TypeEquipmentController');
+// Route::post('importTypeEquipment', 'TypeEquipmentController@import');
+
+Route::resource('typeRooms', 'TypeRoomController');
+// Route::post('importTypeRoom', 'TypeRoomController@import');
+
+Route::resource('appointments', 'AppointmentController');
+// Route::post('importAppointment', 'AppointmentController@import');

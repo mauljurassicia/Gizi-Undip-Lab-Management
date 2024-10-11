@@ -12,15 +12,15 @@
     <meta name="description" content="Webcore - Web Backend Generate">
     <meta name="author" content="Redtech">
 
-    <!-- Favicon -->
-    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('apple-touch-icon.png') }}">
-    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon-32x32.png') }}">
-    <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('favicon-16x16.png') }}">
-    <link rel="shortcut icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
-    {{-- <link rel="manifest" href="site.webmanifest"> --}}
+   <!-- Favicon -->
+   <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('undip.png') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('undip.png') }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('undip.png') }}">
+    <link rel="shortcut icon" type="image/x-icon" href="{{ asset('undip.ico') }}">    >
+      
+   {{-- <link rel="manifest" href="site.webmanifest"> --}}
 
-    <title>Webcore - Web Backend Generate</title>
-
+   <title>Gizi Lab Monitoring </title>
     <!-- vendor css -->
     <link href="{{ asset('vendor/dashforge/lib/@fortawesome/fontawesome-free/css/all.min.css') }}" rel="stylesheet">
     <link href="{{ asset('vendor/dashforge/lib/ionicons/css/ionicons.min.css') }}" rel="stylesheet">
@@ -99,6 +99,7 @@
     <script src="{{ asset('vendor/dashforge/lib/perfect-scrollbar/perfect-scrollbar.min.js') }}"></script>
 
     <script src="{{ asset('vendor/dashforge/assets/js/dashforge.js') }}"></script>
+    <script src="{{ asset('vendor/dashforge/assets/js/dashforge.aside.js') }}"></script>
     <script src="{{ asset('vendor/dashforge/lib/dropify/js/dropify.min.js') }}"></script>
     <script src="{{ asset('vendor/dashforge/lib/select2/js/select2.min.js') }}"></script>
     <script src="{{ asset('vendor/dashforge/lib/js-cookie/js.cookie.js') }}"></script>

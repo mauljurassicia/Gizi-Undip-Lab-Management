@@ -16,3 +16,5 @@ yarn.lock
 composer.lock
 composer-setup.php
 package-lock.json
+/compose
+/nginx

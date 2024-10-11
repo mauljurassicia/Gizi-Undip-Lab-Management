@@ -1,14 +1,14 @@
 <aside class="aside aside-fixed">
     <div class="aside-header">
         <a href="{{ url('/home') }}">
-            <img src="{{ asset('webcore-logo.png') }}" alt="logo" width="120">
+            <img src="{{ asset('S1-Gizi.png') }}" alt="logo" width="120">
         </a>
         <a href="" class="aside-menu-link">
             <i data-feather="menu"></i>
             <i data-feather="x"></i>
         </a>
     </div>
-    <div class="aside-body">
+    <div class="aside-body ps ps--active-y">
         <div class="aside-loggedin">
             <div class="d-flex align-items-center justify-content-start">
                 <span class="avatar">

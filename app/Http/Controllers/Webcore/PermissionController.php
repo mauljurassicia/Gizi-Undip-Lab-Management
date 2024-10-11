@@ -7,7 +7,7 @@ use App\Http\Requests;
 use App\Http\Requests\Webcore\CreatePermissionRequest;
 use App\Http\Requests\Webcore\UpdatePermissionRequest;
 use App\Repositories\PermissionRepository;
-use Flash;
+use Laracasts\Flash\Flash;
 use App\Http\Controllers\AppBaseController;
 use App\Models\Permissiongroup;
 use App\Models\Permissionlabel;
@@ -88,6 +88,8 @@ class PermissionController extends AppBaseController
                 Permission::insert($arr_permission);
             }
         }
+
+        app()->make(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
 
         Flash::success('Permission saved successfully.');
         return redirect(route('permissions.index'));
@@ -187,6 +189,9 @@ class PermissionController extends AppBaseController
         if(count($arr_id) > 0){
             Permission::where('permissions_label_id',$id )->whereNotIn('id', $arr_id)->delete();
         }
+
+        
+        app()->make(\Spatie\Permission\PermissionRegistrar::class)->forgetCachedPermissions();
 
         Flash::success('Permission updated successfully.');
         return redirect(route('permissions.index'));

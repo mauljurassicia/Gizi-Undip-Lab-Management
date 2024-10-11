@@ -7,7 +7,7 @@ use App\Http\Requests;
 use App\Http\Requests\Webcore\CreateUserRequest;
 use App\Http\Requests\Webcore\UpdateUserRequest;
 use App\Repositories\UserRepository;
-use Flash;
+use Laracasts\Flash\Flash;
 use App\Http\Controllers\AppBaseController;
 use App\Models\Permission;
 use App\Models\Permissiongroup;

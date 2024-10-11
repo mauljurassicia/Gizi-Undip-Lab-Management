@@ -57,6 +57,8 @@ Route::resource('users', 'Webcore\UserController');
 Route::resource('equipment', 'EquipmentController');
 // Route::post('importEquipment', 'EquipmentController@import');
 
+Route::get('rooms/{room}/equipments', 'RoomController@getEquipmentByRoom')->name('rooms.equipments.table');
+Route::post('rooms/{room}/equipments', 'RoomController@addEquipment')->name('rooms.equipments.store');
 Route::get('rooms/equipments', 'RoomController@getEquipment')->name('rooms.equipments');
 Route::resource('rooms', 'RoomController');
 

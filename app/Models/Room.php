@@ -86,6 +86,10 @@ class Room extends Model
         return $this->belongsTo(User::class, 'pic_id');
     }
 
+    public function equipment() {
+        return $this->belongsToMany(Equipment::class, 'equipment_rooms', 'room_id', 'equipment_id');
+    }
+
 
 
     

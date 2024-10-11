@@ -253,4 +253,52 @@ class RoomController extends AppBaseController
 
         return ResponseJson::make(ResponseCodeEnum::STATUS_OK, 'Equipment found', $equipments)->send();
     }
+
+    public function getEquipmentByRoom($roomId, Request $request){
+
+        $room = $this->roomRepository->findWithoutFail($roomId);
+
+        if (empty($room)) {
+            return ResponseJson::make(ResponseCodeEnum::STATUS_NOT_FOUND, 'Room not found')->send();
+        }
+        $equipments = $room->equipment()->withPivot('quantity')->get();
+
+        if(count($equipments) == 0){
+            return ResponseJson::make(ResponseCodeEnum::STATUS_NOT_FOUND, 'Equipment not found')->send();
+        }
+
+        return ResponseJson::make(ResponseCodeEnum::STATUS_OK, 'Equipment found', $equipments)->send();
+
+
+    }
+
+    public function addEquipment($roomId, Request $request){
+       $room = $this->roomRepository->findWithoutFail($roomId);
+
+        if (empty($room)) {
+            return ResponseJson::make(ResponseCodeEnum::STATUS_NOT_FOUND, 'Room not found')->send();
+        }
+
+        $quantity = $request->input('quantity');
+        $equipments = $this->equipmentRepository->findWithoutFail($request->input('equipment_id'));
+
+        if (empty($equipments)) {
+            return ResponseJson::make(ResponseCodeEnum::STATUS_NOT_FOUND, 'Equipment not found')->send();
+        }
+
+        if($quantity <= 0){
+            $room->equipment()->detach($request->input('equipment_id'));
+            return ResponseJson::make(ResponseCodeEnum::STATUS_OK, 'Equipment removed successfully')->send();
+        }
+
+        if($room->equipment()->where('equipment_id', $request->input('equipment_id'))->exists()){
+            $room->equipment()->updateExistingPivot($request->input('equipment_id'), ['quantity' => $quantity]);
+            return ResponseJson::make(ResponseCodeEnum::STATUS_OK, 'Equipment updated successfully')->send();
+        }
+
+        $room->equipment()->attach($request->input('equipment_id'), ['quantity' => $quantity]);
+        
+
+        return ResponseJson::make(ResponseCodeEnum::STATUS_OK, 'Equipment added successfully')->send();
+    }
 }

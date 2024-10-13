@@ -90,6 +90,14 @@ class Room extends Model
         return $this->belongsToMany(Equipment::class, 'equipment_rooms', 'room_id', 'equipment_id');
     }
 
+    public function individuals() {
+        return $this->morphedByMany('App/User', 'appointments',  'appointments', 'room_id', 'appointee_id');
+    }
+
+    public function groups() {
+        return $this->morphedByMany('App/Group', 'appointments', 'appointments', 'room_id', 'appointee_id');
+    }
+
 
 
     

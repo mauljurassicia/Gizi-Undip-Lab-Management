@@ -7,21 +7,30 @@ use App\Http\Requests;
 use App\Http\Requests\CreateCourseRequest;
 use App\Http\Requests\UpdateCourseRequest;
 use App\Repositories\CourseRepository;
-use Flash;
+use Laracasts\Flash\Flash;
 use App\Http\Controllers\AppBaseController;
+use App\Services\SaveFileService;
 use Response;
-use Illuminate\Http\Request; 
-use Illuminate\Support\Facades\Auth; 
-use Illuminate\Support\Facades\Storage; 
-use Maatwebsite\Excel\Facades\Excel; 
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
+use Maatwebsite\Excel\Facades\Excel;
 
 class CourseController extends AppBaseController
 {
     /** @var  CourseRepository */
     private $courseRepository;
 
-    public function __construct(CourseRepository $courseRepo)
-    {
+    /** @var  SaveFileService */
+    private $saveFileService;
+
+    /** @var string */
+    private $storage = 'courses';
+
+    public function __construct(
+        CourseRepository $courseRepo,
+        SaveFileService $saveFileService
+    ) {
         $this->middleware('auth');
         $this->middleware('can:course-edit', ['only' => ['edit']]);
         $this->middleware('can:course-store', ['only' => ['store']]);
@@ -30,6 +39,7 @@ class CourseController extends AppBaseController
         $this->middleware('can:course-delete', ['only' => ['delete']]);
         $this->middleware('can:course-create', ['only' => ['create']]);
         $this->courseRepository = $courseRepo;
+        $this->saveFileService = $saveFileService;
     }
 
     /**
@@ -50,7 +60,7 @@ class CourseController extends AppBaseController
      */
     public function create()
     {
-        
+
 
         return view('courses.create');
     }
@@ -65,6 +75,14 @@ class CourseController extends AppBaseController
     public function store(CreateCourseRequest $request)
     {
         $input = $request->all();
+
+        if ($request->hasFile('banner')) {
+            $input['banner'] = $this->saveFileService->setImage($request->file('banner'))->setStorage($this->storage)->handle();
+        }
+
+        if ($request->hasFile('thumbnail')) {
+            $input['thumbnail'] = $this->saveFileService->setImage($request->file('thumbnail'))->setStorage($this->storage)->handle();
+        }
 
         $course = $this->courseRepository->create($input);
 
@@ -100,8 +118,8 @@ class CourseController extends AppBaseController
      */
     public function edit($id)
     {
-        
-        
+
+
 
         $course = $this->courseRepository->findWithoutFail($id);
 
@@ -132,6 +150,16 @@ class CourseController extends AppBaseController
         }
 
         $input = $request->all();
+
+
+        if ($request->hasFile('banner')) {
+            $input['banner'] = $this->saveFileService->setImage($request->file('banner'))->setStorage($this->storage)->setModel($course->banner)->handle();
+        }
+
+        if ($request->hasFile('thumbnail')) {
+            $input['thumbnail'] = $this->saveFileService->setImage($request->file('thumbnail'))->setStorage($this->storage)->setModel($course->thumbnail)->handle();
+        }   
+        
         $course = $this->courseRepository->update($input, $id);
 
         Flash::success('Course updated successfully.');
@@ -169,7 +197,7 @@ class CourseController extends AppBaseController
      */
     public function import(Request $request)
     {
-        Excel::load($request->file('file'), function($reader) {
+        Excel::load($request->file('file'), function ($reader) {
             $reader->each(function ($item) {
                 $course = $this->courseRepository->create($item->toArray());
             });

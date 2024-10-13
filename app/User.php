@@ -61,4 +61,8 @@ class User extends Authenticatable
         $this->attributes['password'] = bcrypt($password);
     }
 
+    public function appointments()
+    {
+        return $this->morphToMany('App\Models\Room', 'appointments');
+    }
 }

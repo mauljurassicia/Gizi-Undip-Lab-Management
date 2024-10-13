@@ -45,6 +45,13 @@ class Appointment extends Model
         'appointee_type'
     ];
 
+    
+    public function appointee()
+    {
+        return $this->morphTo();
+    }
+    
+
     /**
      * The attributes that should be casted to native types.
      *

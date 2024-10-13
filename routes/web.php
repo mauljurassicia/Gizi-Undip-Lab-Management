@@ -72,3 +72,6 @@ Route::resource('typeRooms', 'TypeRoomController');
 
 Route::resource('appointments', 'AppointmentController');
 // Route::post('importAppointment', 'AppointmentController@import');
+
+Route::resource('courses', 'CourseController');
+// Route::post('importCourse', 'CourseController@import');

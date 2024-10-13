@@ -59,6 +59,8 @@
                                             alert(data.message);
                                         }
                                     });
+
+                                this.quantityModal = 0;
                             }
                         }
                     }

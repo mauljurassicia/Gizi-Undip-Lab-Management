@@ -23,6 +23,13 @@
     <a class="nav-link" href="{!! route('permissions.index') !!}"><i data-feather="user-check"></i><span>Permissions</span></a>
 </li>
 
+<li class="nav-label mg-t-25">Manajemen Departemen</li>
+
+@can('course-show')
+<li class="{{ Request::is('courses*') ? 'active' : '' }} nav-item">
+    <a class="nav-link" href="{!! route('courses.index') !!}"><i class="fa fa-graduation-cap" style="width: 32px"></i><span>Mata Kuliah</span></a>
+</li>
+@endcan
 
 <li class="nav-label mg-t-25">Manajemen Lab</li>
 
@@ -69,3 +76,5 @@
         <a class="nav-link" href="{!! route('appointments.index') !!}"><i class="fa fa-book" style="width: 32px"></i><span>Logbook</span></a>
     </li>
 @endcan
+
+

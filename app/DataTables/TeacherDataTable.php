@@ -2,11 +2,11 @@
 
 namespace App\DataTables;
 
-use App\Models\Course;
+use App\User;
 use Yajra\DataTables\Services\DataTable;
 use Yajra\DataTables\EloquentDataTable;
 
-class CourseDataTable extends DataTable
+class TeacherDataTable extends DataTable
 {
     /**
      * Build DataTable class.
@@ -18,13 +18,7 @@ class CourseDataTable extends DataTable
     {
         $dataTable = new EloquentDataTable($query);
 
-        return $dataTable->addColumn('action', 'courses.datatables_actions')
-        ->editColumn('thumbnail', function ($data) {
-            return '<img src="' . asset($data->thumbnail) . '" width="100px">';
-        })
-            ->editColumn('status', function ($data) {
-                return $data->status == 1 ? '<span class="badge badge-success">Tersedia</span>' : '<span class="badge badge-danger">Tidak Tersedia</span>';
-            })->rawColumns(['status', 'action', 'thumbnail']);
+        return $dataTable->addColumn('action', 'teachers.datatables_actions');
     }
 
     /**
@@ -33,9 +27,11 @@ class CourseDataTable extends DataTable
      * @param \App\Models\Post $model
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function query(Course $model)
+    public function query(User $model)
     {
-        return $model->newQuery();
+        return $model->newQuery()->whereHas('roles', function ($q) {
+            $q->where('name', 'teacher');
+        });
     }
 
     /**
@@ -81,8 +77,8 @@ class CourseDataTable extends DataTable
     {
         return [
             'name',
-            'thumbnail',
-            'status'
+            'email',
+            'image',
         ];
     }
 
@@ -91,8 +87,8 @@ class CourseDataTable extends DataTable
      *
      * @return string
      */
-    protected function filename(): string
+    protected function filename():string
     {
-        return 'coursesdatatable_' . time();
+        return 'teachersdatatable_' . time();
     }
 }

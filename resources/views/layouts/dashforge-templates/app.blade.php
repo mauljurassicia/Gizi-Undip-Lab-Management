@@ -22,6 +22,10 @@
 
    <title>Gizi Lab Monitoring </title>
     <!-- vendor css -->
+    <link
+    rel="stylesheet"
+    href="https://site-assets.fontawesome.com/releases/v6.5.1/css/all.css"
+  >
     <link href="{{ asset('vendor/dashforge/lib/@fortawesome/fontawesome-free/css/all.min.css') }}" rel="stylesheet">
     <link href="{{ asset('vendor/dashforge/lib/ionicons/css/ionicons.min.css') }}" rel="stylesheet">
 

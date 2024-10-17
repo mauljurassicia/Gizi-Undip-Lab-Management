@@ -38,7 +38,7 @@
     <link rel="shortcut icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
     <link rel="manifest" href="/site.webmanifest">
 
-    <title>Webcore - Web Backend Generate</title>
+    <title>Applikasi Manajemen Lab</title>
 
     <!-- vendor css -->
     

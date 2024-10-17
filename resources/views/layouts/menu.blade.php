@@ -31,6 +31,30 @@
 </li>
 @endcan
 
+@can('teacher-show')
+<li class="{{ Request::is('teachers*') ? 'active' : '' }} nav-item">
+    <a class="nav-link" href="{!! route('teachers.index') !!}"><i class="fa fa-user-tie" style="width: 32px"></i><span>Dosen</span></a>
+</li>
+@endcan
+
+@can('student-show')
+<li class="{{ Request::is('students*') ? 'active' : '' }} nav-item">
+    <a class="nav-link" href="{!! route('students.index') !!}"><i class="fa fa-user-graduate" style="width: 32px"></i><span>Mahasiswa</span></a>
+</li>
+@endcan
+
+@can('guest-show')
+<li class="{{ Request::is('guests*') ? 'active' : '' }} nav-item">
+    <a class="nav-link" href="{!! route('guests.index') !!}"><i class="fa fa-id-card-clip" style="width: 32px"></i><span>Guest</span></a>
+</li>
+@endcan
+
+@can('group-show')
+<li class="{{ Request::is('groups*') ? 'active' : '' }} nav-item">
+    <a class="nav-link" href="{!! route('courses.index') !!}"><i class="fa fa-users" style="width: 32px"></i><span>Grup</span></a>
+</li>
+@endcan
+
 <li class="nav-label mg-t-25">Manajemen Lab</li>
 
 
@@ -78,3 +102,11 @@
 @endcan
 
 
+<li class="{{ Request::is('logbooks*') ? 'active' : '' }} nav-item">
+    <a class="nav-link" href="{!! route('appointments.index') !!}"><i class="fa fa-heart-crack" style="width: 32px"></i><span>Barang Rusak/ Hilang</span></a>
+</li>
+
+
+<li class="{{ Request::is('logbooks*') ? 'active' : '' }} nav-item">
+    <a class="nav-link" href="{!! route('appointments.index') !!}"><i class="fa fa-receipt" style="width: 32px"></i><span>Pengembalian</span></a>
+</li>

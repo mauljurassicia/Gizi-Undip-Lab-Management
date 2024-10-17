@@ -14,6 +14,14 @@ class User extends Authenticatable
     use HasRoles;
     use Notifiable;
 
+    public static $roleType = [
+        'admin' => 'Admin',
+        'teacher' => 'Teacher',
+        'student' => 'Student',
+        'laborant' => 'Laborant',
+        'guest' => 'Guest',
+    ];
+
     protected $guard_name = 'web';
     public $table = 'users';
 

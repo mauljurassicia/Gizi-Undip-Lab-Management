@@ -21,7 +21,7 @@ use Illuminate\Support\Facades\Auth;
 */
 
 Auth::routes();
-Auth::routes(['register' => false]);
+
 
 Route::get('clear-cache', function () {
     // Artisan::call('schedule:run');
@@ -35,12 +35,6 @@ Route::get('clear-cache', function () {
 
 Route::get('/', function () {
     return view('welcome');
-});
-Route::get('register', function () {
-    return redirect('/');
-});
-Route::post('register', function () {
-    return redirect('/');
 });
 
 Route::get('/dashboard', 'Webcore\HomeController@index')->name('dashboard');
@@ -64,14 +58,17 @@ Route::resource('rooms', 'RoomController');
 
 // Route::post('importRoom', 'RoomController@import');
 
-Route::resource('typeEquipments', 'TypeEquipmentController');
-// Route::post('importTypeEquipment', 'TypeEquipmentController@import');
-
-Route::resource('typeRooms', 'TypeRoomController');
-// Route::post('importTypeRoom', 'TypeRoomController@import');
-
 Route::resource('appointments', 'AppointmentController');
 // Route::post('importAppointment', 'AppointmentController@import');
 
 Route::resource('courses', 'CourseController');
 // Route::post('importCourse', 'CourseController@import');
+
+Route::resource('teachers', 'TeacherController');
+// Route::post('importTeacher', 'TeacherController@import');
+
+Route::resource('guests', 'GuestController');
+// Route::post('importGuest', 'GuestController@import');
+
+Route::resource('students', 'StudentController');
+// Route::post('importStudent', 'StudentController@import');

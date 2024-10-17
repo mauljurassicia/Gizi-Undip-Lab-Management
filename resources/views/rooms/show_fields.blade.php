@@ -140,7 +140,11 @@
 </div>
 
 @section('scripts')
-    <script src="https://unpkg.com/alpinejs"></script>
+    <!-- Alpine Plugins -->
+    <script defer src="https://cdn.jsdelivr.net/npm/@alpinejs/intersect@3.x.x/dist/cdn.min.js"></script>
+ 
+    <!-- Alpine Core -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script>
         $(document).ready(function() {
             $('.dropify').dropify({

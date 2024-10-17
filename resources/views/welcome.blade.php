@@ -6,13 +6,13 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
         <!-- Favicon -->
-        <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('apple-touch-icon.png') }}">
-        <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('favicon-32x32.png') }}">
-        <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('favicon-16x16.png') }}">
-        <link rel="shortcut icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
+        <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('undip.png') }}">
+        <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('undip.png') }}">
+        <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('undip.png') }}">
+        <link rel="shortcut icon" type="image/x-icon" href="{{ asset('undip.ico') }}">    
         {{-- <link rel="manifest" href="site.webmanifest"> --}}
 
-        <title>{{ isset($appName) ? $appName : 'Webcore' }}</title>
+        <title>Gizi Lab Monitoring</title>
 
         <!-- Fonts -->
         <link href="{{ asset('vendor/fonts/Raleway.css') }}" rel="stylesheet" type="text/css">
@@ -87,7 +87,7 @@
             @if (Route::has('login'))
                 <div class="top-right links">
                     @auth
-                        <a href="{{ url('/dashboard') }}">Home</a>
+                        <a href="{{ url('/dashboard') }}">Dashboard</a>
                     @else
                         <a href="{{ route('login') }}">Login</a>
                         {{-- <a href="{{ route('register') }}">Register</a> --}}
@@ -98,7 +98,7 @@
             <div class="content">
                 <div class="title m-b-md">
                     <!-- {{ isset($appName) ? $appName : 'Webcore' }} -->
-                    <img src="{{ asset('webcore-logo.png') }}" alt="Webcore" width="325">
+                    <img src="{{ asset('S1-Gizi.png') }}" alt="Webcore" width="325">
                 </div>
 
                 <div class="links">

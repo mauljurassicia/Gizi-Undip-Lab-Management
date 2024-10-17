@@ -24,6 +24,7 @@
                             table: [],
                             roomId: {{ $room->id }},
                             quantityModal: 0,
+                            shown: false,
                             init() {
                                 this.fetchEquipments(); // Ensure that the 'this' context is correct here
                             },
@@ -53,9 +54,10 @@
                                     }).then(response => response.json())
                                     .then(data => {
                                         if (data.valid) {
-                                            this.fetchEquipments();
+
                                             $('#equipmentModal').modal('hide');
-                                        }else {
+                                            setTimeout(() => this.fetchEquipments(), 500);
+                                        } else {
                                             alert(data.message);
                                         }
                                     });
@@ -71,43 +73,46 @@
                     <h4 class="mg-b-10">Daftar Alat Lab</h4>
                 </div>
 
-                <div class="col-md-12 mb-5">
-                    <table class="table table-striped">
-                        <thead>
-                            <tr>
-                                <th>Nama Alat</th>
-                                <th>Tipe</th>
-                                <th>Gambar</th>
-                                <th>Kuantitas</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <template x-if="table.length > 0">
-                                <template x-for="eqTab in table" :key="eqTab.id">
+                <div x-cloak x-intersect="shown = true">
+                    <div class="col-md-12 mb-5" x-show="shown" >
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Nama Alat</th>
+                                    <th>Tipe</th>
+                                    <th>Gambar</th>
+                                    <th>Kuantitas</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <template x-if="table.length > 0">
+                                    <template x-for="eqTab in table" :key="eqTab.id">
+                                        <tr>
+                                            <td x-text="eqTab.name"></td>
+                                            <td x-text="eqTab.type"></td>
+                                            <td>
+                                                <img class="img-fluid mx-auto d-block"
+                                                    :src="eqTab.image ?
+                                                        `{{ request()->getSchemeAndHttpHost() }}/${eqTab.image}` :
+                                                        '{{ asset('/No_Image_Available.jpg') }}'"
+                                                    alt="Equipment Image"
+                                                    style="height: 75px; width: 75px; object-fit: contain; background-color: #e5e5e5;"
+                                                    height="75" width="75">
+                                            </td>
+                                            <td x-text="eqTab.pivot.quantity+' '+eqTab.unit_type"></td>
+                                        </tr>
+                                    </template>
+                                </template>
+                                <template x-if="table.length == 0">
                                     <tr>
-                                        <td x-text="eqTab.name"></td>
-                                        <td x-text="eqTab.type"></td>
-                                        <td>
-                                            <img class="img-fluid mx-auto d-block"
-                                                :src="eqTab.image ?
-                                                    `{{ request()->getSchemeAndHttpHost() }}/${eqTab.image}` :
-                                                    '{{ asset('/No_Image_Available.jpg') }}'"
-                                                alt="Equipment Image"
-                                                style="height: 75px; width: 75px; object-fit: contain; background-color: #e5e5e5;"
-                                                height="75" width="75">
-                                        </td>
-                                        <td x-text="eqTab.pivot.quantity+' '+eqTab.unit_type"></td>
+                                        <td colspan="4" class="text-center">Tidak ada alat lab yang ditambahkan</td>
                                     </tr>
                                 </template>
-                            </template>
-                            <template x-if="table.length == 0">
-                                <tr>
-                                    <td colspan="4" class="text-center">Tidak ada alat lab yang ditambahkan</td>
-                                </tr>
-                            </template>
-                        </tbody>
-                    </table>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
+                
 
 
                 <div class="col-md-4 mt-3">
@@ -151,7 +156,8 @@
                                 `);
                                 $('#equipmentModalFooter').html(`
                                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                                    <button type="button" class="btn btn-primary" @click="addEquipment(` + equipment.id + `, quantityModal)">Add</button>
+                                    <button type="button" class="btn btn-primary" @click="addEquipment(` + equipment
+                                    .id + `, quantityModal)">Add</button>
                                 `);
                             }
 
@@ -233,5 +239,5 @@
 @endsection
 
 @section('scripts')
-    <script src="https://unpkg.com/alpinejs"></script>
+
 @endsection

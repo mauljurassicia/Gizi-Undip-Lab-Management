@@ -9,19 +9,25 @@ use App\Http\Requests\UpdateScheduleRequest;
 use App\Repositories\ScheduleRepository;
 use Laracasts\Flash\Flash;
 use App\Http\Controllers\AppBaseController;
+use App\Repositories\RoomRepository;
 use Response;
-use Illuminate\Http\Request; 
-use Illuminate\Support\Facades\Auth; 
-use Illuminate\Support\Facades\Storage; 
-use Maatwebsite\Excel\Facades\Excel; 
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ScheduleController extends AppBaseController
 {
     /** @var  ScheduleRepository */
     private $scheduleRepository;
 
-    public function __construct(ScheduleRepository $scheduleRepo)
-    {
+    /** @var RoomRepository */
+    private $roomRepository;
+
+    public function __construct(
+        ScheduleRepository $scheduleRepo,
+        RoomRepository $roomRepo
+    ) {
         $this->middleware('auth');
         $this->middleware('can:schedule-edit', ['only' => ['edit']]);
         $this->middleware('can:schedule-store', ['only' => ['store']]);
@@ -30,6 +36,7 @@ class ScheduleController extends AppBaseController
         $this->middleware('can:schedule-delete', ['only' => ['delete']]);
         $this->middleware('can:schedule-create', ['only' => ['create']]);
         $this->scheduleRepository = $scheduleRepo;
+        $this->roomRepository = $roomRepo;
     }
 
     /**
@@ -50,7 +57,7 @@ class ScheduleController extends AppBaseController
      */
     public function create()
     {
-        
+
 
         return view('schedules.create');
     }
@@ -81,14 +88,14 @@ class ScheduleController extends AppBaseController
      */
     public function show($id)
     {
-        $schedule = $this->scheduleRepository->findWithoutFail($id);
+        $room = $this->roomRepository->findWithoutFail($id);
 
-        if (empty($schedule)) {
+        if (empty($room)) {
             Flash::error('Schedule not found');
             return redirect(route('schedules.index'));
         }
 
-        return view('schedules.show')->with('schedule', $schedule);
+        return view('schedules.show')->with('room', $room);
     }
 
     /**
@@ -100,17 +107,15 @@ class ScheduleController extends AppBaseController
      */
     public function edit($id)
     {
-        
+        $room = $this->roomRepository->findWithoutFail($id);
 
-        $schedule = $this->scheduleRepository->findWithoutFail($id);
-
-        if (empty($schedule)) {
+        if (empty($room)) {
             Flash::error('Schedule not found');
             return redirect(route('schedules.index'));
         }
 
         return view('schedules.edit')
-            ->with('schedule', $schedule);
+            ->with('room', $room);
     }
 
     /**
@@ -168,7 +173,7 @@ class ScheduleController extends AppBaseController
      */
     public function import(Request $request)
     {
-        Excel::load($request->file('file'), function($reader) {
+        Excel::load($request->file('file'), function ($reader) {
             $reader->each(function ($item) {
                 $schedule = $this->scheduleRepository->create($item->toArray());
             });

@@ -47,7 +47,8 @@ class CourseDataTable extends DataTable
     {
         return $this->builder()
             ->columns($this->getColumns())
-            ->minifiedAjax()
+         
+            ->minifiedAjax('', null, [], ['headers' => ['ngrok-skip-browser-warning' => 'true']])
             ->addAction(['width' => '80px'])
             ->parameters([
                 'dom'     => 'Bfrtip',

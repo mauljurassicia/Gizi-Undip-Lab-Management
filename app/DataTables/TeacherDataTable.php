@@ -18,7 +18,10 @@ class TeacherDataTable extends DataTable
     {
         $dataTable = new EloquentDataTable($query);
 
-        return $dataTable->addColumn('action', 'teachers.datatables_actions');
+        return $dataTable->addColumn('action', 'teachers.datatables_actions')
+            ->editColumn('image', function ($data) {
+                return '<img src="' . asset($data->image) . '" width="100px">';
+            })->rawColumns(['image', 'action']);
     }
 
     /**
@@ -77,6 +80,7 @@ class TeacherDataTable extends DataTable
     {
         return [
             'name',
+            'identity_number' => ['name' => 'identity_number', 'data' => 'identity_number', 'title' => 'NIP'],
             'email',
             'image',
         ];
@@ -87,7 +91,7 @@ class TeacherDataTable extends DataTable
      *
      * @return string
      */
-    protected function filename():string
+    protected function filename(): string
     {
         return 'teachersdatatable_' . time();
     }

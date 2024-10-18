@@ -10,6 +10,7 @@ use App\Repositories\TeacherRepository;
 use Laracasts\Flash\Flash;
 use App\Http\Controllers\AppBaseController;
 use App\Repositories\UserRepository;
+use App\Services\SaveFileService;
 use Response;
 use Illuminate\Http\Request; 
 use Illuminate\Support\Facades\Auth; 
@@ -21,7 +22,16 @@ class TeacherController extends AppBaseController
     /** @var  UserRepository */
     private $userRepository;
 
-    public function __construct(UserRepository $userRepo)
+
+    /** @var SaveFileService */
+    private $saveFileService;
+
+
+    /** @var string */
+    private $storage = 'teachers';
+
+    public function __construct(UserRepository $userRepo,
+        SaveFileService $saveFileService)
     {
         $this->middleware('auth');
         $this->middleware('can:teacher-edit', ['only' => ['edit']]);
@@ -31,6 +41,7 @@ class TeacherController extends AppBaseController
         $this->middleware('can:teacher-delete', ['only' => ['delete']]);
         $this->middleware('can:teacher-create', ['only' => ['create']]);
         $this->userRepository = $userRepo;
+        $this->saveFileService = $saveFileService;
     }
 
     /**
@@ -66,7 +77,13 @@ class TeacherController extends AppBaseController
     {
         $input = $request->all();
 
+        if($request->hasFile('image')){
+            $input['image'] = $this->saveFileService->setImage($request->file('image'))->setStorage($this->storage)->handle();
+        }
+
         $teacher = $this->userRepository->create($input);
+
+        $teacher->assignRole('teacher');
 
         Flash::success('Teacher saved successfully.');
         return redirect(route('teachers.index'));
@@ -131,6 +148,10 @@ class TeacherController extends AppBaseController
         }
 
         $input = $request->all();
+
+        if($request->hasFile('image')){
+            $input['image'] = $this->saveFileService->setImage($request->file('image'))->setStorage($this->storage)->setModel($teacher->image)->handle();
+        }
         $teacher = $this->userRepository->update($input, $id);
 
         Flash::success('Teacher updated successfully.');

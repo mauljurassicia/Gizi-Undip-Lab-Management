@@ -36,7 +36,8 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'image'
+        'image',
+        'identity_number',
     ];
 
     /**
@@ -49,7 +50,8 @@ class User extends Authenticatable
         'email' => 'string',
         'password' => 'string',
         'image' => 'string',
-        'remember_token' => 'string'
+        'remember_token' => 'string',
+        'identity_number' => 'string',
     ];
 
     /**

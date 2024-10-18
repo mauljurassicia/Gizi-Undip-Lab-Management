@@ -58,6 +58,7 @@ class Room extends Model
         'operational_days',
         'floor',
         'code',
+        'image',
     ];
 
     /**

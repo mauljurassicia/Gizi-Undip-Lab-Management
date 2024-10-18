@@ -21,7 +21,7 @@
     {!! Form::label('image', 'Image:') !!}
     {!! Form::file('image', [
         'class' => 'dropify',
-        'data-default-file' => @$room->image ? asset('storage/' . $room->image) : '',
+        'data-default-file' => @$room->image ? asset($room->image) : '',
     ]) !!}
 </div>
 
@@ -159,10 +159,6 @@
     {!! Form::submit('Save', ['class' => 'btn btn-primary']) !!}
     <a href="{!! route('rooms.index') !!}" class="btn btn-light">Cancel</a>
 </div>
-
-@section('styles')
-    <link rel="stylesheet" href="{{ asset('js/calendar-js-2.12.0/dist/calendar.js.min.css') }}">
-@endsection
 
 
 

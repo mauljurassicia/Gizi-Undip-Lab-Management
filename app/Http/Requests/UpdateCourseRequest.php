@@ -25,6 +25,6 @@ class UpdateCourseRequest extends FormRequest
      */
     public function rules()
     {
-        return Course::$rules;
+        return [];
     }
 }

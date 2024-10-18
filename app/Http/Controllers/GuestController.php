@@ -9,6 +9,7 @@ use App\Http\Requests\UpdateGuestRequest;
 use App\Repositories\UserRepository;
 use Laracasts\Flash\Flash;
 use App\Http\Controllers\AppBaseController;
+use App\Services\SaveFileService;
 use Response;
 use Illuminate\Http\Request; 
 use Illuminate\Support\Facades\Auth; 
@@ -20,7 +21,14 @@ class GuestController extends AppBaseController
     /** @var  UserRepository */
     private $userRepository;
 
-    public function __construct(UserRepository $userRepo)
+    /** @var SaveFileService */
+    private $saveFileService;
+
+    /** @var string */
+    private $storage = 'guests';
+
+    public function __construct(UserRepository $userRepo,
+        SaveFileService $saveFileService)
     {
         $this->middleware('auth');
         $this->middleware('can:guest-edit', ['only' => ['edit']]);
@@ -30,6 +38,7 @@ class GuestController extends AppBaseController
         $this->middleware('can:guest-delete', ['only' => ['delete']]);
         $this->middleware('can:guest-create', ['only' => ['create']]);
         $this->userRepository = $userRepo;
+        $this->saveFileService = $saveFileService;
     }
 
     /**
@@ -66,7 +75,13 @@ class GuestController extends AppBaseController
     {
         $input = $request->all();
 
+        if($request->hasFile('image')){
+            $input['image'] = $this->saveFileService->setImage($request->file('image'))->setStorage($this->storage)->handle();
+        }
+
         $guest = $this->userRepository->create($input);
+
+        $guest->assignRole('guest');
 
         Flash::success('Guest saved successfully.');
         return redirect(route('guests.index'));
@@ -131,6 +146,11 @@ class GuestController extends AppBaseController
         }
 
         $input = $request->all();
+
+        if($request->hasFile('image')){
+            $input['image'] = $this->saveFileService->setImage($request->file('image'))->setModel($guest->image)->setStorage($this->storage)->handle();
+        }
+        
         $guest = $this->userRepository->update($input, $id);
 
         Flash::success('Guest updated successfully.');

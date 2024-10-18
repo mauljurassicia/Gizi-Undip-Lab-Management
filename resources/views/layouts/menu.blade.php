@@ -45,18 +45,21 @@
 
 @can('guest-show')
 <li class="{{ Request::is('guests*') ? 'active' : '' }} nav-item">
-    <a class="nav-link" href="{!! route('guests.index') !!}"><i class="fa fa-id-card-clip" style="width: 32px"></i><span>Guest</span></a>
+    <a class="nav-link" href="{!! route('guests.index') !!}"><i class="fa fa-address-book" style="width: 32px"></i><span>Guest</span></a>
 </li>
 @endcan
 
 @can('group-show')
 <li class="{{ Request::is('groups*') ? 'active' : '' }} nav-item">
-    <a class="nav-link" href="{!! route('courses.index') !!}"><i class="fa fa-users" style="width: 32px"></i><span>Grup</span></a>
+    <a class="nav-link" href="{!! route('groups.index') !!}"><i class="fa fa-users" style="width: 32px"></i><span>Grup</span></a>
 </li>
 @endcan
 
 <li class="nav-label mg-t-25">Manajemen Lab</li>
 
+<li class="{{ Request::is('laborants*') ? 'active' : '' }} nav-item">
+    <a class="nav-link" href="{!! route('courses.index') !!}"><i class="fa fa-id-card-clip" style="width: 32px"></i><span>Laborant</span></a>
+</li>
 
 
 @can('equipment-show')
@@ -81,32 +84,42 @@
 <li class="nav-label mg-t-25">Manajemen Kegiatan</li>
 
 
-@can('appointment-show')
-    <li class="{{ Request::is('appointments*') ? 'active' : '' }} nav-item">
-        <a class="nav-link" href="{!! route('appointments.index') !!}"><i class="fa fa-calendar"
+@can('schedule-show')
+    <li class="{{ Request::is('schedules*') ? 'active' : '' }} nav-item">
+        <a class="nav-link" href="{!! route('schedules.index') !!}"><i class="fa fa-calendar"
                 style="width: 32px"></i><span>Jadwal</span></a>
     </li>
 @endcan
 
-@can('appointment-show')
+@can('schedule-show')
     <li class="{{ Request::is('borrowings*') ? 'active' : '' }} nav-item">
-        <a class="nav-link" href="{!! route('appointments.index') !!}"><i class="fa fa-dolly" style="width: 32px"></i><span>Peminjaman
+        <a class="nav-link" href="{!! route('courses.index') !!}"><i class="fa fa-dolly" style="width: 32px"></i><span>Peminjaman
                 Alat</span></a>
     </li>
 @endcan
 
-@can('appointment-show')
+@can('schedule-show')
     <li class="{{ Request::is('logbooks*') ? 'active' : '' }} nav-item">
-        <a class="nav-link" href="{!! route('appointments.index') !!}"><i class="fa fa-book" style="width: 32px"></i><span>Logbook</span></a>
+        <a class="nav-link" href="{!! route('courses.index') !!}"><i class="fa fa-book" style="width: 32px"></i><span>Logbook</span></a>
     </li>
+    @endcan
+
+
+<li class="{{ Request::is('logbooks*') ? 'active' : '' }} nav-item">
+    <a class="nav-link" href="{!! route('courses.index') !!}"><i class="fa fa-heart-crack" style="width: 32px"></i><span>Barang Rusak/ Hilang</span></a>
+</li>
+
+
+<li class="{{ Request::is('logbooks*') ? 'active' : '' }} nav-item">
+    <a class="nav-link" href="{!! route('courses.index') !!}"><i class="fa fa-receipt" style="width: 32px"></i><span>Pengembalian</span></a>
+</li>
+
+
+
+
+@can('laborant-show')
+<li class="{{ Request::is('laborants*') ? 'active' : '' }} nav-item">
+    <a class="nav-link" href="{!! route('laborants.index') !!}"><i data-feather="edit-3"></i><span>Laborants</span></a>
+</li>
 @endcan
 
-
-<li class="{{ Request::is('logbooks*') ? 'active' : '' }} nav-item">
-    <a class="nav-link" href="{!! route('appointments.index') !!}"><i class="fa fa-heart-crack" style="width: 32px"></i><span>Barang Rusak/ Hilang</span></a>
-</li>
-
-
-<li class="{{ Request::is('logbooks*') ? 'active' : '' }} nav-item">
-    <a class="nav-link" href="{!! route('appointments.index') !!}"><i class="fa fa-receipt" style="width: 32px"></i><span>Pengembalian</span></a>
-</li>

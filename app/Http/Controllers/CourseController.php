@@ -76,12 +76,8 @@ class CourseController extends AppBaseController
     {
         $input = $request->all();
 
-        if ($request->hasFile('banner')) {
-            $input['banner'] = $this->saveFileService->setImage($request->file('banner'))->setStorage($this->storage)->handle();
-        }
-
-        if ($request->hasFile('thumbnail')) {
-            $input['thumbnail'] = $this->saveFileService->setImage($request->file('thumbnail'))->setStorage($this->storage)->handle();
+        if ($request->hasFile('image')) {
+            $input['image'] = $this->saveFileService->setImage($request->file('image'))->setStorage($this->storage)->handle();
         }
 
         $course = $this->courseRepository->create($input);
@@ -152,13 +148,9 @@ class CourseController extends AppBaseController
         $input = $request->all();
 
 
-        if ($request->hasFile('banner')) {
-            $input['banner'] = $this->saveFileService->setImage($request->file('banner'))->setStorage($this->storage)->setModel($course->banner)->handle();
+        if ($request->hasFile('image')) {
+            $input['image'] = $this->saveFileService->setImage($request->file('image'))->setStorage($this->storage)->setModel($course->image)->handle();
         }
-
-        if ($request->hasFile('thumbnail')) {
-            $input['thumbnail'] = $this->saveFileService->setImage($request->file('thumbnail'))->setStorage($this->storage)->setModel($course->thumbnail)->handle();
-        }   
         
         $course = $this->courseRepository->update($input, $id);
 

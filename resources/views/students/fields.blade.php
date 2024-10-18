@@ -1,38 +1,48 @@
-<!-- Name Field -->
-<div class="form-group col-sm-6">
-    {!! Form::label('name', 'Name:', ['class' => 'd-block']) !!}
-    {!! Form::text('name', null, ['class' => 'form-control']) !!}
+<div class="row">
+    <div class="col-sm-6">
+        <div class="form-group col-sm-12">
+            {!! Form::label('name', 'Name:', ['class' => 'd-block']) !!}
+            {!! Form::text('name', @$student->name, ['class' => 'form-control']) !!}
+        </div>
+
+        <!-- Email Field -->
+        <div class="form-group col-sm-12">
+            {!! Form::label('email', 'Email:') !!}
+            {!! Form::email('email', @$student->email, [
+                'class' => 'form-control',
+                'disabled' => isset($student),
+            ]) !!}
+        </div>
+
+        <!-- identity Number Field -->
+        <div class="form-group col-sm-12">
+            {!! Form::label('identity_number', 'NIM:') !!}
+            {!! Form::text('identity_number', @$student->identity_number, ['class' => 'form-control']) !!}
+        </div>
+
+        <!-- Password Field -->
+        <div class="form-group col-sm-12">
+            {!! Form::label('password', 'Password:', ['class' => 'd-block']) !!}
+            {!! Form::password('password', ['class' => 'form-control']) !!}
+        </div>
+    </div>
+
+    <!-- Image Field -->
+    <div class="form-group col-sm-4">
+        {!! Form::label('image', 'Image:', ['class' => 'd-block']) !!}
+        {!! Form::file('image', [
+            'class' => 'dropify',
+            'id' => 'input-file-now',
+            'data-default-file' => @$student->image ? asset( $student->image) : '',
+            'data-allowed-file-extensions' => 'jpg jpeg png',
+            'data-max-file-size' => '1M',
+
+            
+        ]) !!}
+    </div>
+
 </div>
 
-<!-- Email Field -->
-<div class="form-group col-sm-6">
-    {!! Form::label('email', 'Email:') !!}
-    {!! Form::email('email', null, ['class' => 'form-control']) !!}
-</div>
-
-<!-- Email Verified At Field -->
-<div class="form-group col-sm-6">
-    {!! Form::label('email_verified_at', 'Email Verified At:') !!}
-    {!! Form::date('email_verified_at', null, ['class' => 'form-control date']) !!}
-</div>
-
-<!-- Image Field -->
-<div class="form-group col-sm-6">
-    {!! Form::label('image', 'Image:', ['class' => 'd-block']) !!}
-    {!! Form::text('image', null, ['class' => 'form-control']) !!}
-</div>
-
-<!-- Password Field -->
-<div class="form-group col-sm-6">
-    {!! Form::label('password', 'Password:', ['class' => 'd-block']) !!}
-    {!! Form::password('password', ['class' => 'form-control']) !!}
-</div>
-
-<!-- Remember Token Field -->
-<div class="form-group col-sm-6">
-    {!! Form::label('remember_token', 'Remember Token:', ['class' => 'd-block']) !!}
-    {!! Form::text('remember_token', null, ['class' => 'form-control']) !!}
-</div>
 
 <div class="clearfix"></div>
 <hr>

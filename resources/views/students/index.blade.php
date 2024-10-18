@@ -8,7 +8,7 @@
                     <nav aria-label="breadcrumb">
                         <ol class="breadcrumb breadcrumb-style1 mg-b-10">
                             <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Home</a></li>
-                            <li class="breadcrumb-item active" aria-current="page">Students</li>
+                            <li class="breadcrumb-item active" aria-current="page">Mahasiswa</li>
                         </ol>
                     </nav>
                 </div>
@@ -16,7 +16,7 @@
 
             @include('flash::message')
 
-            <h4 class="mg-b-10">Students</h4>
+            <h4 class="mg-b-10">Mahasiswa</h4>
 
             <p class="mg-b-30">
                 This is a list of your <code>Students</code>, you can manage by clicking on action buttons in this table.

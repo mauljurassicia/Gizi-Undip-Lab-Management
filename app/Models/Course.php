@@ -60,8 +60,9 @@ class Course extends Model
     public $fillable = [
         'name',
         'description',
-        'banner',
-        'thumbnail'
+        'image',
+        'code',
+        'status'
     ];
 
     /**
@@ -73,7 +74,8 @@ class Course extends Model
         'name' => 'string',
         'description' => 'string',
         'banner' => 'string',
-        'thumbnail' => 'string'
+        'thumbnail' => 'string',
+        'code' => 'string'
     ];
 
     /**
@@ -82,7 +84,6 @@ class Course extends Model
      * @var array
      */
     public static $rules = [
-        
     ];
 
     public function getTableColumns() {

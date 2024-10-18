@@ -25,6 +25,11 @@ class UpdateGuestRequest extends FormRequest
      */
     public function rules()
     {
-        return Guest::$rules;
+        return [
+            'name' => 'required',
+            'password' => 'required',
+            'identity_number' => 'required|digits:16',
+            'image' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+        ];
     }
 }

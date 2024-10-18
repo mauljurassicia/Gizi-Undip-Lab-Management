@@ -19,12 +19,12 @@ class CourseDataTable extends DataTable
         $dataTable = new EloquentDataTable($query);
 
         return $dataTable->addColumn('action', 'courses.datatables_actions')
-        ->editColumn('thumbnail', function ($data) {
-            return '<img src="' . asset($data->thumbnail) . '" width="100px">';
+        ->editColumn('image', function ($data) {
+            return '<img src="' . asset($data->image) . '" width="100px">';
         })
             ->editColumn('status', function ($data) {
                 return $data->status == 1 ? '<span class="badge badge-success">Tersedia</span>' : '<span class="badge badge-danger">Tidak Tersedia</span>';
-            })->rawColumns(['status', 'action', 'thumbnail']);
+            })->rawColumns(['status', 'action', 'image']);
     }
 
     /**
@@ -81,7 +81,8 @@ class CourseDataTable extends DataTable
     {
         return [
             'name',
-            'thumbnail',
+            'code',
+            'image',
             'status'
         ];
     }

@@ -25,6 +25,11 @@ class UpdateStudentRequest extends FormRequest
      */
     public function rules()
     {
-        return Student::$rules;
+        return [
+            'name' => 'required',
+            'password' => 'required',
+            'identity_number' => 'required|numeric',
+            'image' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+        ];
     }
 }

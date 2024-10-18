@@ -25,6 +25,11 @@ class UpdateTeacherRequest extends FormRequest
      */
     public function rules()
     {
-        return Teacher::$rules;
+        return [
+            'name' => 'required',
+            'password' => 'required',
+            'identity_number' => 'required|numeric',
+            'image' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+        ];
     }
 }

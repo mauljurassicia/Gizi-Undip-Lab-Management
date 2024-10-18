@@ -25,6 +25,12 @@ class CreateStudentRequest extends FormRequest
      */
     public function rules()
     {
-        return Student::$rules;
+        return [
+            'name' => 'required',
+            'email' => 'required|email|unique:users',
+            'password' => 'required',
+            'identity_number' => 'required|numeric',
+            'image' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+        ];
     }
 }

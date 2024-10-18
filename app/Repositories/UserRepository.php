@@ -22,9 +22,7 @@ class UserRepository extends BaseRepository
     protected $fieldSearchable = [
         'name',
         'email',
-        'email_verified_at',
-        'password',
-        'remember_token'
+        'identity_number',
     ];
 
     /**

@@ -58,9 +58,6 @@ Route::resource('rooms', 'RoomController');
 
 // Route::post('importRoom', 'RoomController@import');
 
-Route::resource('appointments', 'AppointmentController');
-// Route::post('importAppointment', 'AppointmentController@import');
-
 Route::resource('courses', 'CourseController');
 // Route::post('importCourse', 'CourseController@import');
 
@@ -72,3 +69,13 @@ Route::resource('guests', 'GuestController');
 
 Route::resource('students', 'StudentController');
 // Route::post('importStudent', 'StudentController@import');
+
+Route::resource('groups', 'GroupController');
+Route::get('groups/members/sugestion', 'GroupController@memberSuggestion')->name('groups.members.suggestion');
+// Route::post('importGroup', 'GroupController@import');
+
+Route::resource('schedules', 'ScheduleController');
+// Route::post('importSchedule', 'ScheduleController@import');
+
+Route::resource('laborants', 'LaborantController');
+// Route::post('importLaborant', 'LaborantController@import');

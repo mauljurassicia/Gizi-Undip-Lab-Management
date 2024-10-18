@@ -2,12 +2,11 @@
 
 namespace App\DataTables;
 
-use App\Models\Laborant;
-use App\User;
+use App\Models\LogBook;
 use Yajra\DataTables\Services\DataTable;
 use Yajra\DataTables\EloquentDataTable;
 
-class LaborantDataTable extends DataTable
+class LogBookDataTable extends DataTable
 {
     /**
      * Build DataTable class.
@@ -19,11 +18,7 @@ class LaborantDataTable extends DataTable
     {
         $dataTable = new EloquentDataTable($query);
 
-        return $dataTable->addColumn('action', 'laborants.datatables_actions')
-        ->editColumn('image', function ($data) {
-
-            return '<img src="' . asset($data->image) . '" width="100px">';
-        })->rawColumns(['image', 'action']);
+        return $dataTable->addColumn('action', 'log_books.datatables_actions');
     }
 
     /**
@@ -32,11 +27,9 @@ class LaborantDataTable extends DataTable
      * @param \App\Models\Post $model
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function query(User $model)
+    public function query(LogBook $model)
     {
-        return $model->newQuery()->whereHas('roles', function ($q) {
-            $q->where('name', 'laborant');
-        });
+        return $model->newQuery();
     }
 
     /**
@@ -81,10 +74,11 @@ class LaborantDataTable extends DataTable
     protected function getColumns()
     {
         return [
-            'name',
-            'identity_number' => ['name' => 'identity_number', 'data' => 'identity_number', 'title' => 'NIK'],
-            'email',
-            'image',
+            'user_id',
+            'room_id',
+            'type',
+            'time',
+            'report'
         ];
     }
 
@@ -95,6 +89,6 @@ class LaborantDataTable extends DataTable
      */
     protected function filename():string
     {
-        return 'laborantsdatatable_' . time();
+        return 'log_booksdatatable_' . time();
     }
 }

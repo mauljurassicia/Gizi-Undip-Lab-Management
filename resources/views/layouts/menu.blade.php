@@ -26,39 +26,45 @@
 <li class="nav-label mg-t-25">Manajemen Departemen</li>
 
 @can('course-show')
-<li class="{{ Request::is('courses*') ? 'active' : '' }} nav-item">
-    <a class="nav-link" href="{!! route('courses.index') !!}"><i class="fa fa-graduation-cap" style="width: 32px"></i><span>Mata Kuliah</span></a>
-</li>
+    <li class="{{ Request::is('courses*') ? 'active' : '' }} nav-item">
+        <a class="nav-link" href="{!! route('courses.index') !!}"><i class="fa fa-graduation-cap"
+                style="width: 32px"></i><span>Mata Kuliah</span></a>
+    </li>
 @endcan
 
 @can('teacher-show')
-<li class="{{ Request::is('teachers*') ? 'active' : '' }} nav-item">
-    <a class="nav-link" href="{!! route('teachers.index') !!}"><i class="fa fa-user-tie" style="width: 32px"></i><span>Dosen</span></a>
-</li>
+    <li class="{{ Request::is('teachers*') ? 'active' : '' }} nav-item">
+        <a class="nav-link" href="{!! route('teachers.index') !!}"><i class="fa fa-user-tie"
+                style="width: 32px"></i><span>Dosen</span></a>
+    </li>
 @endcan
 
 @can('student-show')
-<li class="{{ Request::is('students*') ? 'active' : '' }} nav-item">
-    <a class="nav-link" href="{!! route('students.index') !!}"><i class="fa fa-user-graduate" style="width: 32px"></i><span>Mahasiswa</span></a>
-</li>
+    <li class="{{ Request::is('students*') ? 'active' : '' }} nav-item">
+        <a class="nav-link" href="{!! route('students.index') !!}"><i class="fa fa-user-graduate"
+                style="width: 32px"></i><span>Mahasiswa</span></a>
+    </li>
 @endcan
 
 @can('guest-show')
-<li class="{{ Request::is('guests*') ? 'active' : '' }} nav-item">
-    <a class="nav-link" href="{!! route('guests.index') !!}"><i class="fa fa-address-book" style="width: 32px"></i><span>Guest</span></a>
-</li>
+    <li class="{{ Request::is('guests*') ? 'active' : '' }} nav-item">
+        <a class="nav-link" href="{!! route('guests.index') !!}"><i class="fa fa-address-book"
+                style="width: 32px"></i><span>Guest</span></a>
+    </li>
 @endcan
 
 @can('group-show')
-<li class="{{ Request::is('groups*') ? 'active' : '' }} nav-item">
-    <a class="nav-link" href="{!! route('groups.index') !!}"><i class="fa fa-users" style="width: 32px"></i><span>Grup</span></a>
-</li>
+    <li class="{{ Request::is('groups*') ? 'active' : '' }} nav-item">
+        <a class="nav-link" href="{!! route('groups.index') !!}"><i class="fa fa-users"
+                style="width: 32px"></i><span>Grup</span></a>
+    </li>
 @endcan
 
 <li class="nav-label mg-t-25">Manajemen Lab</li>
 
 <li class="{{ Request::is('laborants*') ? 'active' : '' }} nav-item">
-    <a class="nav-link" href="{!! route('courses.index') !!}"><i class="fa fa-id-card-clip" style="width: 32px"></i><span>Laborant</span></a>
+    <a class="nav-link" href="{!! route('laborants.index') !!}"><i class="fa fa-id-card-clip"
+            style="width: 32px"></i><span>Laborant</span></a>
 </li>
 
 
@@ -98,28 +104,23 @@
     </li>
 @endcan
 
-@can('schedule-show')
+@can('logBook-show')
     <li class="{{ Request::is('logbooks*') ? 'active' : '' }} nav-item">
-        <a class="nav-link" href="{!! route('courses.index') !!}"><i class="fa fa-book" style="width: 32px"></i><span>Logbook</span></a>
+        <a class="nav-link" href="{!! route('logBooks.index') !!}"><i class="fa fa-book"
+                style="width: 32px"></i><span>Logbook</span></a>
     </li>
-    @endcan
-
-
-<li class="{{ Request::is('logbooks*') ? 'active' : '' }} nav-item">
-    <a class="nav-link" href="{!! route('courses.index') !!}"><i class="fa fa-heart-crack" style="width: 32px"></i><span>Barang Rusak/ Hilang</span></a>
-</li>
-
-
-<li class="{{ Request::is('logbooks*') ? 'active' : '' }} nav-item">
-    <a class="nav-link" href="{!! route('courses.index') !!}"><i class="fa fa-receipt" style="width: 32px"></i><span>Pengembalian</span></a>
-</li>
-
-
-
-
-@can('laborant-show')
-<li class="{{ Request::is('laborants*') ? 'active' : '' }} nav-item">
-    <a class="nav-link" href="{!! route('laborants.index') !!}"><i data-feather="edit-3"></i><span>Laborants</span></a>
-</li>
 @endcan
+
+
+<li class="{{ Request::is('logbooks*') ? 'active' : '' }} nav-item">
+    <a class="nav-link" href="{!! route('courses.index') !!}"><i class="fa fa-heart-crack"
+            style="width: 32px"></i><span>Barang Rusak/ Hilang</span></a>
+</li>
+
+
+<li class="{{ Request::is('logbooks*') ? 'active' : '' }} nav-item">
+    <a class="nav-link" href="{!! route('courses.index') !!}"><i class="fa fa-receipt"
+            style="width: 32px"></i><span>Pengembalian</span></a>
+</li>
+
 

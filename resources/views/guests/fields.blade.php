@@ -20,11 +20,12 @@
 
         <!-- Password Field -->
 
-
-        <div class="form-group col-sm-12">
-            {!! Form::label('password', 'Password:', ['class' => 'd-block']) !!}
-            {!! Form::password('password', ['class' => 'form-control']) !!}
-        </div>
+        @if (!isset($guest))
+            <div class="form-group col-sm-12">
+                {!! Form::label('password', 'Password:', ['class' => 'd-block']) !!}
+                {!! Form::password('password', ['class' => 'form-control']) !!}
+            </div>
+        @endif
     </div>
 
     <!-- Image Field -->
@@ -36,8 +37,6 @@
             'data-default-file' => @$guest->image ? asset('storage/' . $guest->image) : '',
             'data-allowed-file-extensions' => 'jpg jpeg png',
             'data-max-file-size' => '1M',
-
-            
         ]) !!}
     </div>
 

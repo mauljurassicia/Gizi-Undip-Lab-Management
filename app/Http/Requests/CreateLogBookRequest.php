@@ -3,9 +3,9 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use App\Models\Laborant;
+use App\Models\LogBook;
 
-class UpdateLaborantRequest extends FormRequest
+class CreateLogBookRequest extends FormRequest
 {
 
     /**
@@ -25,10 +25,6 @@ class UpdateLaborantRequest extends FormRequest
      */
     public function rules()
     {
-        return [
-            'name' => 'required',
-            'identity_number' => 'required|digits:16',
-            'image' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-        ];
+        return LogBook::$rules;
     }
 }

@@ -79,3 +79,6 @@ Route::resource('schedules', 'ScheduleController');
 
 Route::resource('laborants', 'LaborantController');
 // Route::post('importLaborant', 'LaborantController@import');
+
+Route::resource('logBooks', 'LogBookController');
+// Route::post('importLogBook', 'LogBookController@import');

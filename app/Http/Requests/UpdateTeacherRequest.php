@@ -27,7 +27,6 @@ class UpdateTeacherRequest extends FormRequest
     {
         return [
             'name' => 'required',
-            'password' => 'required',
             'identity_number' => 'required|numeric',
             'image' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ];

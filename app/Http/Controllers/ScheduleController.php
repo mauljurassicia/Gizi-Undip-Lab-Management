@@ -7,7 +7,7 @@ use App\Http\Requests;
 use App\Http\Requests\CreateScheduleRequest;
 use App\Http\Requests\UpdateScheduleRequest;
 use App\Repositories\ScheduleRepository;
-use Flash;
+use Laracasts\Flash\Flash;
 use App\Http\Controllers\AppBaseController;
 use Response;
 use Illuminate\Http\Request; 
@@ -50,13 +50,9 @@ class ScheduleController extends AppBaseController
      */
     public function create()
     {
-        $ = \App\Models\::all();
-        $ = \App\Models\::all();
         
 
-        return view('schedules.create')
-            ->with('', $)
-            ->with('', $);
+        return view('schedules.create');
     }
 
     /**
@@ -105,9 +101,6 @@ class ScheduleController extends AppBaseController
     public function edit($id)
     {
         
-        $ = \App\Models\::all();
-        $ = \App\Models\::all();
-        
 
         $schedule = $this->scheduleRepository->findWithoutFail($id);
 
@@ -117,9 +110,7 @@ class ScheduleController extends AppBaseController
         }
 
         return view('schedules.edit')
-            ->with('schedule', $schedule)
-            ->with('', $)
-            ->with('', $);
+            ->with('schedule', $schedule);
     }
 
     /**

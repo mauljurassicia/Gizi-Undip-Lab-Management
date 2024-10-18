@@ -2,6 +2,7 @@
 
 namespace App\DataTables;
 
+use App\Models\Room;
 use App\Models\Schedule;
 use Yajra\DataTables\Services\DataTable;
 use Yajra\DataTables\EloquentDataTable;
@@ -18,7 +19,14 @@ class ScheduleDataTable extends DataTable
     {
         $dataTable = new EloquentDataTable($query);
 
-        return $dataTable->addColumn('action', 'schedules.datatables_actions');
+        return $dataTable->addColumn('action', 'schedules.datatables_actions')
+        ->editColumn('volume', function ($data) {
+            return $data->volume . ' Orang';
+        })->editColumn('status', function ($data) {
+            return $data->status == 1 ?
+                '<span class="badge badge-success">Tersedia</span>' :
+                '<span class="badge badge-danger">Tidak Tersedia</span>';
+        })->rawColumns(['status', 'action']);
     }
 
     /**
@@ -27,7 +35,7 @@ class ScheduleDataTable extends DataTable
      * @param \App\Models\Post $model
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function query(Schedule $model)
+    public function query(Room $model)
     {
         return $model->newQuery();
     }
@@ -74,13 +82,11 @@ class ScheduleDataTable extends DataTable
     protected function getColumns()
     {
         return [
-            'room_id',
-            'userable_type',
-            'userable_id',
-            'name',
-            'start_schedule',
-            'end_schedule',
-            'course_id'
+            'name' => ['name' => 'name', 'title' => 'Nama Ruangan', 'data' => 'name'],
+            'type' => ['name' => 'type', 'title' => 'Tipe', 'data' => 'type'],
+            'volume',
+            'status',
+            'pic.name' => ['name' => 'pic_id', 'title' => 'PIC', ],
         ];
     }
 

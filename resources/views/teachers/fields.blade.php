@@ -19,10 +19,12 @@
         </div>
 
         <!-- Password Field -->
-        <div class="form-group col-sm-12">
-            {!! Form::label('password', 'Password:', ['class' => 'd-block']) !!}
-            {!! Form::password('password', ['class' => 'form-control']) !!}
-        </div>
+        @if (!isset($teacher))
+            <div class="form-group col-sm-12">
+                {!! Form::label('password', 'Password:', ['class' => 'd-block']) !!}
+                {!! Form::password('password', ['class' => 'form-control']) !!}
+            </div>
+        @endif
     </div>
 
     <!-- Image Field -->
@@ -31,7 +33,7 @@
         {!! Form::file('image', [
             'class' => 'dropify',
             'id' => 'input-file-now',
-            'data-default-file' => @$teacher->image ? asset( $teacher->image) : '',
+            'data-default-file' => @$teacher->image ? asset($teacher->image) : '',
             'data-allowed-file-extensions' => 'jpg jpeg png',
             'data-max-file-size' => '1M',
         ]) !!}

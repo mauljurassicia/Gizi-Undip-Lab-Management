@@ -6,22 +6,31 @@ use App\DataTables\LaborantDataTable;
 use App\Http\Requests;
 use App\Http\Requests\CreateLaborantRequest;
 use App\Http\Requests\UpdateLaborantRequest;
-use App\Repositories\LaborantRepository;
-use Flash;
+use App\Repositories\UserRepository;
+use Laracasts\Flash\Flash;
 use App\Http\Controllers\AppBaseController;
+use App\Services\SaveFileService;
 use Response;
-use Illuminate\Http\Request; 
-use Illuminate\Support\Facades\Auth; 
-use Illuminate\Support\Facades\Storage; 
-use Maatwebsite\Excel\Facades\Excel; 
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
+use Maatwebsite\Excel\Facades\Excel;
 
 class LaborantController extends AppBaseController
 {
-    /** @var  LaborantRepository */
-    private $laborantRepository;
+    /** @var  UserRepository */
+    private $userRepository;
 
-    public function __construct(LaborantRepository $laborantRepo)
-    {
+    /** @var  SaveFileService */
+    private $saveFileService;
+
+    /** @var string */
+    private $storage = 'laborants.';
+
+    public function __construct(
+        UserRepository $userRepo,
+        SaveFileService $saveFileService
+    ) {
         $this->middleware('auth');
         $this->middleware('can:laborant-edit', ['only' => ['edit']]);
         $this->middleware('can:laborant-store', ['only' => ['store']]);
@@ -29,7 +38,8 @@ class LaborantController extends AppBaseController
         $this->middleware('can:laborant-update', ['only' => ['update']]);
         $this->middleware('can:laborant-delete', ['only' => ['delete']]);
         $this->middleware('can:laborant-create', ['only' => ['create']]);
-        $this->laborantRepository = $laborantRepo;
+        $this->userRepository = $userRepo;
+        $this->saveFileService = $saveFileService;
     }
 
     /**
@@ -50,13 +60,9 @@ class LaborantController extends AppBaseController
      */
     public function create()
     {
-        $ = \App\Models\::all();
-        $ = \App\Models\::all();
-        
 
-        return view('laborants.create')
-            ->with('', $)
-            ->with('', $);
+
+        return view('laborants.create');
     }
 
     /**
@@ -70,7 +76,11 @@ class LaborantController extends AppBaseController
     {
         $input = $request->all();
 
-        $laborant = $this->laborantRepository->create($input);
+        if($request->hasFile('image')){
+            $input['image'] = $this->saveFileService->setImage($request->file('image'))->setStorage($this->storage)->handle();
+        }
+
+        $laborant = $this->userRepository->create($input);
 
         Flash::success('Laborant saved successfully.');
         return redirect(route('laborants.index'));
@@ -85,7 +95,7 @@ class LaborantController extends AppBaseController
      */
     public function show($id)
     {
-        $laborant = $this->laborantRepository->findWithoutFail($id);
+        $laborant = $this->userRepository->findWithoutFail($id);
 
         if (empty($laborant)) {
             Flash::error('Laborant not found');
@@ -104,12 +114,8 @@ class LaborantController extends AppBaseController
      */
     public function edit($id)
     {
-        
-        $ = \App\Models\::all();
-        $ = \App\Models\::all();
-        
 
-        $laborant = $this->laborantRepository->findWithoutFail($id);
+        $laborant = $this->userRepository->findWithoutFail($id);
 
         if (empty($laborant)) {
             Flash::error('Laborant not found');
@@ -117,9 +123,7 @@ class LaborantController extends AppBaseController
         }
 
         return view('laborants.edit')
-            ->with('laborant', $laborant)
-            ->with('', $)
-            ->with('', $);
+            ->with('laborant', $laborant);
     }
 
     /**
@@ -132,7 +136,7 @@ class LaborantController extends AppBaseController
      */
     public function update($id, UpdateLaborantRequest $request)
     {
-        $laborant = $this->laborantRepository->findWithoutFail($id);
+        $laborant = $this->userRepository->findWithoutFail($id);
 
         if (empty($laborant)) {
             Flash::error('Laborant not found');
@@ -140,7 +144,12 @@ class LaborantController extends AppBaseController
         }
 
         $input = $request->all();
-        $laborant = $this->laborantRepository->update($input, $id);
+
+        if($request->hasFile('image')){
+            $input['image'] = $this->saveFileService->setImage($request->file('image'))->setModel($laborant->image)->setStorage($this->storage)->handle();
+        }
+
+        $laborant = $this->userRepository->update($input, $id);
 
         Flash::success('Laborant updated successfully.');
         return redirect(route('laborants.index'));
@@ -155,14 +164,14 @@ class LaborantController extends AppBaseController
      */
     public function destroy($id)
     {
-        $laborant = $this->laborantRepository->findWithoutFail($id);
+        $laborant = $this->userRepository->findWithoutFail($id);
 
         if (empty($laborant)) {
             Flash::error('Laborant not found');
             return redirect(route('laborants.index'));
         }
 
-        $this->laborantRepository->delete($id);
+        $this->userRepository->delete($id);
 
         Flash::success('Laborant deleted successfully.');
         return redirect(route('laborants.index'));
@@ -177,9 +186,9 @@ class LaborantController extends AppBaseController
      */
     public function import(Request $request)
     {
-        Excel::load($request->file('file'), function($reader) {
+        Excel::load($request->file('file'), function ($reader) {
             $reader->each(function ($item) {
-                $laborant = $this->laborantRepository->create($item->toArray());
+                $laborant = $this->userRepository->create($item->toArray());
             });
         });
 

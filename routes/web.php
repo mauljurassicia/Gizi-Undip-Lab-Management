@@ -72,6 +72,7 @@ Route::resource('students', 'StudentController');
 
 Route::resource('groups', 'GroupController');
 Route::get('groups/members/sugestion', 'GroupController@memberSuggestion')->name('groups.members.suggestion');
+Route::get('groups/{group}/members', 'GroupController@getMembers')->name('groups.members.table');
 // Route::post('importGroup', 'GroupController@import');
 
 Route::resource('schedules', 'ScheduleController');

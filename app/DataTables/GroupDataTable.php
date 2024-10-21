@@ -29,7 +29,7 @@ class GroupDataTable extends DataTable
      */
     public function query(Group $model)
     {
-        return $model->newQuery();
+        return $model->newQuery()->with('course');
     }
 
     /**

@@ -33,7 +33,7 @@
         {!! Form::file('image', [
             'class' => 'dropify',
             'id' => 'input-file-now',
-            'data-default-file' => @$laborant->image ? asset('storage/' . $laborant->image) : '',
+            'data-default-file' => @$laborant->image ? asset( $laborant->image) : '',
             'data-allowed-file-extensions' => 'jpg jpeg png',
             'data-max-file-size' => '1M',
         ]) !!}

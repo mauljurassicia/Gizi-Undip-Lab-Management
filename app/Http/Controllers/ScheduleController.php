@@ -9,6 +9,7 @@ use App\Http\Requests\UpdateScheduleRequest;
 use App\Repositories\ScheduleRepository;
 use Laracasts\Flash\Flash;
 use App\Http\Controllers\AppBaseController;
+use App\Repositories\CourseRepository;
 use App\Repositories\RoomRepository;
 use Response;
 use Illuminate\Http\Request;
@@ -24,9 +25,13 @@ class ScheduleController extends AppBaseController
     /** @var RoomRepository */
     private $roomRepository;
 
+    /** @var CourseRepository */
+    private $courseRepository;
+
     public function __construct(
         ScheduleRepository $scheduleRepo,
-        RoomRepository $roomRepo
+        RoomRepository $roomRepo,
+        CourseRepository $courseRepo
     ) {
         $this->middleware('auth');
         $this->middleware('can:schedule-edit', ['only' => ['edit']]);
@@ -37,6 +42,7 @@ class ScheduleController extends AppBaseController
         $this->middleware('can:schedule-create', ['only' => ['create']]);
         $this->scheduleRepository = $scheduleRepo;
         $this->roomRepository = $roomRepo;
+        $this->courseRepository = $courseRepo;
     }
 
     /**
@@ -107,7 +113,14 @@ class ScheduleController extends AppBaseController
      */
     public function edit($id)
     {
+        /** @var User $user */
+        $user = Auth::user();
         $room = $this->roomRepository->findWithoutFail($id);
+        $courses = $this->courseRepository->all()->pluck('name', 'id');
+
+        $groups = $user->groups()->get();
+
+
 
         if (empty($room)) {
             Flash::error('Schedule not found');
@@ -115,7 +128,9 @@ class ScheduleController extends AppBaseController
         }
 
         return view('schedules.edit')
-            ->with('room', $room);
+            ->with('room', $room)
+            ->with('courses', $courses)
+            ->with('groups', $groups);
     }
 
     /**
@@ -181,5 +196,20 @@ class ScheduleController extends AppBaseController
 
         Flash::success('Schedule saved successfully.');
         return redirect(route('schedules.index'));
+    }
+
+
+    public function getScheduleByRoomAndDate(Request $request)
+    {
+        $room = $request->get('room');
+        $date = $request->get('date');
+        $schedule = $this->scheduleRepository->getScheduleByRoomAndDate($room, $date);
+        return response()->json($schedule);
+    }
+
+    public function getScheduleByRoom(Request $request){
+        $room = $request->get('room');
+        $schedule = $this->scheduleRepository->getScheduleByRoom($room);
+        return response()->json($schedule);
     }
 }

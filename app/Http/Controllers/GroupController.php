@@ -13,6 +13,7 @@ use Laracasts\Flash\Flash;
 use App\Http\Controllers\AppBaseController;
 use App\Repositories\CourseRepository;
 use App\Repositories\UserRepository;
+use App\Services\SaveFileService;
 use Response;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -30,10 +31,17 @@ class GroupController extends AppBaseController
     /** @var UserRepository */
     private $userRepository;
 
+    /** @var SaveFileService */
+    private $saveFileService;
+
+    /** @var string */
+    private $storage = 'group';
+
     public function __construct(
         GroupRepository $groupRepo,
         CourseRepository $courseRepo,
-        UserRepository $userRepo
+        UserRepository $userRepo,
+        SaveFileService $saveFileService
     ) {
         $this->middleware('auth');
         $this->middleware('can:group-edit', ['only' => ['edit']]);
@@ -45,6 +53,7 @@ class GroupController extends AppBaseController
         $this->groupRepository = $groupRepo;
         $this->courseRepository = $courseRepo;
         $this->userRepository = $userRepo;
+        $this->saveFileService = $saveFileService;
     }
 
     /**
@@ -81,7 +90,18 @@ class GroupController extends AppBaseController
     {
         $input = $request->all();
 
+        if($request->hasFile('thumbnail')){ 
+            $input['thumbnail'] = $this->saveFileService->setImage($request->file('thumbnail'))->setStorage($this->storage)->handle();
+        }
+
+        $members = $input['member_id'];
+        unset($input['member_id']);
+
         $group = $this->groupRepository->create($input);
+
+        if($members){
+            $group->users()->sync($members);
+        }
 
         Flash::success('Group saved successfully.');
         return redirect(route('groups.index'));
@@ -118,6 +138,7 @@ class GroupController extends AppBaseController
 
 
         $group = $this->groupRepository->findWithoutFail($id);
+        $courses = $this->courseRepository->all()->pluck('name', 'id');
 
         if (empty($group)) {
             Flash::error('Group not found');
@@ -125,7 +146,8 @@ class GroupController extends AppBaseController
         }
 
         return view('groups.edit')
-            ->with('group', $group);
+            ->with('group', $group)
+            ->with('courses', $courses);
     }
 
     /**
@@ -146,7 +168,18 @@ class GroupController extends AppBaseController
         }
 
         $input = $request->all();
+
+        $members = $input['member_id'];
+        unset($input['member_id']);
+
+        if($request->hasFile('thumbnail')){ 
+            $input['thumbnail'] = $this->saveFileService->setImage($request->file('thumbnail'))->setStorage($this->storage)->setModel($group->thumbnail)->handle();
+        }
         $group = $this->groupRepository->update($input, $id);
+
+        if($members){
+            $group->users()->sync($members);
+        }
 
         Flash::success('Group updated successfully.');
         return redirect(route('groups.index'));
@@ -208,5 +241,13 @@ class GroupController extends AppBaseController
 
         Flash::success('Group saved successfully.');
         return redirect(route('groups.index'));
+    }
+
+    public function getMembers($id){
+        $users = $this->groupRepository->findWithoutFail($id)->users;
+        if (!$users) {
+            return ResponseJson::make(ResponseCodeEnum::STATUS_NOT_FOUND, 'Group not found')->send();
+        }
+        return ResponseJson::make(ResponseCodeEnum::STATUS_OK, 'Success', $users)->send();
     }
 }

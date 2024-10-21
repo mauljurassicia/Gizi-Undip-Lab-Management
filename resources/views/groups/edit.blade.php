@@ -11,7 +11,7 @@
 
             <div style="margin-right: -15px;margin-left: -15px;">
                 <div data-label="Edit" class="df-example demo-forms services-forms">
-                    {!! Form::model($group, ['route' => ['groups.update', $group->id], 'method' => 'patch']) !!}
+                    {!! Form::model($group, ['route' => ['groups.update', $group->id], 'method' => 'patch', 'files' => true]) !!}
                         @include('groups.fields')
                     {!! Form::close() !!}
                 </div>

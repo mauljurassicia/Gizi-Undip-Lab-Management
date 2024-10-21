@@ -1,7 +1,7 @@
 <!-- Name Field -->
 <div class="form-group col-sm-6">
     {!! Form::label('name', 'Name:', ['class' => 'd-block']) !!}
-    {!! Form::text('name', @$group->name, ['class' => 'form-control']) !!}
+    {!! Form::text('name', @$group->name, ['class' => 'form-control', 'required']) !!}
 </div>
 
 <!-- Thumbnail Field -->
@@ -10,7 +10,7 @@
     {!! Form::file('thumbnail', [
         'class' => 'dropify',
         'id' => 'input-file-now',
-        'data-default-file' => @$group->thumbnail ? asset('storage/' . $group->thumbnail) : '',
+        'data-default-file' => @$group->thumbnail ? asset($group->thumbnail) : '',
         'data-allowed-file-extensions' => 'jpg jpeg png',
         'data-max-file-size' => '1M',
     ]) !!}
@@ -19,7 +19,7 @@
 <!-- Course Id Field -->
 <div class="form-group col-sm-6">
     {!! Form::label('course_id', 'Mata Kuliah:') !!}
-    {!! Form::select('course_id', $courses, @$group->course_id, ['class' => 'form-control']) !!}
+    {!! Form::select('course_id', $courses, @$group->course_id, ['class' => 'form-control', 'required']) !!}
 </div>
 
 <!-- Description Field -->
@@ -31,10 +31,15 @@
 <!-- Status Field -->
 <div class="form-group col-sm-6">
     {!! Form::label('status', 'Status:', ['class' => 'd-block']) !!}
-    {!! Form::select('status', [
-        1 => 'Active',
-        0 => 'Inactive',
-    ], @$group->status, ['class' => 'form-control']) !!}
+    {!! Form::select(
+        'status',
+        [
+            1 => 'Active',
+            0 => 'Inactive',
+        ],
+        @$group->status,
+        ['class' => 'form-control', 'required'],
+    ) !!}
 </div>
 
 <div class="col-sm-12">
@@ -92,8 +97,8 @@
                 <div class="col-sm-12">
                     <div class="input-group">
                         <input type="text" class="form-control" id="search" name="search" placeholder="Search..."
-                           @input.debounce.500ms="getMembers()" @keydown.enter.prevent=""
-                            x-model="search" autocomplete="off">
+                            @input.debounce.500ms="getMembers()" @keydown.enter.prevent="" x-model="search"
+                            autocomplete="off">
                         <span class="input-group-btn">
                             <button type="button" id="btn-add-member" class="btn btn-success btn-flat"
                                 @click.prevent="inputMember()"><i class="fa fa-user-plus"></i>
@@ -102,7 +107,7 @@
                         <template x-if="membersSuggest.length > 0">
                             <div id="suggestion-member"
                                 style="position:absolute; top: calc(100% + 1px); background-color:white; border:1px solid #ccc; z-index:1">
-                                
+
                                 <template x-for="member in membersSuggest">
                                     <button type="button" class="btn btn-link" style="width:100%; text-align:left"
                                         @click.prevent="chooseMember(member)">
@@ -162,6 +167,9 @@
                     <script>
                         function tableMembers() {
                             return {
+                                init() {
+                                    this.getMembers()
+                                },
                                 members: [],
                                 addMember($event) {
                                     let member = $event.detail
@@ -179,6 +187,19 @@
                                     this.members.splice(index, 1);
 
                                     console.log(this.members);
+                                },
+                                getMembers() {
+                                    fetch(`{{ @route('groups.members.table', @$group->id ?? 0) }}`)
+                                        .then(response => response.json())
+                                        .then(data => {
+                                            this.members = data.data.map(member => ({
+                                                id: member.id,
+                                                name: member.name,
+                                                nim: member.identity_number,
+                                                email: member.email
+                                            }))
+                                        })
+                                        .catch(error => console.log(error));
                                 }
                             }
                         }

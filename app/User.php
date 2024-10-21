@@ -75,4 +75,9 @@ class User extends Authenticatable
     {
         return $this->morphToMany('App\Models\Room', 'appointments');
     }
+
+    public function groups()
+    {
+        return $this->belongsToMany('App\Models\Group', 'users_groups');
+    }
 }

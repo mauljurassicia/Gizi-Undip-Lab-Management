@@ -22,9 +22,9 @@
     </div>
 
 </div>
-<div class="modal fade" id="scheduleModal" tabindex="-1" aria-labelledby="scheduleModalLabel" aria-hidden="true"
+<div class="modal fade" id="scheduleModal" tabindex="-1" aria-labelledby="scheduleModalLabel" aria-hidden="true" 
     x-data="scheduleModal()">
-    <div class="modal-dialog">
+    <div class="modal-dialog" @set-operational.window="setOperationalHours($event)">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="scheduleModalLabel">Pilih Jadwal</h5>
@@ -89,10 +89,10 @@
 
                     <div>
                         {!! Form::label('start_schedule', 'Waktu Mulai:', ['class' => 'mt-3']) !!}
-                        {!! Form::time('start_schedule', null, ['class' => 'form-control']) !!}
+                        {!! Form::time('start_schedule', null, ['class' => 'form-control', 'x-model' => 'startTime']) !!}
 
                         {!! Form::label('end_schedule', 'Waktu Selesai:', ['class' => 'mt-3']) !!}
-                        {!! Form::time('end_schedule', null, ['class' => 'form-control']) !!}
+                        {!! Form::time('end_schedule', null, ['class' => 'form-control', 'x-model' => 'endTime']) !!}
                     </div>
                 </div>
             </div>
@@ -203,11 +203,18 @@
                 if (this.currentDate.isSame(date, 'day')) {
                     this.$store.calendar.isVisible = false;
                     this.$store.date.selectedDate = date;
+
+                    this.$dispatch('set-operational', date.format('YYYY-MM-DD'));
                     fetch(`{{ route('schedules.rooms', ['room' => $room->id]) }}?date=${date.format('YYYY-MM-DD')}`)
                         .then(res => res.json())
                         .then(res => {
-                            this.$store.schedule.schedules = res.data;
-                        })
+                           if(res.valid){
+                               this.$store.schedule.schedules = res.data;
+                           }else{
+                               this.$store.schedule.schedules = [];
+                           }
+                        });
+                   
                 }
                 this.currentDate = date.clone();
 
@@ -269,6 +276,52 @@
     function scheduleModal() {
         return {
             typeModel: 0,
+            operationalHours: {
+                start: '00:00',
+                end: '23:59'
+            },
+            init() {
+                this.$watch('startTime', this.checkStartTime.bind(this));
+                this.$watch('endTime', this.checkEndTime.bind(this));
+            },
+            startTime: null,
+            endTime: null,
+            checkStartTime() {
+                if (this.startTime < this.operationalHours.start) {
+                    this.startTime = null;
+                    alert('Waktu mulai harus lebih dari ' + this.operationalHours.start);
+                }else if(this.startTime > this.endTime){
+                    this.startTime = this.endTime;
+                    alert('Waktu mulai harus kurang dari ' + this.endTime);
+                } else if(this.startTime > this.operationalHours.end){
+                    this.startTime = null;
+                    alert('Waktu mulai harus kurang dari ' + this.operationalHours.end);
+                } 
+            },
+
+            checkEndTime() {
+                if (this.endTime > this.operationalHours.end ) {
+                    this.endTime = null;
+                    alert('Waktu selesai harus kurang dari ' + this.operationalHours.end);
+                }else if(this.endTime < this.startTime){
+                    this.endTime = this.startTime;
+                    alert('Waktu selesai harus lebih dari ' + this.startTime); 
+                } else if(this.endTime < this.operationalHours.start){
+                    this.endTime = null;
+                    alert('Waktu selesai harus lebih dari ' + this.operationalHours.start);
+                } 
+            },
+            
+            setOperationalHours($event) {
+                fetch(`{{ route('schedules.operationalHours', ['room' => $room->id]) }}?date=${$event.detail}`)
+                .then(res => res.json())
+                .then(res => {
+                  if(res.valid){
+                      this.operationalHours = res.data;
+                  }
+                });
+
+            }
         }
     }
 </script>

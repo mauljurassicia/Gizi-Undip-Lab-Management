@@ -13,6 +13,7 @@ use Laracasts\Flash\Flash;
 use App\Http\Controllers\AppBaseController;
 use App\Repositories\CourseRepository;
 use App\Repositories\RoomRepository;
+use Carbon\Carbon;
 use Response;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -59,54 +60,6 @@ class ScheduleController extends AppBaseController
     }
 
     /**
-     * Show the form for creating a new Schedule.
-     *
-     * @return Response
-     */
-    public function create()
-    {
-
-
-        return view('schedules.create');
-    }
-
-    /**
-     * Store a newly created Schedule in storage.
-     *
-     * @param CreateScheduleRequest $request
-     *
-     * @return Response
-     */
-    public function store(CreateScheduleRequest $request)
-    {
-        $input = $request->all();
-
-        $schedule = $this->scheduleRepository->create($input);
-
-        Flash::success('Schedule saved successfully.');
-        return redirect(route('schedules.index'));
-    }
-
-    /**
-     * Display the specified Schedule.
-     *
-     * @param  int $id
-     *
-     * @return Response
-     */
-    public function show($id)
-    {
-        $room = $this->roomRepository->findWithoutFail($id);
-
-        if (empty($room)) {
-            Flash::error('Schedule not found');
-            return redirect(route('schedules.index'));
-        }
-
-        return view('schedules.show')->with('room', $room);
-    }
-
-    /**
      * Show the form for editing the specified Schedule.
      *
      * @param  int $id
@@ -136,30 +89,6 @@ class ScheduleController extends AppBaseController
     }
 
     /**
-     * Update the specified Schedule in storage.
-     *
-     * @param  int              $id
-     * @param UpdateScheduleRequest $request
-     *
-     * @return Response
-     */
-    public function update($id, UpdateScheduleRequest $request)
-    {
-        $schedule = $this->scheduleRepository->findWithoutFail($id);
-
-        if (empty($schedule)) {
-            Flash::error('Schedule not found');
-            return redirect(route('schedules.index'));
-        }
-
-        $input = $request->all();
-        $schedule = $this->scheduleRepository->update($input, $id);
-
-        Flash::success('Schedule updated successfully.');
-        return redirect(route('schedules.index'));
-    }
-
-    /**
      * Remove the specified Schedule from storage.
      *
      * @param  int $id
@@ -181,31 +110,48 @@ class ScheduleController extends AppBaseController
         return redirect(route('schedules.index'));
     }
 
-    /**
-     * Store data Schedule from an excel file in storage.
-     *
-     * @param Request $request
-     *
-     * @return Response
-     */
-    public function import(Request $request)
+    public function getOperationalHoursByRoomAndDate($room, Request $request)
     {
-        Excel::load($request->file('file'), function ($reader) {
-            $reader->each(function ($item) {
-                $schedule = $this->scheduleRepository->create($item->toArray());
-            });
-        });
+        $room = $this->roomRepository->findWithoutFail($room);
 
-        Flash::success('Schedule saved successfully.');
-        return redirect(route('schedules.index'));
+        if ($request->query('date') == '' || $request->query('date') == null) {
+            return ResponseJson::make(ResponseCodeEnum::STATUS_BAD_REQUEST, 'Date is required')->send();
+        }
+
+        if (empty($room)) {
+            return ResponseJson::make(ResponseCodeEnum::STATUS_NOT_FOUND, 'Room not found')->send();
+        }
+        if (! Carbon::createFromFormat('Y-m-d', $request->query('date'))->isValid()) {
+            return ResponseJson::make(ResponseCodeEnum::STATUS_BAD_REQUEST, 'Date is not valid')->send();
+        }
+
+        $dayName = [
+            'Sunday' => 'minggu',
+            'Monday' => 'senin',
+            'Tuesday' => 'selasa',
+            'Wednesday' => 'rabu',
+            'Thursday' => 'kamis',
+            'Friday' => 'jumat',
+            'Saturday' => 'sabtu'
+        ][date('l', strtotime($request->query('date')))];
+
+
+        $operationalHours = json_decode($room->operational_days);
+
+        if (! isset($operationalHours->$dayName)) {
+            return ResponseJson::make(ResponseCodeEnum::STATUS_NOT_FOUND, 'Operational hours not found')->send();
+        }
+
+        return ResponseJson::make(ResponseCodeEnum::STATUS_OK, 'Operational hours found', $operationalHours->$dayName)->send();
     }
 
-    public function getScheduleByRoomAndDate($room){
+    public function getScheduleByRoomAndDate($room)
+    {
         $schedules = $this->scheduleRepository->where('room_id', $room)
-        ->whereDate('start_schedule', '=', request('date'))
-        ->whereDate('end_schedule', '=', request('date'))->get();
-        
-        if(empty($schedules)){
+            ->whereDate('start_schedule', '=', request('date'))
+            ->whereDate('end_schedule', '=', request('date'))->get();
+
+        if (count($schedules) == 0) {
             return ResponseJson::make(ResponseCodeEnum::STATUS_NOT_FOUND, 'Schedule not found')->send();
         }
 

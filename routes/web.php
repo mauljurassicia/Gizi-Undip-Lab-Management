@@ -76,6 +76,7 @@ Route::get('groups/{group}/members', 'GroupController@getMembers')->name('groups
 // Route::post('importGroup', 'GroupController@import');
 
 Route::resource('schedules', 'ScheduleController');
+Route::get('schedules/room/{room}', 'ScheduleController@getScheduleByRoomAndDate')->name('schedules.rooms');
 // Route::post('importSchedule', 'ScheduleController@import');
 
 Route::resource('laborants', 'LaborantController');

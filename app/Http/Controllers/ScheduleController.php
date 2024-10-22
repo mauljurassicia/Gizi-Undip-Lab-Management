@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\DataTables\ScheduleDataTable;
+use App\Enums\ResponseCodeEnum;
+use App\Helpers\ResponseJson;
 use App\Http\Requests;
 use App\Http\Requests\CreateScheduleRequest;
 use App\Http\Requests\UpdateScheduleRequest;
@@ -198,18 +200,15 @@ class ScheduleController extends AppBaseController
         return redirect(route('schedules.index'));
     }
 
+    public function getScheduleByRoomAndDate($room){
+        $schedules = $this->scheduleRepository->where('room_id', $room)
+        ->whereDate('start_schedule', '=', request('date'))
+        ->whereDate('end_schedule', '=', request('date'))->get();
+        
+        if(empty($schedules)){
+            return ResponseJson::make(ResponseCodeEnum::STATUS_NOT_FOUND, 'Schedule not found')->send();
+        }
 
-    public function getScheduleByRoomAndDate(Request $request)
-    {
-        $room = $request->get('room');
-        $date = $request->get('date');
-        $schedule = $this->scheduleRepository->getScheduleByRoomAndDate($room, $date);
-        return response()->json($schedule);
-    }
-
-    public function getScheduleByRoom(Request $request){
-        $room = $request->get('room');
-        $schedule = $this->scheduleRepository->getScheduleByRoom($room);
-        return response()->json($schedule);
+        return ResponseJson::make(ResponseCodeEnum::STATUS_OK, 'Schedule found', $schedules)->send();
     }
 }

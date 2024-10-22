@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use Eloquent as Model;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -23,7 +23,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class Schedule extends Model
 {
-    use SoftDeletes;
 
     public $table = 'schedules';
     
@@ -65,6 +64,10 @@ class Schedule extends Model
 
     public function getTableColumns() {
         return $this->getConnection()->getSchemaBuilder()->getColumnListing($this->getTable());
+    }
+
+    public function room() {
+        return $this->belongsTo('App\Models\Room');
     }
 
     

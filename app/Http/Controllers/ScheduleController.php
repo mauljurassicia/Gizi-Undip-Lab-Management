@@ -5,9 +5,6 @@ namespace App\Http\Controllers;
 use App\DataTables\ScheduleDataTable;
 use App\Enums\ResponseCodeEnum;
 use App\Helpers\ResponseJson;
-use App\Http\Requests;
-use App\Http\Requests\CreateScheduleRequest;
-use App\Http\Requests\UpdateScheduleRequest;
 use App\Repositories\ScheduleRepository;
 use Laracasts\Flash\Flash;
 use App\Http\Controllers\AppBaseController;
@@ -17,8 +14,6 @@ use Carbon\Carbon;
 use Response;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Storage;
-use Maatwebsite\Excel\Facades\Excel;
 
 class ScheduleController extends AppBaseController
 {
@@ -156,5 +151,13 @@ class ScheduleController extends AppBaseController
         }
 
         return ResponseJson::make(ResponseCodeEnum::STATUS_OK, 'Schedule found', $schedules)->send();
+    }
+
+    public function addSchedule($room, Request $request)
+    {
+        // if(){
+
+        // }
+
     }
 }

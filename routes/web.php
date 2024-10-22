@@ -78,6 +78,7 @@ Route::get('groups/{group}/members', 'GroupController@getMembers')->name('groups
 Route::resource('schedules', 'ScheduleController')->only(['index', 'edit', 'destroy']);
 Route::get('schedules/room/{room}', 'ScheduleController@getScheduleByRoomAndDate')->name('schedules.rooms');
 Route::get('schedules/room/{room}/operationalHours', 'ScheduleController@getOperationalHoursByRoomAndDate')->name('schedules.operationalHours');
+Route::post('schedules/room/{room}', 'ScheduleController@addSchedule')->name('schedules.adds');
 // Route::post('importSchedule', 'ScheduleController@import');
 
 Route::resource('laborants', 'LaborantController');

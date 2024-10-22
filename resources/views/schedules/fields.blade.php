@@ -22,7 +22,7 @@
     </div>
 
 </div>
-<div class="modal fade" id="scheduleModal" tabindex="-1" aria-labelledby="scheduleModalLabel" aria-hidden="true" 
+<div class="modal fade" id="scheduleModal" tabindex="-1" aria-labelledby="scheduleModalLabel" aria-hidden="true"
     x-data="scheduleModal()">
     <div class="modal-dialog" @set-operational.window="setOperationalHours($event)">
         <div class="modal-content">
@@ -144,7 +144,7 @@
     <!-- Scrollable Content -->
     <div class="relative">
         <template x-for="hour in hours" :key="hour">
-            <div class="hour" @click="addSchedule()">
+            <div class="hour" @click="addScheduleModal()">
                 <span x-text="hour"></span>
                 <span>
                     <template x-for="i in 12" :key="i">
@@ -180,8 +180,24 @@
                     this.hours.push(i < 10 ? '0' + i + ':00' : i + ':00');
                 }
             },
-            addSchedule() {
-                $('#scheduleModal').modal('show');
+            addScheduleModal() {
+                fetch(
+                        `{{ route('schedules.operationalHours', ['room' => $room->id]) }}?date=${this.$store.date.selectedDate?.format('YYYY-MM-DD')}`
+                        )
+                    .then(res => res.json())
+                    .then(res => {
+                        if (res.valid) {
+                            $('#scheduleModal').modal('show');
+                        } else {
+                            Swal.fire({
+                                title: 'Error!',
+                                text: "Ruangan tidak tersedia pada hari ini",
+                                icon: 'error',
+                                confirmButtonText: 'Ok'
+                            })
+                        }
+                    })
+
             }
         }
     }
@@ -208,13 +224,13 @@
                     fetch(`{{ route('schedules.rooms', ['room' => $room->id]) }}?date=${date.format('YYYY-MM-DD')}`)
                         .then(res => res.json())
                         .then(res => {
-                           if(res.valid){
-                               this.$store.schedule.schedules = res.data;
-                           }else{
-                               this.$store.schedule.schedules = [];
-                           }
+                            if (res.valid) {
+                                this.$store.schedule.schedules = res.data;
+                            } else {
+                                this.$store.schedule.schedules = [];
+                            }
                         });
-                   
+
                 }
                 this.currentDate = date.clone();
 
@@ -289,37 +305,66 @@
             checkStartTime() {
                 if (this.startTime < this.operationalHours.start) {
                     this.startTime = null;
-                    alert('Waktu mulai harus lebih dari ' + this.operationalHours.start);
-                }else if(this.startTime > this.endTime){
+                    Swal.fire({
+                        title: 'Waktu mulai harus lebih dari ' + this.operationalHours.start,
+                        icon: 'error'
+                    });
+                } else if (this.startTime > this.endTime) {
                     this.startTime = this.endTime;
-                    alert('Waktu mulai harus kurang dari ' + this.endTime);
-                } else if(this.startTime > this.operationalHours.end){
+                    Swal.fire({
+                        title: 'Waktu mulai harus kurang dari ' + this.endTime,
+                        icon: 'error'
+                    });
+                } else if (this.startTime > this.operationalHours.end) {
                     this.startTime = null;
-                    alert('Waktu mulai harus kurang dari ' + this.operationalHours.end);
-                } 
+                    Swal.fire({
+                        title: 'Waktu mulai harus kurang dari ' + this.operationalHours.end,
+                        icon: 'error'
+                    });
+                }
             },
 
             checkEndTime() {
-                if (this.endTime > this.operationalHours.end ) {
+                if (this.endTime > this.operationalHours.end) {
                     this.endTime = null;
-                    alert('Waktu selesai harus kurang dari ' + this.operationalHours.end);
-                }else if(this.endTime < this.startTime){
+                    Swal.fire({
+                        title: 'Waktu selesai harus kurang dari ' + this.operationalHours.end,
+                        icon: 'error'
+                    });
+                } else if (this.endTime < this.startTime) {
                     this.endTime = this.startTime;
-                    alert('Waktu selesai harus lebih dari ' + this.startTime); 
-                } else if(this.endTime < this.operationalHours.start){
+                    Swal.fire({
+                        title: 'Waktu selesai harus lebih dari ' + this.startTime,
+                        icon: 'error'
+                    });
+                } else if (this.endTime < this.operationalHours.start) {
                     this.endTime = null;
-                    alert('Waktu selesai harus lebih dari ' + this.operationalHours.start);
-                } 
+                    Swal.fire({
+                        title: 'Waktu selesai harus lebih dari ' + this.operationalHours.start,
+                        icon: 'error'
+                    });
+                }
             },
-            
+
             setOperationalHours($event) {
                 fetch(`{{ route('schedules.operationalHours', ['room' => $room->id]) }}?date=${$event.detail}`)
-                .then(res => res.json())
-                .then(res => {
-                  if(res.valid){
-                      this.operationalHours = res.data;
-                  }
-                });
+                    .then(res => res.json())
+                    .then(res => {
+                        if (res.valid) {
+                            this.operationalHours = res.data;
+                            this.endTime = this.operationalHours.end;
+                            this.startTime = this.operationalHours.start;
+                        } else {
+                            this.operationalHours = {
+                                start: '00:00',
+                                end: '23:59'
+                            };
+                            this.endTime = null;
+                            this.startTime = null;
+                        }
+
+
+                    });
 
             }
         }
@@ -377,6 +422,7 @@
 
 @section('scripts')
     <!-- Relational Form table -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.3/dist/cdn.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
 @endsection

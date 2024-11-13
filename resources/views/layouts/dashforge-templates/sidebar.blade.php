@@ -1,4 +1,4 @@
-<aside class="aside aside-fixed">
+<aside class="aside aside-fixed" style="z-index: 1021">
     <div class="aside-header">
         <a href="{{ url('/home') }}">
             <img src="{{ asset('S1-Gizi.png') }}" alt="logo" width="120">
@@ -8,7 +8,7 @@
             <i data-feather="x"></i>
         </a>
     </div>
-    <div class="aside-body ps ps--active-y">
+    <div class="aside-body ps ps--active-y" >
         <div class="aside-loggedin">
             <div class="d-flex align-items-center justify-content-start">
                 <span class="avatar">

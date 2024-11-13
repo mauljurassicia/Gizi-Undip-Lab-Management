@@ -8,6 +8,7 @@ use App\Helpers\ResponseJson;
 use App\Repositories\ScheduleRepository;
 use Laracasts\Flash\Flash;
 use App\Http\Controllers\AppBaseController;
+use App\Models\Schedule;
 use App\Repositories\CourseRepository;
 use App\Repositories\RoomRepository;
 use Carbon\Carbon;
@@ -155,9 +156,79 @@ class ScheduleController extends AppBaseController
 
     public function addSchedule($room, Request $request)
     {
-        // if(){
+        $room = $this->roomRepository->findWithoutFail($room);
 
-        // }
+        if (empty($room)) {
+            return ResponseJson::make(ResponseCodeEnum::STATUS_NOT_FOUND, 'Room not found')->send();
+        }
 
+        $input = $request->all();
+        $date = null;
+        $typeModel = null;
+        $typeId = $input['type_id'];
+
+        $this->handleDate($date, $input);
+
+        $this->handleTypeModel($typeModel, $typeId, $input);
+
+        if(is_array($date)){
+            foreach ($date as $item) {
+                $this->createSchedule($input, $item, $typeModel, $room);
+            }
+        } else {
+            $this->createSchedule($input, $date, $typeModel, $room);
+        }
+    
+    }
+
+    private function handleDate(&$date, $input){
+        if ($input['type_schedule'] == 0) {
+            return ResponseJson::make(ResponseCodeEnum::STATUS_BAD_REQUEST, 'Type schedule is required')->send();
+        } else if ($input['type_schedule'] == 1) {
+            $date = Carbon::createFromFormat('Y-m-d', $input['date']);
+        } else if ($input['type_schedule'] == 2) {
+            if (!$input['weeks']) {
+                return ResponseJson::make(ResponseCodeEnum::STATUS_BAD_REQUEST, 'Weeks is required')->send();
+            }
+
+            $dates = [];
+            $weeks = $input['weeks'];
+            $date = Carbon::createFromFormat('Y-m-d', $input['date']);
+
+            for ($i = 0; $i < $weeks; $i++) {
+                $dates[] = $date->copy()->addWeeks($i)->format('Y-m-d');
+            }
+        } else{
+            return ResponseJson::make(ResponseCodeEnum::STATUS_BAD_REQUEST, 'Type schedule is not valid')->send();
+        }
+    }
+
+    private function handleTypeModel(&$typeModel, &$typeId, $input){
+        if($input['type_model'] == 0){
+            return ResponseJson::make(ResponseCodeEnum::STATUS_BAD_REQUEST, 'Type model is required')->send();
+        } else if($input['type_model'] == 1){
+            $typeModel = 'App\User';
+            $typeId = Auth::user()->id;
+        } else if($input['type_model'] == 2){
+            if($input)
+            $typeModel = 'App\model\Group';
+
+        } else{
+            return ResponseJson::make(ResponseCodeEnum::STATUS_BAD_REQUEST, 'Type model is not valid')->send();
+        }
+    }
+
+    private function createSchedule($input, $date, $typeModel, $room){
+
+        $start = $date->copy()->setTimeFromTimeString($input['start_time']);
+        $end = $date->copy()->setTimeFromTimeString($input['end_time']);
+        dd($start, $end);
+        $schedule = new Schedule();
+        $schedule->room_id = $room->id;
+        $schedule->start_schedule = $start;
+        $schedule->end_schedule = $end;
+        $schedule->userable_type = $typeModel;
+
+        $schedule->save();
     }
 }

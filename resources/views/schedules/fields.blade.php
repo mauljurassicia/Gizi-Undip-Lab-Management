@@ -1,8 +1,14 @@
 <div x-data="calendar()" class="calendar mt-4" x-show="$store.calendar.isVisible" x-cloak>
     <header class="calendar-header">
-        <button @click="prevMonth">Previous</button>
-        <h2 x-text="monthName"></h2>
-        <button @click="nextMonth">Next</button>
+        <button @click="prevMonth" class="btn btn-light btn-sm btn-icon">
+            <span class="d-none d-md-inline">Sebelum</span>
+            <i class="fa fa-chevron-left d-md-none"></i>
+        </button>
+        <h2 x-text="monthName" style="font-size: clamp(1rem, 2vw, 2rem);"></h2>
+        <button @click="nextMonth" class="btn btn-light btn-sm btn-icon">
+            <span class="d-none d-md-inline">Selanjutnya</span>
+            <i class="fa fa-chevron-right d-md-none"></i>
+        </button>
     </header>
     <div class="calendar-grid">
         <template x-for="day in daysOfWeek" :key="day">
@@ -51,13 +57,42 @@
                 </div>
                 <h4>Buat Jadwal</h4>
                 <div>
-                    {!! Form::label('type', 'Tipe Kunjungan:') !!}
+                    {!! Form::label('name', 'Nama Kegiatan:') !!}
+                    {!! Form::text('name', null, [
+                        'class' => 'form-control',
+                        'placeholder' => 'Contoh: Praktikum Makanan',
+                        'x-model' => 'name',
+                        'required',
+                    ]) !!}
+                    <template x-if="!name">
+                        <p class="tx-danger tx-12 tx-bold mg-t-10 ">Nama Kegiatan harus diisi!</p>
+                    </template>
+
+                    {!! Form::label('type', 'Tipe Kunjungan:', ['class' => 'mt-3']) !!}
                     {!! Form::select(
                         'type',
-                        ['0' => 'Pilih Tipe Kunjungan', '1' => 'Kunjungan Tunggal', '2' => 'Kunjungan Mingguan'],
+                        ['0' => 'Pilih Tipe Kunjungan', '1' => 'Kunjungan Tunggal', '2' => 'Kunjungan Rutin/ Terjadwal'],
                         null,
-                        ['class' => 'form-control'],
+                        ['class' => 'form-control', 'x-model' => 'typeSchedules'],
                     ) !!}
+                    <template x-if="typeSchedules == 0">
+                        <p class="tx-danger tx-12 tx-bold mg-t-10 ">Silahkan pilih tipe kunjungan!</p>
+                    </template>
+
+                    <template x-if="typeSchedules == 2">
+                        <div>
+                            {!! Form::label('duration_weeks', 'Durasi Jadwal (Minggu):', ['class' => 'mt-3']) !!}
+                            {!! Form::number('duration_weeks', null, [
+                                'class' => 'form-control',
+                                'min' => '0',
+                                'placeholder' => 'Jumlah Minggu',
+                                'x-model' => 'weeks',
+                            ]) !!}
+                        </div>
+                    </template>
+
+
+
 
                     {!! Form::label('type_model', 'Tipe Pengunjung:', ['class' => 'mt-3']) !!}
                     {!! Form::select(
@@ -67,11 +102,23 @@
                         ['class' => 'form-control', 'x-model' => 'typeModel'],
                     ) !!}
 
+                    <template x-if="typeModel == 0">
+                        <p class="tx-danger tx-12 tx-bold mg-t-10 ">Silahkan pilih tipe pengunjung!</p>
+                    </template>
+
                     <template x-if="typeModel == 2">
                         <div>
                             {!! Form::label('group_id', 'Pilih Grup:', ['class' => 'mt-3']) !!}
                             @if ($groups->count() == 0)
                                 <p class="text-muted m-0">Anda belum memiliki grup.</p>
+                            @else
+                                {!! Form::select('group_id', ['0' => 'Pilih Grup'] + $groups->toArray(), null, [
+                                    'class' => 'form-control',
+                                    'x-model' => 'groupId',
+                                ]) !!}
+                                <template x-if="groupId == 0">
+                                    <p class="tx-danger tx-12 tx-bold mg-t-10 ">Silahkan pilih grup!</p>
+                                </template>
                             @endif
                         </div>
 
@@ -82,10 +129,16 @@
                             {!! Form::label('course_id', 'Mata kuliah:', ['class' => 'mt-3']) !!}
                             {!! Form::select('course_id', ['0' => 'Pilih Mata Kuliah'] + $courses->toArray(), null, [
                                 'class' => 'form-control',
+                                'x-model' => 'courseId',
                             ]) !!}
+                            <template x-if="courseId == 0 || courseId == null">
+                                <p class="tx-danger tx-12 tx-bold mg-t-10 ">Silahkan pilih mata kuliah!</p>
+                            </template>
+
                         </div>
 
                     </template>
+
 
                     <div>
                         {!! Form::label('start_schedule', 'Waktu Mulai:', ['class' => 'mt-3']) !!}
@@ -98,7 +151,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary">Save changes</button>
+                <button type="button" class="btn btn-primary" @click.prevent="saveChanges">Save changes</button>
             </div>
         </div>
     </div>
@@ -133,11 +186,13 @@
     </style>
 
     <!-- Header with Date -->
-    <div class="date-header bg-gray-200 py-2 sticky-top">
+    <div class="date-header bg-gray-200 py-2" style="position: sticky; top: 0;">
         <div class="d-flex align-items-center justify-content-center position-relative w-100">
             <button @click="$store.calendar.isVisible = true; $store.date.selectedDate = null"
-                class="btn btn-light position-absolute" style="left: 10px;">Back to Calendar</button>
-            <h3 x-text="$store.date.selectedDate?.format('DD MMMM YYYY')"></h3>
+                class="btn btn-light position-absolute" style="left: 10px;">
+                <i class="fa fa-arrow-left d-inline d-md-none"></i>
+            <span class="d-none d-md-inline">Kembali ke Kalender</span></button>
+            <h3 x-text="$store.date.selectedDate?.format('DD MMMM YYYY')" style="font-size: clamp(1rem, 2vw, 2rem);"></h3>
         </div>
     </div>
 
@@ -183,7 +238,7 @@
             addScheduleModal() {
                 fetch(
                         `{{ route('schedules.operationalHours', ['room' => $room->id]) }}?date=${this.$store.date.selectedDate?.format('YYYY-MM-DD')}`
-                        )
+                    )
                     .then(res => res.json())
                     .then(res => {
                         if (res.valid) {
@@ -296,54 +351,76 @@
                 start: '00:00',
                 end: '23:59'
             },
-            init() {
-                this.$watch('startTime', this.checkStartTime.bind(this));
-                this.$watch('endTime', this.checkEndTime.bind(this));
-            },
+            typeSchedules: 0,
+            name: null,
+            courseId: null,
             startTime: null,
             endTime: null,
+            weeks: null,
             checkStartTime() {
                 if (this.startTime < this.operationalHours.start) {
-                    this.startTime = null;
+                    this.startTime = this.operationalHours.start;
                     Swal.fire({
                         title: 'Waktu mulai harus lebih dari ' + this.operationalHours.start,
                         icon: 'error'
                     });
+                    return false;
                 } else if (this.startTime > this.endTime) {
                     this.startTime = this.endTime;
                     Swal.fire({
                         title: 'Waktu mulai harus kurang dari ' + this.endTime,
                         icon: 'error'
                     });
+                    return false;
                 } else if (this.startTime > this.operationalHours.end) {
-                    this.startTime = null;
+                    this.startTime = this.operationalHours.start;
                     Swal.fire({
                         title: 'Waktu mulai harus kurang dari ' + this.operationalHours.end,
                         icon: 'error'
                     });
+                    return false;
+                } else if (!this.startTime) {
+                    this.startTime = this.operationalHours.start;
+                    Swal.fire({
+                        title: "Waktu mulai harus diisi",
+                        icon: 'error'
+                    });
+                    return false;
                 }
+                return true;
             },
 
             checkEndTime() {
                 if (this.endTime > this.operationalHours.end) {
-                    this.endTime = null;
+                    this.endTime = this.operationalHours.end;
                     Swal.fire({
                         title: 'Waktu selesai harus kurang dari ' + this.operationalHours.end,
                         icon: 'error'
                     });
+                    return false;
                 } else if (this.endTime < this.startTime) {
                     this.endTime = this.startTime;
                     Swal.fire({
                         title: 'Waktu selesai harus lebih dari ' + this.startTime,
                         icon: 'error'
                     });
+                    return false;
                 } else if (this.endTime < this.operationalHours.start) {
-                    this.endTime = null;
+                    this.endTime = this.operationalHours.end;
                     Swal.fire({
                         title: 'Waktu selesai harus lebih dari ' + this.operationalHours.start,
                         icon: 'error'
                     });
+                    return false;
+                } else if (!this.endTime) {
+                    this.endTime = this.operationalHours.end;
+                    Swal.fire({
+                        title: "Waktu selesai harus diisi",
+                        icon: 'error'
+                    });
+                    return false;
                 }
+                return true;
             },
 
             setOperationalHours($event) {
@@ -366,6 +443,54 @@
 
                     });
 
+            },
+            saveChanges() {
+                if (!this.checkStartTime()) return;
+                if (!this.checkEndTime()) return;
+                fetch(`{{ route('schedules.adds', ['room' => $room->id]) }}?date=${this.$store.date.selectedDate?.format('YYYY-MM-DD') }`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        },
+                        body: JSON.stringify({
+                            name: this.name,
+                            course_id: this.courseId,
+                            start_time: this.startTime,
+                            end_time: this.endTime,
+                            type_schedule: this.typeSchedules,
+                            type_model: this.typeModel,
+                            weeks: this.weeks
+                        }),
+                    })
+                    .then(res => res.json())
+                    .then(res => {
+                        if (res.valid) {
+                            this.$dispatch('set-operational', this.$store.date.selectedDate?.format('YYYY-MM-DD'));
+                            this.$store.calendar.isVisible = false;
+                            this.$store.schedule.schedules = res.data;
+                            this.name = null;
+                            this.courseId = null;
+                            this.startTime = null;
+                            this.endTime = null;
+                            this.typeSchedules = 0;
+                            this.typeModel = 0;
+                            this.$store.date.selectedDate = null;
+                            this.$store.date.selectedDay = null;
+                            this.$store.date.selectedDayName = null;
+                            this.$store.date.selectedDateName = null;
+                        } else {
+                            Swal.fire({
+                                title: res.message,
+                                icon: 'error'
+                            });
+                        }
+                    })
+                    .catch(err => {
+                        if (err) {
+                            console.log(err);
+                        }
+                    })
             }
         }
     }

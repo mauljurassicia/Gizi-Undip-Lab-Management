@@ -90,7 +90,7 @@ class GroupController extends AppBaseController
     {
         $input = $request->all();
 
-        if($request->hasFile('thumbnail')){ 
+        if ($request->hasFile('thumbnail')) {
             $input['thumbnail'] = $this->saveFileService->setImage($request->file('thumbnail'))->setStorage($this->storage)->handle();
         }
 
@@ -99,7 +99,7 @@ class GroupController extends AppBaseController
 
         $group = $this->groupRepository->create($input);
 
-        if($members){
+        if ($members) {
             $group->users()->sync($members);
         }
 
@@ -172,12 +172,12 @@ class GroupController extends AppBaseController
         $members = $input['member_id'];
         unset($input['member_id']);
 
-        if($request->hasFile('thumbnail')){ 
+        if ($request->hasFile('thumbnail')) {
             $input['thumbnail'] = $this->saveFileService->setImage($request->file('thumbnail'))->setStorage($this->storage)->setModel($group->thumbnail)->handle();
         }
         $group = $this->groupRepository->update($input, $id);
 
-        if($members){
+        if ($members) {
             $group->users()->sync($members);
         }
 
@@ -243,11 +243,28 @@ class GroupController extends AppBaseController
         return redirect(route('groups.index'));
     }
 
-    public function getMembers($id){
+    public function getMembers($id)
+    {
         $users = $this->groupRepository->findWithoutFail($id)->users;
         if (!$users) {
             return ResponseJson::make(ResponseCodeEnum::STATUS_NOT_FOUND, 'Group not found')->send();
         }
         return ResponseJson::make(ResponseCodeEnum::STATUS_OK, 'Success', $users)->send();
+    }
+
+
+    public function groupSuggestion(Request $request)
+    {
+        if (!$request->has('search')) {
+            return ResponseJson::make(ResponseCodeEnum::STATUS_BAD_REQUEST, 'Search term is required')->send();
+        }
+
+
+        $groups = $this->groupRepository->where('name', 'like', '%' . $request->get('search') . '%')
+            ->when($request->has('course_id'), function ($query) use ($request) {
+                $query->where('course_id', $request->get('course_id'));
+            })->with('course')->get();
+
+        return ResponseJson::make(ResponseCodeEnum::STATUS_OK, 'Success', $groups)->send();
     }
 }

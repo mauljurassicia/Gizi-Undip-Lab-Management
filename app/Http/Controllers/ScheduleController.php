@@ -156,6 +156,8 @@ class ScheduleController extends AppBaseController
 
     public function addSchedule($room, Request $request)
     {
+
+        dd($request->all());
         $room = $this->roomRepository->findWithoutFail($room);
 
         if (empty($room)) {
@@ -165,7 +167,7 @@ class ScheduleController extends AppBaseController
         $input = $request->all();
         $date = null;
         $typeModel = null;
-        $typeId = $input['type_id'];
+        $typeId = @$input['type_id'];
 
         $this->handleDate($date, $input);
 
@@ -173,11 +175,13 @@ class ScheduleController extends AppBaseController
 
         if(is_array($date)){
             foreach ($date as $item) {
-                $this->createSchedule($input, $item, $typeModel, $room);
+                $this->createSchedule($input, $item, $typeModel, $room, $typeId);
             }
         } else {
-            $this->createSchedule($input, $date, $typeModel, $room);
+            $this->createSchedule($input, $date, $typeModel, $room, $typeId);
         }
+
+        return ResponseJson::make(ResponseCodeEnum::STATUS_OK, 'Schedule created successfully')->send();
     
     }
 
@@ -210,7 +214,10 @@ class ScheduleController extends AppBaseController
             $typeModel = 'App\User';
             $typeId = Auth::user()->id;
         } else if($input['type_model'] == 2){
-            if($input)
+            if(!$input['type_id']){
+                return ResponseJson::make(ResponseCodeEnum::STATUS_BAD_REQUEST, 'Type id is required')->send();
+            }
+
             $typeModel = 'App\model\Group';
 
         } else{
@@ -218,16 +225,17 @@ class ScheduleController extends AppBaseController
         }
     }
 
-    private function createSchedule($input, $date, $typeModel, $room){
+    private function createSchedule($input, $date, $typeModel, $room, $typeId){
 
         $start = $date->copy()->setTimeFromTimeString($input['start_time']);
         $end = $date->copy()->setTimeFromTimeString($input['end_time']);
-        dd($start, $end);
         $schedule = new Schedule();
         $schedule->room_id = $room->id;
         $schedule->start_schedule = $start;
+        $schedule->name = $input['name'];
         $schedule->end_schedule = $end;
         $schedule->userable_type = $typeModel;
+        $schedule->userable_id = $typeId;
 
         $schedule->save();
     }

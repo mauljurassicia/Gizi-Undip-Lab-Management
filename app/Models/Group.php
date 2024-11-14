@@ -91,5 +91,7 @@ class Group extends Model
         return $this->belongsToMany(User::class, 'users_groups', 'group_id', 'user_id');
     }
 
-    
+    public function schedules(){
+        return $this->morphMany(Schedule::class, 'scheduleable');
+    }
 }

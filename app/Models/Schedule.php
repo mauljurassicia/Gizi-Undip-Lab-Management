@@ -35,8 +35,6 @@ class Schedule extends Model
 
     public $fillable = [
         'room_id',
-        'userable_type',
-        'userable_id',
         'name',
         'start_schedule',
         'end_schedule',
@@ -49,7 +47,6 @@ class Schedule extends Model
      * @var array
      */
     protected $casts = [
-        'userable_type' => 'string',
         'name' => 'string'
     ];
 
@@ -68,6 +65,18 @@ class Schedule extends Model
 
     public function room() {
         return $this->belongsTo('App\Models\Room');
+    }
+
+    public function course() {
+        return $this->belongsTo('App\Models\Course');
+    }
+
+    public function users() {
+        return $this->morphByMany('App\Models\User', 'scheduleable');
+    }
+
+    public function groups() {
+        return $this->morphByMany('App\Models\Group', 'scheduleable');
     }
 
     

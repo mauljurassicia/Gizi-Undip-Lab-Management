@@ -70,6 +70,7 @@ Route::resource('guests', 'GuestController');
 Route::resource('students', 'StudentController');
 // Route::post('importStudent', 'StudentController@import');
 
+Route::get('groups/suggestion', 'GroupController@groupSuggestion')->name('groups.suggestion');
 Route::resource('groups', 'GroupController');
 Route::get('groups/members/sugestion', 'GroupController@memberSuggestion')->name('groups.members.suggestion');
 Route::get('groups/{group}/members', 'GroupController@getMembers')->name('groups.members.table');

@@ -80,4 +80,9 @@ class User extends Authenticatable
     {
         return $this->belongsToMany('App\Models\Group', 'users_groups');
     }
+
+    public function schedules()
+    {
+        return $this->morphMany('App\Models\Schedule', 'scheduleable');
+    }
 }

@@ -10,11 +10,16 @@ use Laracasts\Flash\Flash;
 use App\Http\Controllers\AppBaseController;
 use App\Models\Schedule;
 use App\Repositories\CourseRepository;
+use App\Repositories\GroupRepository;
 use App\Repositories\RoomRepository;
+use App\Repositories\UserRepository;
+use App\User;
 use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;
 use Response;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use PHPUnit\Framework\Attributes\Group;
 
 class ScheduleController extends AppBaseController
 {
@@ -27,10 +32,19 @@ class ScheduleController extends AppBaseController
     /** @var CourseRepository */
     private $courseRepository;
 
+    /** @var UserRepository */
+    private $userRepository;
+
+
+    /** @var GroupRepository */
+    private $groupRepository;
+
     public function __construct(
         ScheduleRepository $scheduleRepo,
         RoomRepository $roomRepo,
-        CourseRepository $courseRepo
+        CourseRepository $courseRepo,
+        UserRepository $userRepository,
+        GroupRepository $groupRepository
     ) {
         $this->middleware('auth');
         $this->middleware('can:schedule-edit', ['only' => ['edit']]);
@@ -42,6 +56,8 @@ class ScheduleController extends AppBaseController
         $this->scheduleRepository = $scheduleRepo;
         $this->roomRepository = $roomRepo;
         $this->courseRepository = $courseRepo;
+        $this->userRepository = $userRepository;
+        $this->groupRepository = $groupRepository;
     }
 
     /**
@@ -141,11 +157,14 @@ class ScheduleController extends AppBaseController
         return ResponseJson::make(ResponseCodeEnum::STATUS_OK, 'Operational hours found', $operationalHours->$dayName)->send();
     }
 
-    public function getScheduleByRoomAndDate($room)
+    public function getScheduleByRoomAndDate($room, Request $request)
     {
-        $schedules = $this->scheduleRepository->where('room_id', $room)
-            ->whereDate('start_schedule', '=', request('date'))
-            ->whereDate('end_schedule', '=', request('date'))->get();
+
+        if (!$request->query('date')) {
+            return ResponseJson::make(ResponseCodeEnum::STATUS_BAD_REQUEST, 'Date is required')->send();
+        }
+        $schedules = $this->scheduleRepository->where('room_id', $room)->whereDate('start_schedule', $request->query('date'))
+            ->whereDate('end_schedule', $request->query('date'))->with('course')->with('groups')->with('users')->get();
 
         if (count($schedules) == 0) {
             return ResponseJson::make(ResponseCodeEnum::STATUS_NOT_FOUND, 'Schedule not found')->send();
@@ -156,8 +175,6 @@ class ScheduleController extends AppBaseController
 
     public function addSchedule($room, Request $request)
     {
-
-        dd($request->all());
         $room = $this->roomRepository->findWithoutFail($room);
 
         if (empty($room)) {
@@ -167,32 +184,54 @@ class ScheduleController extends AppBaseController
         $input = $request->all();
         $date = null;
         $typeModel = null;
-        $typeId = @$input['type_id'];
+        $typeId = [];
 
-        $this->handleDate($date, $input);
+        $dateErrorResponse = $this->handleDate($date, $input);
 
-        $this->handleTypeModel($typeModel, $typeId, $input);
-
-        if(is_array($date)){
-            foreach ($date as $item) {
-                $this->createSchedule($input, $item, $typeModel, $room, $typeId);
-            }
-        } else {
-            $this->createSchedule($input, $date, $typeModel, $room, $typeId);
+        if ($dateErrorResponse) {
+            return $dateErrorResponse;
         }
 
-        return ResponseJson::make(ResponseCodeEnum::STATUS_OK, 'Schedule created successfully')->send();
-    
+        $modelErrorResponse = $this->handleTypeModel($typeModel, $typeId, $input);
+
+        if ($modelErrorResponse) {
+            return $modelErrorResponse;
+        }
+
+        $capacityErrorResponse = $this->handleCountCapacity($typeModel, $typeId, $room);
+
+        if ($capacityErrorResponse) {
+            return $capacityErrorResponse;
+        }
+
+        if (is_array($date)) {
+            foreach ($date as $item) {
+                $createScheduleErrorResponse = $this->createSchedule($input, $item, $room, $typeModel, $typeId);
+
+                if ($createScheduleErrorResponse) {
+                    return $createScheduleErrorResponse;
+                }
+            }
+        } else {
+            $createScheduleErrorResponse = $this->createSchedule($input, $date, $room, $typeModel, $typeId);
+
+            if ($createScheduleErrorResponse) {
+                return $createScheduleErrorResponse;
+            }
+        }
+
+        return ResponseJson::make(ResponseCodeEnum::STATUS_OK, 'Jadwal berhasil ditambahkan')->send();
     }
 
-    private function handleDate(&$date, $input){
+    private function handleDate(&$date, $input)
+    {
         if ($input['type_schedule'] == 0) {
-            return ResponseJson::make(ResponseCodeEnum::STATUS_BAD_REQUEST, 'Type schedule is required')->send();
+            return ResponseJson::make(ResponseCodeEnum::STATUS_BAD_REQUEST, 'Tipe Kunjungan harus diisi')->send();
         } else if ($input['type_schedule'] == 1) {
             $date = Carbon::createFromFormat('Y-m-d', $input['date']);
         } else if ($input['type_schedule'] == 2) {
             if (!$input['weeks']) {
-                return ResponseJson::make(ResponseCodeEnum::STATUS_BAD_REQUEST, 'Weeks is required')->send();
+                return ResponseJson::make(ResponseCodeEnum::STATUS_BAD_REQUEST, 'Jumlah minggu harus diisi')->send();
             }
 
             $dates = [];
@@ -202,30 +241,52 @@ class ScheduleController extends AppBaseController
             for ($i = 0; $i < $weeks; $i++) {
                 $dates[] = $date->copy()->addWeeks($i)->format('Y-m-d');
             }
-        } else{
-            return ResponseJson::make(ResponseCodeEnum::STATUS_BAD_REQUEST, 'Type schedule is not valid')->send();
+        } else {
+            return ResponseJson::make(ResponseCodeEnum::STATUS_BAD_REQUEST, 'Tipe Kunjungan harus diisi')->send();
         }
     }
 
-    private function handleTypeModel(&$typeModel, &$typeId, $input){
-        if($input['type_model'] == 0){
-            return ResponseJson::make(ResponseCodeEnum::STATUS_BAD_REQUEST, 'Type model is required')->send();
-        } else if($input['type_model'] == 1){
+    private function handleTypeModel(&$typeModel, &$typeId, $input)
+    {
+        if ($input['type_model'] == 0) {
+            return ResponseJson::make(ResponseCodeEnum::STATUS_BAD_REQUEST, 'Tipe Pengunjung harus diisi')->send();
+        } else if ($input['type_model'] == 1) {
             $typeModel = 'App\User';
-            $typeId = Auth::user()->id;
-        } else if($input['type_model'] == 2){
-            if(!$input['type_id']){
-                return ResponseJson::make(ResponseCodeEnum::STATUS_BAD_REQUEST, 'Type id is required')->send();
+
+            /** @var User */
+            $user = Auth::user();
+            if (!$user->hasRole('administrator') && !$user->hasRole('laborant')) {
+                $typeId = [Auth::user()->id];
+            } else {
+                if (!$input['type_id']) {
+                    return ResponseJson::make(ResponseCodeEnum::STATUS_BAD_REQUEST, 'Pengunjung harus diisi')->send();
+                }
+                $typeId = $input['type_id'];
+            }
+        } else if ($input['type_model'] == 2) {
+            if (!$input['type_id']) {
+                return ResponseJson::make(ResponseCodeEnum::STATUS_BAD_REQUEST, 'Pengunjung harus diisi')->send();
             }
 
             $typeModel = 'App\model\Group';
-
-        } else{
-            return ResponseJson::make(ResponseCodeEnum::STATUS_BAD_REQUEST, 'Type model is not valid')->send();
+            $typeId = $input['type_id'];
+        } else {
+            return ResponseJson::make(ResponseCodeEnum::STATUS_BAD_REQUEST, 'Tipe Pengunjung tidak valid')->send();
         }
     }
 
-    private function createSchedule($input, $date, $typeModel, $room, $typeId){
+    private function createSchedule($input, $date, $room, $typeModel, $typeId)
+    {
+
+
+        if (!$input['start_time'] || !$input['end_time']) {
+            return ResponseJson::make(ResponseCodeEnum::STATUS_BAD_REQUEST, 'Waktu mulai dan waktu selesai harus diisi')->send();
+        }
+
+        if ($input['start_time'] > $input['end_time']) {
+            return ResponseJson::make(ResponseCodeEnum::STATUS_BAD_REQUEST, 'Waktu mulai harus lebih kecil dari waktu selesai')->send();
+        }
+
 
         $start = $date->copy()->setTimeFromTimeString($input['start_time']);
         $end = $date->copy()->setTimeFromTimeString($input['end_time']);
@@ -234,9 +295,48 @@ class ScheduleController extends AppBaseController
         $schedule->start_schedule = $start;
         $schedule->name = $input['name'];
         $schedule->end_schedule = $end;
-        $schedule->userable_type = $typeModel;
-        $schedule->userable_id = $typeId;
+
+        if (@$input['course_id'] && !($input['course_id'] == 'null') && !($input['course_id'] == '0')) {
+            $schedule->course_id = $input['course_id'];
+        }
+
+        if (@$input['associated_info']) {
+            $schedule->associated_info = $input['associated_info'];
+        }
+
+        /** @var User */
+        $user = Auth::user();
+        if ($user->hasRole('administrator') || $user->hasRole('laborant')) {
+            $schedule->status = 'approved';
+        }
 
         $schedule->save();
+
+        foreach ($typeId as $id) {
+            if ($typeModel == 'App\User') {
+                $schedule->users()->attach($id);
+            } else if ($typeModel == 'App\model\Group') {
+                $schedule->groups()->attach($id);
+            }
+        }
+    }
+
+
+    private function handleCountCapacity($typeModel, $typeId, $room): JsonResponse | bool
+    {
+        $guestCount = 0;
+        if ($typeModel == 'App\User') {
+            $guestCount = $this->userRepository->whereIn('id', $typeId)->count();
+        } elseif ($typeModel == 'App\model\Group') {
+            $guestCount = $this->groupRepository->whereIn('id', $typeId)->withCount('users')->get()->sum('users_count');
+        } else {
+            return ResponseJson::make(ResponseCodeEnum::STATUS_BAD_REQUEST, 'Type model is not valid')->send();
+        }
+
+        if ($guestCount > $room->volume) {
+            return ResponseJson::make(ResponseCodeEnum::STATUS_BAD_REQUEST, 'Guest count is more than capacity')->send();
+        }
+
+        return false;
     }
 }

@@ -76,6 +76,7 @@
                             @click="groups.splice(groups.indexOf(group), 1)">
                             <i class="fa fa-trash"></i>
                         </button>
+                        <input type="hidden" name="typeId[]" :value="group.id">
                     </td>
                 </tr>
             </template>

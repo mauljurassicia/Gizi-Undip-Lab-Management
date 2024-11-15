@@ -124,3 +124,21 @@
 </li>
 
 
+@can('borrowing-show')
+<li class="{{ Request::is('borrowings*') ? 'active' : '' }} nav-item">
+    <a class="nav-link" href="{!! route('borrowings.index') !!}"><i data-feather="edit-3"></i><span>Borrowings</span></a>
+</li>
+@endcan
+
+@can('brokenEquipment-show')
+<li class="{{ Request::is('brokenEquipments*') ? 'active' : '' }} nav-item">
+    <a class="nav-link" href="{!! route('brokenEquipments.index') !!}"><i data-feather="edit-3"></i><span>Broken Equipments</span></a>
+</li>
+@endcan
+
+@can('returnReport-show')
+<li class="{{ Request::is('returnReports*') ? 'active' : '' }} nav-item">
+    <a class="nav-link" href="{!! route('returnReports.index') !!}"><i data-feather="edit-3"></i><span>Return Reports</span></a>
+</li>
+@endcan
+

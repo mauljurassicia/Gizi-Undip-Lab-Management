@@ -87,3 +87,12 @@ Route::resource('laborants', 'LaborantController');
 
 Route::resource('logBooks', 'LogBookController');
 // Route::post('importLogBook', 'LogBookController@import');
+
+Route::resource('borrowings', 'BorrowingController');
+// Route::post('importBorrowing', 'BorrowingController@import');
+
+Route::resource('brokenEquipments', 'BrokenEquipmentController');
+// Route::post('importBrokenEquipment', 'BrokenEquipmentController@import');
+
+Route::resource('returnReports', 'ReturnReportController');
+// Route::post('importReturnReport', 'ReturnReportController@import');

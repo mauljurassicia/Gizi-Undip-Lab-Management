@@ -1,8 +1,11 @@
-@include('schedules.components.calendar')
+<div x-data="{}">
+    @include('schedules.components.calendar')
 
-@include('schedules.components.schedule_modale')
+    @include('schedules.components.schedule_modale')
 
-@include('schedules.components.hours')
+    @include('schedules.components.hours')
+</div>
+
 
 
 <script>
@@ -19,6 +22,31 @@
             schedules: [],
         });
     });
+
+
+    async function getSchedules() {
+        const date = Alpine.store('date').selectedDate;
+
+        if (!date) {
+            Swal.fire({
+                title: 'Error!',
+                text: "Tanggal belum dipilih",
+                icon: 'error',
+                confirmButtonText: 'Ok'
+            });
+            return;
+        }
+        Alpine.store('schedule').schedules = await fetch(
+            `{{ route('schedules.rooms', ['room' => $room->id]) }}?date=${date.format('YYYY-MM-DD')}`).then(
+            res => res.json()).then(res => {
+            if (res.valid) {
+                return res.data.sort((a, b) => new Date(a.start_schedule) - new Date(b.start_schedule));
+            }
+            return [];
+        });
+
+        console.log(Alpine.store('schedule').schedules);
+    }
 </script>
 <style>
     [x-cloak] {

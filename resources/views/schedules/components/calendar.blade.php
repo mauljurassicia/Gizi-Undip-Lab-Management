@@ -18,15 +18,6 @@
                     this.$store.date.selectedDate = date;
 
                     this.$dispatch('set-operational', date.format('YYYY-MM-DD'));
-                    fetch(`{{ route('schedules.rooms', ['room' => $room->id]) }}?date=${date.format('YYYY-MM-DD')}`)
-                        .then(res => res.json())
-                        .then(res => {
-                            if (res.valid) {
-                                this.$store.schedule.schedules = res.data;
-                            } else {
-                                this.$store.schedule.schedules = [];
-                            }
-                        });
 
                 }
                 this.currentDate = date.clone();
@@ -86,33 +77,35 @@
         };
     }
 </script>
-<div x-data="calendar()" class="calendar mt-4" x-show="$store.calendar.isVisible" x-cloak>
-    <header class="calendar-header">
-        <button @click="prevMonth" class="btn btn-light btn-sm btn-icon">
-            <span class="d-none d-md-inline">Sebelum</span>
-            <i class="fa fa-chevron-left d-md-none"></i>
-        </button>
-        <h2 x-text="monthName" style="font-size: clamp(1rem, 2vw, 2rem);"></h2>
-        <button @click="nextMonth" class="btn btn-light btn-sm btn-icon">
-            <span class="d-none d-md-inline">Selanjutnya</span>
-            <i class="fa fa-chevron-right d-md-none"></i>
-        </button>
-    </header>
-    <div class="calendar-grid">
-        <template x-for="day in daysOfWeek" :key="day">
-            <div class="day-header" x-text="day"></div>
-        </template>
-        <template x-for="day in daysInMonth" :key="day.date._d?.getTime()">
-            <div class="day" x-text="day.day"
-                :class="{
-                    'other-month': day.otherMonth,
-                    'selected-date': day.date.isSame(currentDate,
-                        'day'),
-                    'hovered-date': day.date.isSame(hoveredDate, 'day')
-                }"
-                @click="selectDate(day.date)" @mouseenter="hoverHandler(day.date)" @mouseleave="hoveredDate = null">
-            </div>
-        </template>
-    </div>
+<template x-if="$store.calendar.isVisible">
+    <div x-data="calendar()" class="calendar mt-4" x-cloak>
+        <header class="calendar-header">
+            <button @click="prevMonth" class="btn btn-light btn-sm btn-icon">
+                <span class="d-none d-md-inline">Sebelum</span>
+                <i class="fa fa-chevron-left d-md-none"></i>
+            </button>
+            <h2 x-text="monthName" style="font-size: clamp(1rem, 2vw, 2rem);"></h2>
+            <button @click="nextMonth" class="btn btn-light btn-sm btn-icon">
+                <span class="d-none d-md-inline">Selanjutnya</span>
+                <i class="fa fa-chevron-right d-md-none"></i>
+            </button>
+        </header>
+        <div class="calendar-grid">
+            <template x-for="day in daysOfWeek" :key="day">
+                <div class="day-header" x-text="day"></div>
+            </template>
+            <template x-for="day in daysInMonth" :key="day.date._d?.getTime()">
+                <div class="day" x-text="day.day"
+                    :class="{
+                        'other-month': day.otherMonth,
+                        'selected-date': day.date.isSame(currentDate,
+                            'day'),
+                        'hovered-date': day.date.isSame(hoveredDate, 'day')
+                    }"
+                    @click="selectDate(day.date)" @mouseenter="hoverHandler(day.date)" @mouseleave="hoveredDate = null">
+                </div>
+            </template>
+        </div>
 
-</div>
+    </div>
+</template>

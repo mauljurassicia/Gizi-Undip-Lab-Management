@@ -8,7 +8,7 @@
             },
             typeSchedules: 0,
             name: null,
-            courseId: 0,
+            courseId: '0',
             startTime: null,
             endTime: null,
             weeks: 1,
@@ -80,25 +80,9 @@
             },
 
             setOperationalHours($event) {
-                fetch(`{{ route('schedules.operationalHours', ['room' => $room->id]) }}?date=${$event.detail}`)
-                    .then(res => res.json())
-                    .then(res => {
-                        if (res.valid) {
-                            this.operationalHours = res.data;
-                            this.endTime = this.operationalHours.end;
-                            this.startTime = this.operationalHours.start;
-                        } else {
-                            this.operationalHours = {
-                                start: '00:00',
-                                end: '23:59'
-                            };
-                            this.endTime = null;
-                            this.startTime = null;
-                        }
-
-
-                    });
-
+                this.operationalHours = $event.detail;
+                this.startTime = this.operationalHours.start;
+                this.endTime = this.operationalHours.end;
             },
             saveChanges() {
                 if (!this.name) {
@@ -141,6 +125,40 @@
                     return;
                 }
 
+                if (this.courseId == '0') {
+                    Swal.fire({
+                        title: 'Error!',
+                        text: "Mata kuliah harus diisi",
+                        icon: 'error',
+                        confirmButtonText: 'Ok'
+                    })
+                    return;
+                }
+
+                if (this.courseId == 'null' && !this.associatedInfo) {
+                    {
+                        Swal.fire({
+                            title: 'Error!',
+                            text: "Info kegiatan harus diisi",
+                            icon: 'error',
+                            confirmButtonText: 'Ok'
+                        })
+                        return;
+                    }
+                }
+
+                let typeIds = [...document.querySelectorAll('input[name="typeId[]"]')].map(el => el.value);
+
+                if (typeIds.length == 0) {
+                    Swal.fire({
+                        title: 'Error!',
+                        text: "Pengunjung harus diisi",
+                        icon: 'error',
+                        confirmButtonText: 'Ok'
+                    })
+                    return;
+                }
+
                 if (!this.checkStartTime()) return;
                 if (!this.checkEndTime()) return;
                 fetch(`{{ route('schedules.adds', ['room' => $room->id]) }}?date=${this.$store.date.selectedDate?.format('YYYY-MM-DD') }`, {
@@ -157,25 +175,32 @@
                             type_schedule: this.typeSchedules,
                             type_model: this.typeModel,
                             weeks: this.weeks,
-                            type_id: document.querySelector('input[name="typeId"]').value
+                            type_id: typeIds,
+                            associated_info: this.associatedInfo
+
                         }),
                     })
                     .then(res => res.json())
                     .then(res => {
                         if (res.valid) {
-                            this.$dispatch('set-operational', this.$store.date.selectedDate?.format('YYYY-MM-DD'));
-                            this.$store.calendar.isVisible = false;
-                            this.$store.schedule.schedules = res.data;
                             this.name = null;
                             this.courseId = null;
-                            this.startTime = null;
-                            this.endTime = null;
+                            this.startTime = this.operationalHours.start;
+                            this.endTime = this.operationalHours.end;
                             this.typeSchedules = 0;
                             this.typeModel = 0;
-                            this.$store.date.selectedDate = null;
-                            this.$store.date.selectedDay = null;
-                            this.$store.date.selectedDayName = null;
-                            this.$store.date.selectedDateName = null;
+                            this.weeks = 1;
+
+                            Swal.fire({
+                                title: res.message,
+                                icon: 'success'
+                            });
+
+                            getSchedules();
+
+                            $('#scheduleModal').modal('hide');
+
+
                         } else {
                             Swal.fire({
                                 title: res.message,
@@ -185,7 +210,10 @@
                     })
                     .catch(err => {
                         if (err) {
-                            console.log(err);
+                            Swal.fire({
+                                title: err.message,
+                                icon: 'error'
+                            })
                         }
                     })
             }
@@ -312,7 +340,7 @@
 
                     </template>
 
-                    <template x-if="typeModel == 1">
+                    <template x-if="typeModel == 1 ">
                         <div>
 
                             @include('schedules.components.search_guest')

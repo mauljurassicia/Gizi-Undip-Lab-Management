@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+
+<head>
 
     <!-- Required meta tags -->
     <meta charset="utf-8">
@@ -12,20 +13,17 @@
     <meta name="description" content="Webcore - Web Backend Generate">
     <meta name="author" content="Redtech">
 
-   <!-- Favicon -->
-   <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('undip.png') }}">
+    <!-- Favicon -->
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('undip.png') }}">
     <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('undip.png') }}">
     <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('undip.png') }}">
-    <link rel="shortcut icon" type="image/x-icon" href="{{ asset('undip.ico') }}">    >
-      
-   {{-- <link rel="manifest" href="site.webmanifest"> --}}
+    <link rel="shortcut icon" type="image/x-icon" href="{{ asset('undip.ico') }}"> >
 
-   <title>Gizi Lab Monitoring </title>
+    {{-- <link rel="manifest" href="site.webmanifest"> --}}
+
+    <title>Gizi Lab Monitoring </title>
     <!-- vendor css -->
-    <link
-    rel="stylesheet"
-    href="https://site-assets.fontawesome.com/releases/v6.5.1/css/all.css"
-  >
+    <link rel="stylesheet" href="https://site-assets.fontawesome.com/releases/v6.5.1/css/all.css">
     <link href="{{ asset('vendor/dashforge/lib/@fortawesome/fontawesome-free/css/all.min.css') }}" rel="stylesheet">
     <link href="{{ asset('vendor/dashforge/lib/ionicons/css/ionicons.min.css') }}" rel="stylesheet">
 
@@ -42,7 +40,8 @@
     <link rel="stylesheet" href="{{ asset('vendor/dashforge/lib/select2/css/select2.min.css') }}">
 
     <!-- include Datetimepicker -->
-    <link rel="stylesheet" href="{{ asset('vendor/dashforge/lib/datetimepicker/css/bootstrap-datetimepicker.min.css') }}">
+    <link rel="stylesheet"
+        href="{{ asset('vendor/dashforge/lib/datetimepicker/css/bootstrap-datetimepicker.min.css') }}">
 
     <!-- DashForge CSS -->
     <link rel="stylesheet" href="{{ asset('vendor/dashforge/assets/css/dashforge.css') }}">
@@ -56,7 +55,8 @@
             /* padding: 5px; */
             border: 1px solid #d2d6de;
         }
-        .file-item > div:first-child {
+
+        .file-item>div:first-child {
             margin-left: -10px;
         }
 
@@ -71,30 +71,29 @@
             width: 100% !important;
         }
 
-        @media screen and (max-width: 767px) {
-        }
+        @media screen and (max-width: 767px) {}
 
-        @media screen and (max-width: 576px) {
-        }
+        @media screen and (max-width: 576px) {}
     </style>
 
     @yield('styles')
-  </head>
-  <body>
+</head>
+
+<body>
     @include('layouts.dashforge-templates.sidebar')
 
     <div class="content ht-100v pd-0">
-      <div class="content-header">
-        <div class="content-search"></div>
-        <nav class="nav">
-            <a class="nav-link" href="{!! url('/logout') !!}" data-toggle="tooltip" title="Sign out"
+        <div class="content-header">
+            <div class="content-search"></div>
+            <nav class="nav">
+                <a class="nav-link" href="{!! url('/logout') !!}" data-toggle="tooltip" title="Sign out"
                     onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                     <i data-feather="log-out"></i>
-            </a>
-        </nav>
-      </div>
+                </a>
+            </nav>
+        </div>
 
-      @yield('contents')
+        @yield('contents')
     </div>
 
     <script src="{{ asset('vendor/dashforge/lib/jquery/jquery.min.js') }}"></script>
@@ -111,17 +110,16 @@
     <script src="{{ asset('vendor/fancybox/jquery.fancybox.min.js') }}"></script>
     <script src="{{ asset('vendor/fileuploader/jquery.fileuploader.min.js') }}"></script>
     <script src="{{ asset('vendor/moment/moment.min.js') }}"></script>
-    
-    <script crossorigin="anonymous"
-            src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/4.9.11/tinymce.min.js"
-            integrity="sha512-3tlegnpoIDTv9JHc9yJO8wnkrIkq7WO7QJLi5YfaeTmZHvfrb1twMwqT4C0K8BLBbaiR6MOo77pLXO1/PztcLg==">
+
+    <script crossorigin="anonymous" src="https://cdnjs.cloudflare.com/ajax/libs/tinymce/4.9.11/tinymce.min.js"
+        integrity="sha512-3tlegnpoIDTv9JHc9yJO8wnkrIkq7WO7QJLi5YfaeTmZHvfrb1twMwqT4C0K8BLBbaiR6MOo77pLXO1/PztcLg==">
     </script>
     <script>
         var editor_config = {
             skin: "lightgray",
             height: 300,
             min_height: 300,
-            path_absolute : "/",
+            path_absolute: "/",
             selector: "textarea.my-editor",
             plugins: [
                 "advlist autolink lists link image charmap print preview hr anchor pagebreak",
@@ -131,26 +129,37 @@
             ],
             toolbar: "insertfile undo redo | styleselect | bold italic | alignleft aligncenter alignright alignjustify | bullist numlist outdent indent | link image media",
             relative_urls: false,
-            file_browser_callback : function(field_name, url, type, win) {
-                var x = window.innerWidth || document.documentElement.clientWidth || document.getElementsByTagName('body')[0].clientWidth;
-                var y = window.innerHeight|| document.documentElement.clientHeight|| document.getElementsByTagName('body')[0].clientHeight;
+            file_browser_callback: function(field_name, url, type, win) {
+                var x = window.innerWidth || document.documentElement.clientWidth || document.getElementsByTagName(
+                    'body')[0].clientWidth;
+                var y = window.innerHeight || document.documentElement.clientHeight || document
+                    .getElementsByTagName('body')[0].clientHeight;
 
                 var cmsURL = editor_config.path_absolute + 'filemanager?field_name=' + field_name;
                 cmsURL = cmsURL + "&type=Files";
 
                 tinyMCE.activeEditor.windowManager.open({
-                    file : cmsURL,
-                    title : 'Filemanager',
-                    width : x * 0.8,
-                    height : y * 0.8,
-                    resizable : "yes",
-                    close_previous : "no"
+                    file: cmsURL,
+                    title: 'Filemanager',
+                    width: x * 0.8,
+                    height: y * 0.8,
+                    resizable: "yes",
+                    close_previous: "no"
                 });
             }
         };
 
         tinymce.init(editor_config);
+
+        var is_mobile = ((/Mobile|iPhone|iPod|BlackBerry|Windows Phone/i).test(navigator.userAgent || navigator.vendor ||
+            window.opera) ? true : false);
+
+        if (!is_mobile) {
+            // whatever the init call is
+            perfectScroller.init()
+        }
     </script>
     @yield('scripts')
-  </body>
+</body>
+
 </html>

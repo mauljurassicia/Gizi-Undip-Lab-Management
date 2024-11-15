@@ -1,4 +1,4 @@
-<aside class="aside aside-fixed" style="z-index: 1021">
+<aside class="aside aside-fixed">
     <div class="aside-header">
         <a href="{{ url('/home') }}">
             <img src="{{ asset('S1-Gizi.png') }}" alt="logo" width="120">

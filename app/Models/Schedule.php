@@ -38,7 +38,8 @@ class Schedule extends Model
         'name',
         'start_schedule',
         'end_schedule',
-        'course_id'
+        'course_id',
+        'associated_info'
     ];
 
     /**
@@ -72,11 +73,11 @@ class Schedule extends Model
     }
 
     public function users() {
-        return $this->morphByMany('App\Models\User', 'scheduleable');
+        return $this->morphedByMany('App\User', 'scheduleable');
     }
 
     public function groups() {
-        return $this->morphByMany('App\Models\Group', 'scheduleable');
+        return $this->morphedByMany('App\Models\Group', 'scheduleable');
     }
 
     

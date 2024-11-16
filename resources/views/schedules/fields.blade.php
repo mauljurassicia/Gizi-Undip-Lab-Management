@@ -20,33 +20,34 @@
 
         Alpine.store('schedule', {
             schedules: [],
+
+            async getSchedules() {
+                const date = Alpine.store('date').selectedDate;
+
+                if (!date) {
+                    Swal.fire({
+                        title: 'Error!',
+                        text: "Tanggal belum dipilih",
+                        icon: 'error',
+                        confirmButtonText: 'Ok'
+                    });
+                    return;
+                }
+                this.schedules = fetch(
+                    `{{ route('schedules.rooms', ['room' => $room->id]) }}?date=${date.format('YYYY-MM-DD')}`).then(
+                    res => res.json()).then(res => {
+                    if (res.valid) {
+                        return res.data.sort((a, b) => new Date(a.start_schedule) - new Date(b.start_schedule));
+                    }
+                    return [];
+                });
+            },
+            getSchedule($id) {
+                return this.schedules.find(schedule => schedule.id === $id);
+            }
         });
     });
 
-
-    async function getSchedules() {
-        const date = Alpine.store('date').selectedDate;
-
-        if (!date) {
-            Swal.fire({
-                title: 'Error!',
-                text: "Tanggal belum dipilih",
-                icon: 'error',
-                confirmButtonText: 'Ok'
-            });
-            return;
-        }
-        Alpine.store('schedule').schedules = await fetch(
-            `{{ route('schedules.rooms', ['room' => $room->id]) }}?date=${date.format('YYYY-MM-DD')}`).then(
-            res => res.json()).then(res => {
-            if (res.valid) {
-                return res.data.sort((a, b) => new Date(a.start_schedule) - new Date(b.start_schedule));
-            }
-            return [];
-        });
-
-        console.log(Alpine.store('schedule').schedules);
-    }
 </script>
 <style>
     [x-cloak] {

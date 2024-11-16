@@ -10,7 +10,7 @@
 
                 this.$nextTick(() => {
 
-                    getSchedules();
+                    this.$store.schedule.getSchedules();
                     this.initHours();
 
                 })
@@ -21,17 +21,6 @@
                     Swal.fire({
                         title: 'Error!',
                         text: "Tanggal belum dipilih",
-                        icon: 'error',
-                        confirmButtonText: 'Ok'
-                    });
-                    this.$store.calendar.isVisible = true;
-                    return;
-                }
-
-                if (this.$store.date.selectedDate.format('YYYY-MM-DD') < moment().format('YYYY-MM-DD')) {
-                    Swal.fire({
-                        title: 'Error!',
-                        text: "Tanggal tidak boleh kurang dari hari ini",
                         icon: 'error',
                         confirmButtonText: 'Ok'
                     });
@@ -62,7 +51,21 @@
 
             },
             addScheduleModal() {
+   
+
+                if (this.$store.date.selectedDate.format('YYYY-MM-DD') < moment().format('YYYY-MM-DD')) {
+                    Swal.fire({
+                        title: 'Error!',
+                        text: "Tanggal tidak boleh kurang dari hari ini",
+                        icon: 'error',
+                        confirmButtonText: 'Ok'
+                    });
+
+                    return;
+                }
+
                 $('#scheduleModal').modal('show');
+
                 this.$dispatch('set-operational', this.operationalHours);
             },
             getStatusText(status, endTime) {
@@ -79,6 +82,11 @@
                 };
 
                 return statusMap[status] || '';
+            },
+            editScheduleModal(id) {
+                const schedule = this.$store.schedule.getSchedule(id);
+
+                this.$dispatch('set-edit', schedule);
             }
 
         }
@@ -103,6 +111,32 @@
         };
 
         return statusMap[status] || '';
+    }
+
+    function getElapsedTime(startTime, endTime) {
+        const start = moment(startTime, 'YYYY-MM-DD HH:mm');
+        const end = moment(endTime, 'YYYY-MM-DD HH:mm');
+        const now = moment();
+
+        if (now.isBefore(start)) {
+            const duration = moment.duration(now.diff(start));
+            const minutes = duration.asMinutes();
+            if(minutes < 60) {
+                return `Berlangsung dalam ${Math.abs(minutes.toFixed(0))} menit`;
+            }
+            const hours = duration.asHours();
+            return `Berlangsung dalam ${Math.abs(hours.toFixed(0))} jam`;
+        } else if (now.isAfter(end)) {
+            const duration = moment.duration(now.diff(end));
+            const minutes = duration.asMinutes();
+            if(minutes < 60) {
+                return `Selesai pada ${minutes.toFixed(0)} menit yang lalu`;
+            }
+            const hours = duration.asHours();
+            return `Selesai pada ${hours.toFixed(0)} jam yang lalu`;
+        } else {
+            return 'Sedang berlangsung';
+        }
     }
 </script>
 <template x-if="!$store.calendar.isVisible">
@@ -144,7 +178,7 @@
                 <h3 x-text="$store.date.selectedDate?.format('DD MMMM YYYY')"
                     style="font-size: clamp(1rem, 2vw, 2rem);">
                 </h3>
-                <button @click="addScheduleModal" class="btn btn-primary position-absolute" style="right: 10px;"
+                <button @click="addScheduleModal" class="btn btn-primary position-absolute" :class="$store.date.selectedDate?.format('YYYY-MM-DD') < moment().format('YYYY-MM-DD') ? 'disabled' : ''" style="right: 10px;"
                     tooltip="Tambah Jadwal">
                     <i class="fa fa-plus d-inline d-md-none"></i>
                     <span class="d-none d-md-inline">Tambah Jadwal</span></button>
@@ -231,7 +265,8 @@
                         <span class="badge rounded-pill"
                             :class="{
                                 'bg-warning': schedule.status === 'pending',
-                                'bg-success': (schedule.status === 'approved' && !isSchedulePassed(schedule.end_schedule)) || schedule.status === 'finished',
+                                'bg-success': (schedule.status === 'approved' && !isSchedulePassed(schedule
+                                    .end_schedule)) || schedule.status === 'finished',
                                 'bg-danger': schedule.status === 'canceled',
                                 'bg-warning': schedule.status === 'rejected',
                                 'bg-secondary': isSchedulePassed(schedule.end_schedule) && schedule
@@ -239,6 +274,13 @@
                             }"
                             x-text="getStatusText(schedule.status, schedule.end_schedule)">
                         </span>
+                        <template x-if="schedule.status === 'pending' || schedule.status === 'approved'">
+                            <span class="ms-2 badge rounded-pill bg-info">
+                                <i class="fa fa-clock"></i>
+                                <span x-text="getElapsedTime(schedule.start_schedule, schedule.end_schedule)"></span>
+                            </span>
+                        </template>
+
                     </div>
                 </div>
 

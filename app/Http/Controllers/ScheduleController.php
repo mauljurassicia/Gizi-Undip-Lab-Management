@@ -35,16 +35,17 @@ class ScheduleController extends AppBaseController
     /** @var UserRepository */
     private $userRepository;
 
-
     /** @var GroupRepository */
     private $groupRepository;
+
+
 
     public function __construct(
         ScheduleRepository $scheduleRepo,
         RoomRepository $roomRepo,
         CourseRepository $courseRepo,
         UserRepository $userRepository,
-        GroupRepository $groupRepository
+        GroupRepository $groupRepository,
     ) {
         $this->middleware('auth');
         $this->middleware('can:schedule-edit', ['only' => ['edit']]);
@@ -188,36 +189,50 @@ class ScheduleController extends AppBaseController
 
         $dateErrorResponse = $this->handleDate($date, $input);
 
-        if ($dateErrorResponse) {
+        if ($dateErrorResponse instanceof JsonResponse) {
             return $dateErrorResponse;
         }
 
         $modelErrorResponse = $this->handleTypeModel($typeModel, $typeId, $input);
 
-        if ($modelErrorResponse) {
+        if ($modelErrorResponse instanceof JsonResponse) {
             return $modelErrorResponse;
         }
 
         $capacityErrorResponse = $this->handleCountCapacity($typeModel, $typeId, $room);
 
-        if ($capacityErrorResponse) {
+        if ($capacityErrorResponse instanceof JsonResponse) {
             return $capacityErrorResponse;
         }
+
+        $successAssigns = 0;
 
         if (is_array($date)) {
             foreach ($date as $item) {
                 $createScheduleErrorResponse = $this->createSchedule($input, $item, $room, $typeModel, $typeId);
 
-                if ($createScheduleErrorResponse) {
+                if ($createScheduleErrorResponse  instanceof JsonResponse) {
                     return $createScheduleErrorResponse;
+                }
+
+                if($createScheduleErrorResponse) {
+                    $successAssigns++;
                 }
             }
         } else {
             $createScheduleErrorResponse = $this->createSchedule($input, $date, $room, $typeModel, $typeId);
 
-            if ($createScheduleErrorResponse) {
+            if ($createScheduleErrorResponse  instanceof JsonResponse) {
                 return $createScheduleErrorResponse;
             }
+
+            if($createScheduleErrorResponse) {
+                $successAssigns++;
+            }
+        }
+
+        if ($successAssigns == 0) {
+            return ResponseJson::make(ResponseCodeEnum::STATUS_BAD_REQUEST, 'Jadwal tidak berhasil ditambahkan')->send();
         }
 
         return ResponseJson::make(ResponseCodeEnum::STATUS_OK, 'Jadwal berhasil ditambahkan')->send();
@@ -287,9 +302,24 @@ class ScheduleController extends AppBaseController
             return ResponseJson::make(ResponseCodeEnum::STATUS_BAD_REQUEST, 'Waktu mulai harus lebih kecil dari waktu selesai')->send();
         }
 
-
         $start = $date->copy()->setTimeFromTimeString($input['start_time']);
         $end = $date->copy()->setTimeFromTimeString($input['end_time']);
+
+        $existingSchedule = Schedule::where('room_id', $room->id)
+            ->where(function ($query) use ($start, $end) {
+                $query->where(function ($query) use ($start, $end) {
+                    $query->where('start_schedule', '<', $end)
+                        ->where('end_schedule', '>', $start);
+                })->orWhere(function ($query) use ($start, $end) {
+                    $query->where('start_schedule', '<', $start)
+                        ->where('end_schedule', '>', $end);
+                });
+            })->exists();
+
+        if ($existingSchedule) {
+            return false;
+        }
+
         $schedule = new Schedule();
         $schedule->room_id = $room->id;
         $schedule->start_schedule = $start;
@@ -319,6 +349,8 @@ class ScheduleController extends AppBaseController
                 $schedule->groups()->attach($id);
             }
         }
+
+        return true;
     }
 
 

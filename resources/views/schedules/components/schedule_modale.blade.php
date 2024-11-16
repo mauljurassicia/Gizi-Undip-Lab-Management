@@ -13,6 +13,7 @@
             endTime: null,
             weeks: 1,
             associatedInfo: "",
+            isEdit: false,
             checkStartTime() {
                 if (this.startTime < this.operationalHours.start) {
                     this.startTime = this.operationalHours.start;
@@ -190,13 +191,15 @@
                             this.typeSchedules = 0;
                             this.typeModel = 0;
                             this.weeks = 1;
+                            this.associatedInfo = "";
+                            this.isEdit = false;
 
                             Swal.fire({
                                 title: res.message,
                                 icon: 'success'
                             });
 
-                            getSchedules();
+                            this.$store.schedule.getSchedules();
 
                             $('#scheduleModal').modal('hide');
 
@@ -216,14 +219,40 @@
                             })
                         }
                     })
+            },
+            closeModal() {
+                $('#scheduleModal').modal('hide');
+
+                setTimeout(() => {
+                    this.name = null;
+                    this.courseId = null;
+                    this.startTime = this.operationalHours.start;
+                    this.endTime = this.operationalHours.end;
+                    this.typeSchedules = 0;
+                    this.typeModel = 0;
+                    this.weeks = 1;
+                    this.associatedInfo = "";
+                    this.isEdit = false;
+                }, 500);
+            },
+            editModal(schedule) {
+                this.isEdit = true;
+                this.name = schedule.name;
+                this.courseId = schedule.course_id;
+                this.startTime = schedule.start_time;
+                this.endTime = schedule.end_time;
+                this.typeSchedules = schedule.type_schedule;
+                this.typeModel = schedule.type_model;
+                this.weeks = schedule.weeks;
+                this.associatedInfo = schedule.associated_info;
             }
         }
     }
 </script>
 <div class="modal fade" id="scheduleModal" tabindex="-1" aria-labelledby="scheduleModalLabel" aria-hidden="true"
-    x-data="scheduleModal()" x-init="$watch('courseId', (value) => console.log(value))">
-    <div class="modal-dialog" @set-operational.window="setOperationalHours($event)">
-        <div class="modal-content">
+    x-data="scheduleModal()" x-init="$watch('courseId', (value) => console.log(value))" data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog" @set-operational.window="setOperationalHours($event)" @set-edit.window="editModal($event.detail)">
+        <div class="modal-content" @click.outside="closeModal">
             <div class="modal-header">
                 <h5 class="modal-title" id="scheduleModalLabel">Buat Jadwal</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
@@ -371,7 +400,7 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-secondary" @click.prevent="closeModal" >Close</button>
                 <button type="button" class="btn btn-primary" @click.prevent="saveChanges">Save changes</button>
             </div>
         </div>

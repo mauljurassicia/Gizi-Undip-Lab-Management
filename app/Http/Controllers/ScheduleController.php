@@ -125,6 +125,7 @@ class ScheduleController extends AppBaseController
 
     public function getOperationalHoursByRoomAndDate($room, Request $request)
     {
+
         $room = $this->roomRepository->findWithoutFail($room);
 
         if ($request->query('date') == '' || $request->query('date') == null) {
@@ -167,6 +168,10 @@ class ScheduleController extends AppBaseController
         $schedules = $this->scheduleRepository->where('room_id', $room)->whereDate('start_schedule', $request->query('date'))
             ->whereDate('end_schedule', $request->query('date'))->with('course')->with('groups')->with('users')->get();
 
+        $schedules->each(function ($schedule) {
+            $schedule->weeks = $this->scheduleRepository->where('grouped_schedule_code', $schedule->grouped_schedule_code)->whereNotNull('grouped_schedule_code')->count();
+        });
+
         if (count($schedules) == 0) {
             return ResponseJson::make(ResponseCodeEnum::STATUS_NOT_FOUND, 'Schedule not found')->send();
         }
@@ -183,11 +188,13 @@ class ScheduleController extends AppBaseController
         }
 
         $input = $request->all();
-        $date = null;
+        $dates = null;
         $typeModel = null;
         $typeId = [];
+        $scheduleType = null;
 
-        $dateErrorResponse = $this->handleDate($date, $input);
+        $dateErrorResponse = $this->handleDate($dates, $input, $scheduleType);
+
 
         if ($dateErrorResponse instanceof JsonResponse) {
             return $dateErrorResponse;
@@ -207,12 +214,11 @@ class ScheduleController extends AppBaseController
 
         $successAssigns = 0;
 
-        
-        $input['grouped_schedule_code'] = strtoupper(substr(str_shuffle(MD5(microtime())), 0, 7));
+        if (is_array($dates)) {
+            $input['grouped_schedule_code'] = strtoupper(substr(str_shuffle(MD5(microtime())), 0, 7));
+            foreach ($dates as $item) {
 
-        if (is_array($date)) {
-            foreach ($date as $item) {
-                $createScheduleErrorResponse = $this->createSchedule($input, $item, $room, $typeModel, $typeId);
+                $createScheduleErrorResponse = $this->createSchedule($input, $item, $room, $typeModel, $typeId, $scheduleType);
 
                 if ($createScheduleErrorResponse  instanceof JsonResponse) {
                     return $createScheduleErrorResponse;
@@ -223,7 +229,7 @@ class ScheduleController extends AppBaseController
                 }
             }
         } else {
-            $createScheduleErrorResponse = $this->createSchedule($input, $date, $room, $typeModel, $typeId);
+            $createScheduleErrorResponse = $this->createSchedule($input, $dates, $room, $typeModel, $typeId, $scheduleType);
 
             if ($createScheduleErrorResponse  instanceof JsonResponse) {
                 return $createScheduleErrorResponse;
@@ -241,7 +247,7 @@ class ScheduleController extends AppBaseController
         return ResponseJson::make(ResponseCodeEnum::STATUS_OK, 'Jadwal berhasil ditambahkan')->send();
     }
 
-    private function handleDate(&$date, $input)
+    private function handleDate(&$dates, $input, &$scheduleType)
     {
         if ($input['type_schedule'] == 0) {
             return ResponseJson::make(ResponseCodeEnum::STATUS_BAD_REQUEST, 'Tipe Kunjungan harus diisi')->send();
@@ -252,28 +258,42 @@ class ScheduleController extends AppBaseController
                 return ResponseJson::make(ResponseCodeEnum::STATUS_BAD_REQUEST, 'Jumlah minggu harus diisi')->send();
             }
 
-            $input['schedule_type'] = 'weekly';
+            $scheduleType = 'weekly';
 
             $dates = [];
             $weeks = $input['weeks'];
             $date = Carbon::createFromFormat('Y-m-d', $input['date']);
 
             for ($i = 0; $i < $weeks; $i++) {
-                $dates[] = $date->copy()->addWeeks($i)->format('Y-m-d');
+                $dates[] = $date->copy()->addWeeks($i);
             }
         } else if ($input['type_schedule'] == 3) {
             if (!$input['weeks']) {
                 return ResponseJson::make(ResponseCodeEnum::STATUS_BAD_REQUEST, 'Jumlah bulan harus diisi')->send();
             }
 
-            $input['schedule_type'] = 'monthly';
+            $scheduleType = 'monthly';
 
             $dates = [];
             $weeks = $input['weeks'];
             $date = Carbon::createFromFormat('Y-m-d', $input['date']);
 
             for ($i = 0; $i < $weeks; $i++) {
-                $dates[] = $date->copy()->addMonths($i)->format('Y-m-d');
+                $dates[] = $date->copy()->addMonths($i);
+            }
+        } else if ($input['type_schedule'] == 4) {
+            if (!$input['weeks']) {
+                return ResponseJson::make(ResponseCodeEnum::STATUS_BAD_REQUEST, 'Jumlah hari harus diisi')->send();
+            }
+
+            $scheduleType = 'series';
+
+            $dates = [];
+            $weeks = $input['weeks'];
+            $date = Carbon::createFromFormat('Y-m-d', $input['date']);
+
+            for ($i = 0; $i < $weeks; $i++) {
+                $dates[] = $date->copy()->addDays($i);
             }
         } else {
             return ResponseJson::make(ResponseCodeEnum::STATUS_BAD_REQUEST, 'Tipe Kunjungan harus diisi')->send();
@@ -309,9 +329,8 @@ class ScheduleController extends AppBaseController
         }
     }
 
-    private function createSchedule($input, $date, $room, $typeModel, $typeId)
+    private function createSchedule($input, $date, $room, $typeModel, $typeId, $scheduleType)
     {
-
 
         if (!$input['start_time'] || !$input['end_time']) {
             return ResponseJson::make(ResponseCodeEnum::STATUS_BAD_REQUEST, 'Waktu mulai dan waktu selesai harus diisi')->send();
@@ -320,6 +339,34 @@ class ScheduleController extends AppBaseController
         if ($input['start_time'] > $input['end_time']) {
             return ResponseJson::make(ResponseCodeEnum::STATUS_BAD_REQUEST, 'Waktu mulai harus lebih kecil dari waktu selesai')->send();
         }
+
+        $dayName = [
+            'Sunday' => 'minggu',
+            'Monday' => 'senin',
+            'Tuesday' => 'selasa',
+            'Wednesday' => 'rabu',
+            'Thursday' => 'kamis',
+            'Friday' => 'jumat',
+            'Saturday' => 'sabtu'
+        ][date('l', strtotime($date))];
+
+
+        $operationalHours = json_decode($room->operational_days);
+
+        if (!isset($operationalHours->$dayName)) {
+            return false;
+        }
+
+        $operationalHours = $operationalHours->$dayName;
+
+        if ($input['start_time'] < $operationalHours->start || $input['end_time'] > $operationalHours->end) {
+            return false;
+        }
+
+        if ($input['end_time'] < $operationalHours->start && $input['start_time'] > $operationalHours->end) {
+            return false;
+        }
+
 
         $start = $date->copy()->setTimeFromTimeString($input['start_time']);
         $end = $date->copy()->setTimeFromTimeString($input['end_time']);
@@ -351,6 +398,14 @@ class ScheduleController extends AppBaseController
 
         if (@$input['associated_info']) {
             $schedule->associated_info = $input['associated_info'];
+        }
+
+        if ($scheduleType) {
+            $schedule->schedule_type = $scheduleType;
+        }
+
+        if (@$input['grouped_schedule_code']) {
+            $schedule->grouped_schedule_code = $input['grouped_schedule_code'];
         }
 
         /** @var User */
@@ -389,5 +444,22 @@ class ScheduleController extends AppBaseController
         }
 
         return false;
+    }
+
+    public function deleteSchedule(Request $request, $id)
+    {
+        $schedule = $this->scheduleRepository->findWithoutFail($id);
+
+        if (empty($schedule)) {
+            return ResponseJson::make(ResponseCodeEnum::STATUS_NOT_FOUND, 'Schedule not found')->send();
+        }
+
+        if (!is_null($request->query('group') && $request->query('group') == '1')) {
+            $this->scheduleRepository->where('grouped_schedule_code', $schedule->grouped_schedule_code)->delete();
+        } else {
+            $schedule->delete();
+        }
+
+        return ResponseJson::make(ResponseCodeEnum::STATUS_OK, 'Schedule deleted successfully')->send();
     }
 }

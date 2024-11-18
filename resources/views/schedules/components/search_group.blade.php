@@ -3,11 +3,9 @@
         return {
             groupSuggestions: [],
             search: '',
-            groups: [],
+            groupsModal: [],
             init() {
-                if(this.typeModel == '2'){
-                    this.groups = this.attendees;
-                }
+                    this.groupsModal = [...this.groups];
             },
             getGroups() {
                 if (this.search.length == 0) {
@@ -32,10 +30,10 @@
             chooseGroup(group) {
                 this.groupSuggestions = [];
                 this.search = '';
-                if (this.groups.find(m => m.id == group.id)) {
+                if (this.groupsModal.find(m => m.id == group.id)) {
                     return;
                 }
-                this.groups.push(group);
+                this.groupsModal.push(group);
             }
         }
     }
@@ -73,19 +71,19 @@
             <th>Action</th>
         </thead>
         <tbody>
-            <template x-for="group in groups">
+            <template x-for="group in groupsModal">
                 <tr>
                     <td x-text="group.name" class="w-75"></td>
                     <td>
                         <button type="button" class="btn-delete btn btn-danger btn-xs"
-                            @click="groups.splice(groups.indexOf(group), 1)">
+                            @click="groups.splice(groupsModal.indexOf(group), 1)">
                             <i class="fa fa-trash"></i>
                         </button>
                         <input type="hidden" name="typeId[]" :value="group.id">
                     </td>
                 </tr>
             </template>
-            <template x-if="groups.length == 0">
+            <template x-if="groupsModal.length == 0">
                 <tr>
                     <td colspan="2" class="text-center">Tidak ada kelompok</td>
                 </tr>

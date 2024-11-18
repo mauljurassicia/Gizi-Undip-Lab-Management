@@ -14,7 +14,8 @@
             weeks: 1,
             associatedInfo: "",
             isEdit: false,
-            attendees: [],
+            groups: [],
+            guests: [],
             checkStartTime() {
                 if (this.startTime < this.operationalHours.start) {
                     this.startTime = this.operationalHours.start;
@@ -117,7 +118,7 @@
                     return;
                 }
 
-                if (!this.weeks && this.typeSchedules == 2) {
+                if (!this.weeks && (this.typeSchedules == 2 || this.typeSchedules == 3)) {
                     Swal.fire({
                         title: 'Error!',
                         text: "Jumlah pertemuan harus diisi",
@@ -194,6 +195,8 @@
                             this.weeks = 1;
                             this.associatedInfo = "";
                             this.isEdit = false;
+                            this.groups = [];
+                            this.guests = [];
 
                             Swal.fire({
                                 title: res.message,
@@ -234,19 +237,21 @@
                     this.weeks = 1;
                     this.associatedInfo = "";
                     this.isEdit = false;
+                    this.groups = [];
+                    this.guests = [];
                 }, 500);
             },
             editModal(schedule) {
-
-                console.log(schedule);
                 this.isEdit = true;
                 this.name = schedule.name;
                 this.courseId = schedule.course_id;
                 this.startTime = moment(schedule.start_schedule).format('HH:mm');
                 this.endTime = moment(schedule.end_schedule).format('HH:mm');
-                this.typeSchedules = schedule.schedule_type == "onetime" ? 1 : (schedule.schedule_type == "weekly" ? 2 : 3);
+                this.typeSchedules = schedule.schedule_type == "onetime" ? 1 : (schedule.schedule_type == "weekly" ? 2 :
+                    3);
                 this.typeModel = schedule.users.length > 0 ? 1 : 2;
-                this.attendees = schedule.users.length > 0 ? schedule.users : schedule.groups;
+                this.groups = schedule.groups;
+                this.guests = schedule.users;
                 this.weeks = schedule.weeks;
                 this.associatedInfo = schedule.associated_info;
             }
@@ -255,11 +260,12 @@
 </script>
 <div class="modal fade" id="scheduleModal" tabindex="-1" aria-labelledby="scheduleModalLabel" aria-hidden="true"
     x-data="scheduleModal()" x-init="$watch('courseId', (value) => console.log(value))" data-backdrop="static" data-keyboard="false">
-    <div class="modal-dialog" @set-operational.window="setOperationalHours($event)" @set-edit.window="editModal($event.detail)">
-        <div class="modal-content" @click.outside="closeModal">
+    <div class="modal-dialog" @set-operational.window="setOperationalHours($event)"
+        @set-edit.window="editModal($event.detail)">
+        <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="scheduleModalLabel">Buat Jadwal</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <button type="button" class="close" @click.prevent="closeModal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
@@ -279,22 +285,41 @@
                     {!! Form::label('type', 'Tipe Kunjungan:', ['class' => 'mt-3']) !!}
                     {!! Form::select(
                         'type',
-                        ['0' => 'Pilih Tipe Kunjungan', '1' => 'Kunjungan Tunggal', '2' => 'Kunjungan Mingguan', '3' => 'Kunjungan Bulanan'],
+                        [
+                            '0' => 'Pilih Tipe Kunjungan',
+                            '1' => 'Kunjungan Tunggal',
+                            '4' => 'Kunjungan Beberapa Hari',
+                            '2' => 'Kunjungan Mingguan',
+                            '3' => 'Kunjungan Bulanan',
+                        ],
                         null,
-                        ['class' => 'form-control', 'x-model' => 'typeSchedules'],
+                        ['class' => 'form-control', 'x-model' => 'typeSchedules', ':disabled' => 'isEdit'],
                     ) !!}
                     <template x-if="typeSchedules == 0">
                         <p class="tx-danger tx-12 tx-bold mg-t-10 ">Silahkan pilih tipe kunjungan!</p>
                     </template>
 
-                    <template x-if="typeSchedules == 2">
+                    <template x-if="typeSchedules == 2 || typeSchedules == 3 || typeSchedules == 4">
                         <div>
-                            {!! Form::label('duration_weeks', 'Durasi Jadwal (Minggu):', ['class' => 'mt-3']) !!}
+                            <template x-if="typeSchedules == 2 && !isEdit">
+                                {!! Form::label('duration_weeks', 'Durasi Jadwal (Minggu):', ['class' => 'mt-3']) !!}
+                            </template>
+                            <template x-if="typeSchedules == 3 && !isEdit">
+                                {!! Form::label('duration_weeks', 'Durasi Jadwal (Bulan):', ['class' => 'mt-3']) !!}
+                            </template>
+                            <template x-if="typeSchedules == 4 && !isEdit">
+                                {!! Form::label('duration_weeks', 'Durasi Jadwal (Hari):', ['class' => 'mt-3']) !!}
+                            </template>
+                            <template x-if="isEdit">
+                                {!! Form::label('duration_weeks', 'Jumlah Pertemuan:', ['class' => 'mt-3']) !!}
+                            </template>
                             {!! Form::number('duration_weeks', null, [
                                 'class' => 'form-control',
                                 'min' => '1',
                                 'placeholder' => 'Jumlah Minggu',
                                 'x-model' => 'weeks',
+                                'required',
+                                ':disabled' => 'isEdit',
                             ]) !!}
                             <template x-if="!weeks || weeks <= 0">
                                 <p class="tx-danger tx-12 tx-bold mg-t-10 ">Durasi Jadwal harus diisi!</p>
@@ -404,7 +429,7 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" @click.prevent="closeModal" >Close</button>
+                <button type="button" class="btn btn-secondary" @click.prevent="closeModal">Close</button>
                 <button type="button" class="btn btn-primary" @click.prevent="saveChanges">Save changes</button>
             </div>
         </div>

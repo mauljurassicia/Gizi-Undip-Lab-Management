@@ -5,9 +5,7 @@
             search: '',
             membersSearch: [],
             init() {
-              if(this.typeModel == '1'){
-                  this.membersSearch = this.attendees;
-              }  
+               this.membersSearch = [...this.guests];
             },
             getMembers() {
                 if (this.search.length == 0) {

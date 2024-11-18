@@ -20,6 +20,7 @@
 
         Alpine.store('schedule', {
             schedules: [],
+            loading: false,
 
             async getSchedules() {
                 const date = Alpine.store('date').selectedDate;
@@ -33,16 +34,18 @@
                     });
                     return;
                 }
+
+                this.loading = true;
                 this.schedules = await fetch(
                     `{{ route('schedules.rooms', ['room' => $room->id]) }}?date=${date.format('YYYY-MM-DD')}`
-                    ).then(
+                ).then(
                     res => res.json()).then(res => {
                     if (res.valid) {
                         return res.data.sort((a, b) => new Date(a.start_schedule) -
                             new Date(b.start_schedule));
                     }
                     return [];
-                });
+                }).finally(() => this.loading = false);
             },
             getSchedule($id) {
                 return this.schedules.find(schedule => schedule.id === $id);

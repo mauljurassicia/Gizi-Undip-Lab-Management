@@ -5,6 +5,7 @@
                 start: '00:00',
                 end: '23:59'
             },
+            hoursLoading: false,
             init() {
 
 
@@ -29,7 +30,7 @@
                 }
 
 
-
+                this.hoursLoading = true;
                 fetch(
                         `{{ route('schedules.operationalHours', ['room' => $room->id]) }}?date=${this.$store.date.selectedDate?.format('YYYY-MM-DD')}`
                     )
@@ -47,6 +48,8 @@
                             this.$store.calendar.isVisible = true;
 
                         }
+                    }).finally(() => {
+                        this.hoursLoading = false;
                     })
 
             },
@@ -98,6 +101,84 @@
                 $('#scheduleModal').modal('show');
 
                 this.$dispatch('set-edit', schedule);
+            },
+            async deleteScheduleModal(id) {
+                const schedule = this.$store.schedule.getSchedule(id);
+
+                if (!schedule) {
+                    await Swal.fire({
+                        title: 'Error!',
+                        text: "Jadwal tidak ditemukan",
+                        icon: 'error',
+                        confirmButtonText: 'Ok'
+                    });
+                    return;
+                }
+
+                let sureDelete = true;
+
+                await Swal.fire({
+                    title: 'Hapus Jadwal',
+                    text: "Apakah anda yakin ingin menghapus jadwal ini?",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Ya, Hapus!',
+                    cancelButtonText: 'Batal'
+                }).then((result) => {
+                    if (!result.isConfirmed) {
+                        sureDelete = false;
+                    }
+                })
+
+                if (!sureDelete) {
+                    return;
+                }
+
+                let groupedDelete = false;
+                if (schedule.grouped_schedule_code) {
+                    await Swal.fire({
+                        title: 'Hapus Seluruh Jadwal Dengan Kode ' + schedule.grouped_schedule_code,
+                        text: "Apakah anda yakin ingin menghapus seluruh jadwal dengan kode ini?",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#3085d6',
+                        cancelButtonColor: '#d33',
+                        confirmButtonText: 'Ya',
+                        cancelButtonText: 'Tidak'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            groupedDelete = true;
+                        }
+
+                    })
+                }
+
+                fetch(`{{ url('schedules') }}/${id}?grouped=${groupedDelete ? 1 : 0}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        },
+                    })
+                    .then(res => res.json())
+                    .then(res => {
+                        if (res.valid) {
+                            this.$store.schedule.getSchedules();
+                            Swal.fire({
+                                title: res.message,
+                                icon: 'success'
+                            });
+                        } else {
+                            Swal.fire({
+                                title: 'Error!',
+                                text: "Jadwal gagal dihapus",
+                                icon: 'error',
+                                confirmButtonText: 'Ok'
+                            });
+                        }
+                    })
             }
 
         }
@@ -216,16 +297,37 @@
 
                 <div>
                     <label class="form-label d-block d-md-inline">Jam Operasional:</label>
-                    <span>
-                        <input type="time" :value="operationalHours.start"
-                            class="form-control w-auto d-inline-block border-0" readonly>
-                        <span> - </span>
-                        <input type="time" :value="operationalHours.end"
-                            class="form-control w-auto d-inline-block border-0" readonly>
-                    </span>
+                    <template x-if=hoursLoading>
+                        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                    </template>
+                    <template x-if="!hoursLoading">
+                        <span>
+                            <input type="time" :value="operationalHours.start"
+                                class="form-control w-auto d-inline-block border-0" readonly>
+                            <span> - </span>
+                            <input type="time" :value="operationalHours.end"
+                                class="form-control w-auto d-inline-block border-0" readonly>
+                        </span>
+                    </template>
                 </div>
 
             </div>
+
+            <template x-if="$store.schedule.schedules.length == 0 && !$store.schedule.loading">
+                <div class="p-3 mb-3 border rounded bg-light">
+                    <h5 class="mb-2 text-center">
+                        <span>Belum ada jadwal</span>
+                    </h5>
+                </div>
+            </template>
+
+            <template x-if="$store.schedule.loading">
+                <div class="p-3 mb-3 border rounded bg-light">
+                    <h5 class="mb-2 text-center">
+                        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                    </h5>
+                </div>            
+            </template>
             <template x-for="schedule in $store.schedule.schedules" :key="schedule.id">
 
                 <div class="p-3 mb-3 border rounded bg-light">
@@ -234,11 +336,19 @@
                         <h5 class="mb-2">
                             <span x-text="schedule.name"></span>
                         </h5>
-                        <button @click="editScheduleModal(schedule.id)" class="btn btn-primary btn-sm d-none d-md-block"><i
-                                class="fa fa-pencil"></i></button>
+                        <div class="d-flex ">
+                            <button @click="editScheduleModal(schedule.id)"
+                                class="btn btn-primary btn-sm d-none d-md-block mr-2"><i
+                                    class="fa fa-pencil"></i></button>
+                            <button @click="editScheduleModal(schedule.id)"
+                                class="btn btn-primary btn-xs btn-icon d-md-none mr-1"><i
+                                    class="fa fa-pencil"></i></button>
+                            <button @click="deleteScheduleModal(schedule.id)"
+                                class="btn btn-danger btn-xs btn-icon d-md-none"><i class="fa fa-trash"></i></button>
+                            <button @click="deleteScheduleModal(schedule.id)"
+                                class="btn btn-danger btn-sm d-none d-md-block"><i class="fa fa-trash"></i></button>
+                        </div>
 
-                        <button @click="editScheduleModal(schedule.id)"
-                            class="btn btn-primary btn-xs btn-icon d-md-none"><i class="fa fa-pencil"></i></button>
                     </div>
 
 
@@ -273,10 +383,10 @@
                     <div>
                         <label class="form-label fw-bold">Pengunjung :</label>
                         <template x-for="visitor in schedule.users" :key="visitor.id">
-                            <span class="badge bg-primary me-2 text-white" x-text="visitor.name"></span>
+                            <span class="badge bg-primary mr-1 text-white" x-text="visitor.name"></span>
                         </template>
                         <template x-for="visitor in schedule.groups" :key="visitor.id">
-                            <span class="badge bg-primary me-2 text-white" x-text="visitor.name"></span>
+                            <span class="badge bg-primary mr-1 text-white" x-text="visitor.name"></span>
                         </template>
                     </div>
 

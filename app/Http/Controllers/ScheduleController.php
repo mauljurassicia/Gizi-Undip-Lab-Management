@@ -252,7 +252,7 @@ class ScheduleController extends AppBaseController
         if ($input['type_schedule'] == 0) {
             return ResponseJson::make(ResponseCodeEnum::STATUS_BAD_REQUEST, 'Tipe Kunjungan harus diisi')->send();
         } else if ($input['type_schedule'] == 1) {
-            $date = Carbon::createFromFormat('Y-m-d', $input['date']);
+            $dates = Carbon::createFromFormat('Y-m-d', $input['date']);
         } else if ($input['type_schedule'] == 2) {
             if (!$input['weeks']) {
                 return ResponseJson::make(ResponseCodeEnum::STATUS_BAD_REQUEST, 'Jumlah minggu harus diisi')->send();
@@ -461,5 +461,71 @@ class ScheduleController extends AppBaseController
         }
 
         return ResponseJson::make(ResponseCodeEnum::STATUS_OK, 'Schedule deleted successfully')->send();
+    }
+
+    public function updateSchedule(Request $request, $id)
+    {
+        $schedule = $this->scheduleRepository->findWithoutFail($id);
+
+        if (empty($schedule)) {
+            return ResponseJson::make(ResponseCodeEnum::STATUS_NOT_FOUND, 'Schedule not found')->send();
+        }
+
+        $input = $request->all();
+
+        if (!$input['start_time'] || !$input['end_time']) {
+            return ResponseJson::make(ResponseCodeEnum::STATUS_BAD_REQUEST, 'Waktu mulai dan waktu selesai harus diisi')->send();
+        }
+
+
+        if ($input['start_time'] > $input['end_time']) {
+            return ResponseJson::make(ResponseCodeEnum::STATUS_BAD_REQUEST, 'Start time must be less than end time')->send();
+        }
+
+        $scheduleDate = Carbon::parse($schedule->start_schedule);
+        $start = $scheduleDate->copy()->setTimeFromTimeString($input['start_time']);
+        $end = $scheduleDate->copy()->setTimeFromTimeString($input['end_time']);
+
+        $scheduleRoom = $schedule->room_id;
+
+        $existingSchedule = Schedule::where('room_id', $scheduleRoom)
+            ->where(function ($query) use ($start, $end) {
+                $query->where(function ($query) use ($start, $end) {
+                    $query->where('start_schedule', '<', $end)
+                        ->where('end_schedule', '>', $start);
+                })->orWhere(function ($query) use ($start, $end) {
+                    $query->where('start_schedule', '<', $start)
+                        ->where('end_schedule', '>', $end);
+                });
+            })->where('id', '!=', $schedule->id)->exists();
+
+        if ($existingSchedule) {
+            return false;
+        }
+
+        $schedule->start_schedule = $start;
+        $schedule->end_schedule = $end;
+        $schedule->name = $input['name'];
+        $schedule->course_id = is_numeric($input['course_id']) ? $input['course_id'] : null;
+        $schedule->associated_info = $input['associated_info'];
+        $schedule->save();
+
+        if($input['type_model'] !=1 && $input['type_model'] !=2){
+            return ResponseJson::make(ResponseCodeEnum::STATUS_BAD_REQUEST, 'Tipe Pengunjung harus diisi')->send();
+        }elseif($input['type_model'] == 1){
+            $typeId = $input['type_id'];
+            $schedule->users()->detach();
+            $schedule->groups()->detach();
+            $schedule->users()->attach($typeId);
+        }elseif($input['type_model'] == 2){
+            $typeId = $input['type_id'];
+            $schedule->users()->detach();
+            $schedule->groups()->detach();
+            $schedule->groups()->attach($typeId);
+        }
+
+        return ResponseJson::make(ResponseCodeEnum::STATUS_OK, 'Schedule updated successfully')->send();
+
+
     }
 }

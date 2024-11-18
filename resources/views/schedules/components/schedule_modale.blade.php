@@ -14,6 +14,7 @@
             weeks: 1,
             associatedInfo: "",
             isEdit: false,
+            scheduleId: 0,
             groups: [],
             guests: [],
             checkStartTime() {
@@ -118,7 +119,7 @@
                     return;
                 }
 
-                if (!this.weeks && (this.typeSchedules == 2 || this.typeSchedules == 3)) {
+                if (!this.weeks && (this.typeSchedules == 2 || this.typeSchedules == 3 || this.typeSchedules == 4)) {
                     Swal.fire({
                         title: 'Error!',
                         text: "Jumlah pertemuan harus diisi",
@@ -239,6 +240,7 @@
                     this.isEdit = false;
                     this.groups = [];
                     this.guests = [];
+                    this.scheduleId = 0;
                 }, 500);
             },
             editModal(schedule) {
@@ -254,6 +256,137 @@
                 this.guests = schedule.users;
                 this.weeks = schedule.weeks;
                 this.associatedInfo = schedule.associated_info;
+                this.scheduleId = schedule.id;
+            },
+            updateSchedule() {
+                if (!this.name) {
+                    Swal.fire({
+                        title: 'Error!',
+                        text: "Nama kegiatan harus diisi",
+                        icon: 'error',
+                        confirmButtonText: 'Ok'
+                    })
+                    return;
+                }
+
+                if (this.typeModel == 0 || this.typeModel == null) {
+                    Swal.fire({
+                        title: 'Error!',
+                        text: "Tipe pengunjung harus diisi",
+                        icon: 'error',
+                        confirmButtonText: 'Ok'
+                    })
+                    return;
+                }
+
+                if (this.typeSchedules == 0 || this.typeSchedules == null) {
+                    Swal.fire({
+                        title: 'Error!',
+                        text: "Tipe kunjungan harus diisi",
+                        icon: 'error',
+                        confirmButtonText: 'Ok'
+                    })
+                    return;
+                }
+
+                if (!this.weeks && (this.typeSchedules == 2 || this.typeSchedules == 3 || this.typeSchedules == 4)) {
+                    Swal.fire({
+                        title: 'Error!',
+                        text: "Jumlah pertemuan harus diisi",
+                        icon: 'error',
+                        confirmButtonText: 'Ok'
+                    })
+                    return;
+                }
+
+                if (this.courseId == '0') {
+                    Swal.fire({
+                        title: 'Error!',
+                        text: "Mata kuliah harus diisi",
+                        icon: 'error',
+                        confirmButtonText: 'Ok'
+                    })
+                    return;
+                }
+
+                if (this.courseId == 'null' && !this.associatedInfo) {
+                    {
+                        Swal.fire({
+                            title: 'Error!',
+                            text: "Info kegiatan harus diisi",
+                            icon: 'error',
+                            confirmButtonText: 'Ok'
+                        })
+                        return;
+                    }
+                }
+
+                let typeIds = [...document.querySelectorAll('input[name="typeId[]"]')].map(el => el.value);
+
+                if (typeIds.length == 0) {
+                    Swal.fire({
+                        title: 'Error!',
+                        text: "Pengunjung harus diisi",
+                        icon: 'error',
+                        confirmButtonText: 'Ok'
+                    })
+                    return;
+                }
+
+                if (!this.checkStartTime()) return;
+                if (!this.checkEndTime()) return;
+
+                fetch(`{{ url('schedules') }}/${this.scheduleId }}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        },
+                        body: JSON.stringify({
+                            name: this.name,
+                            course_id: this.courseId,
+                            start_time: this.startTime,
+                            end_time: this.endTime,
+                            type_schedule: this.typeSchedules,
+                            type_model: this.typeModel,
+                            weeks: this.weeks,
+                            type_id: typeIds,
+                            associated_info: this.associatedInfo,
+                        }),
+                    })
+                    .then(res => res.json())
+                    .then(res => {
+                        if (res.valid) {
+                            this.name = null;
+                            this.courseId = null;
+                            this.startTime = this.operationalHours.start;
+                            this.endTime = this.operationalHours.end;
+                            this.typeSchedules = 0;
+                            this.typeModel = 0;
+                            this.weeks = 1;
+                            this.associatedInfo = "";
+                            this.isEdit = false;
+                            this.groups = [];
+                            this.guests = [];
+
+                            Swal.fire({
+                                title: res.message,
+                                icon: 'success'
+                            });
+                            this.$store.schedule.getSchedules();
+                            this.closeModal();
+                        } else {
+                            Swal.fire({
+                                title: 'Error!',
+                                text: res.message,
+                                icon: 'error',
+                                confirmButtonText: 'Ok'
+                            });
+                        }
+                    })
+
+
+
             }
         }
     }
@@ -430,7 +563,12 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" @click.prevent="closeModal">Close</button>
-                <button type="button" class="btn btn-primary" @click.prevent="saveChanges">Save changes</button>
+                <template x-if="isEdit">
+                    <button type="button" class="btn btn-primary" @click.prevent="updateSchedule">Update</button>
+                </template>
+                <template x-if="!isEdit">
+                    <button type="button" class="btn btn-primary" @click.prevent="saveChanges">Save changes</button>
+                </template>
             </div>
         </div>
     </div>

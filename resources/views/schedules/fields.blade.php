@@ -33,11 +33,13 @@
                     });
                     return;
                 }
-                this.schedules = fetch(
-                    `{{ route('schedules.rooms', ['room' => $room->id]) }}?date=${date.format('YYYY-MM-DD')}`).then(
+                this.schedules = await fetch(
+                    `{{ route('schedules.rooms', ['room' => $room->id]) }}?date=${date.format('YYYY-MM-DD')}`
+                    ).then(
                     res => res.json()).then(res => {
                     if (res.valid) {
-                        return res.data.sort((a, b) => new Date(a.start_schedule) - new Date(b.start_schedule));
+                        return res.data.sort((a, b) => new Date(a.start_schedule) -
+                            new Date(b.start_schedule));
                     }
                     return [];
                 });
@@ -47,7 +49,6 @@
             }
         });
     });
-
 </script>
 <style>
     [x-cloak] {

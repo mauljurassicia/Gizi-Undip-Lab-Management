@@ -14,6 +14,7 @@
             weeks: 1,
             associatedInfo: "",
             isEdit: false,
+            attendees: [],
             checkStartTime() {
                 if (this.startTime < this.operationalHours.start) {
                     this.startTime = this.operationalHours.start;
@@ -236,13 +237,16 @@
                 }, 500);
             },
             editModal(schedule) {
+
+                console.log(schedule);
                 this.isEdit = true;
                 this.name = schedule.name;
                 this.courseId = schedule.course_id;
-                this.startTime = schedule.start_time;
-                this.endTime = schedule.end_time;
-                this.typeSchedules = schedule.type_schedule;
-                this.typeModel = schedule.type_model;
+                this.startTime = moment(schedule.start_schedule).format('HH:mm');
+                this.endTime = moment(schedule.end_schedule).format('HH:mm');
+                this.typeSchedules = schedule.schedule_type == "onetime" ? 1 : (schedule.schedule_type == "weekly" ? 2 : 3);
+                this.typeModel = schedule.users.length > 0 ? 1 : 2;
+                this.attendees = schedule.users.length > 0 ? schedule.users : schedule.groups;
                 this.weeks = schedule.weeks;
                 this.associatedInfo = schedule.associated_info;
             }
@@ -275,7 +279,7 @@
                     {!! Form::label('type', 'Tipe Kunjungan:', ['class' => 'mt-3']) !!}
                     {!! Form::select(
                         'type',
-                        ['0' => 'Pilih Tipe Kunjungan', '1' => 'Kunjungan Tunggal', '2' => 'Kunjungan Rutin/ Terjadwal'],
+                        ['0' => 'Pilih Tipe Kunjungan', '1' => 'Kunjungan Tunggal', '2' => 'Kunjungan Mingguan', '3' => 'Kunjungan Bulanan'],
                         null,
                         ['class' => 'form-control', 'x-model' => 'typeSchedules'],
                     ) !!}

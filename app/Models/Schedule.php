@@ -39,7 +39,9 @@ class Schedule extends Model
         'start_schedule',
         'end_schedule',
         'course_id',
-        'associated_info'
+        'associated_info',
+        'schedule_type',
+        'grouped_schedule_code'
     ];
 
     /**

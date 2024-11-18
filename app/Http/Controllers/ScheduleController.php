@@ -207,6 +207,9 @@ class ScheduleController extends AppBaseController
 
         $successAssigns = 0;
 
+        
+        $input['grouped_schedule_code'] = strtoupper(substr(str_shuffle(MD5(microtime())), 0, 7));
+
         if (is_array($date)) {
             foreach ($date as $item) {
                 $createScheduleErrorResponse = $this->createSchedule($input, $item, $room, $typeModel, $typeId);
@@ -215,7 +218,7 @@ class ScheduleController extends AppBaseController
                     return $createScheduleErrorResponse;
                 }
 
-                if($createScheduleErrorResponse) {
+                if ($createScheduleErrorResponse) {
                     $successAssigns++;
                 }
             }
@@ -226,7 +229,7 @@ class ScheduleController extends AppBaseController
                 return $createScheduleErrorResponse;
             }
 
-            if($createScheduleErrorResponse) {
+            if ($createScheduleErrorResponse) {
                 $successAssigns++;
             }
         }
@@ -249,12 +252,28 @@ class ScheduleController extends AppBaseController
                 return ResponseJson::make(ResponseCodeEnum::STATUS_BAD_REQUEST, 'Jumlah minggu harus diisi')->send();
             }
 
+            $input['schedule_type'] = 'weekly';
+
             $dates = [];
             $weeks = $input['weeks'];
             $date = Carbon::createFromFormat('Y-m-d', $input['date']);
 
             for ($i = 0; $i < $weeks; $i++) {
                 $dates[] = $date->copy()->addWeeks($i)->format('Y-m-d');
+            }
+        } else if ($input['type_schedule'] == 3) {
+            if (!$input['weeks']) {
+                return ResponseJson::make(ResponseCodeEnum::STATUS_BAD_REQUEST, 'Jumlah bulan harus diisi')->send();
+            }
+
+            $input['schedule_type'] = 'monthly';
+
+            $dates = [];
+            $weeks = $input['weeks'];
+            $date = Carbon::createFromFormat('Y-m-d', $input['date']);
+
+            for ($i = 0; $i < $weeks; $i++) {
+                $dates[] = $date->copy()->addMonths($i)->format('Y-m-d');
             }
         } else {
             return ResponseJson::make(ResponseCodeEnum::STATUS_BAD_REQUEST, 'Tipe Kunjungan harus diisi')->send();

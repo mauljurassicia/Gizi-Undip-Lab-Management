@@ -51,7 +51,7 @@
 
             },
             addScheduleModal() {
-   
+
 
                 if (this.$store.date.selectedDate.format('YYYY-MM-DD') < moment().format('YYYY-MM-DD')) {
                     Swal.fire({
@@ -85,6 +85,17 @@
             },
             editScheduleModal(id) {
                 const schedule = this.$store.schedule.getSchedule(id);
+                if (!schedule) {
+                    Swal.fire({
+                        title: 'Error!',
+                        text: "Jadwal tidak ditemukan",
+                        icon: 'error',
+                        confirmButtonText: 'Ok'
+                    });
+                    return;
+                }
+
+                $('#scheduleModal').modal('show');
 
                 this.$dispatch('set-edit', schedule);
             }
@@ -121,7 +132,7 @@
         if (now.isBefore(start)) {
             const duration = moment.duration(now.diff(start));
             const minutes = duration.asMinutes();
-            if(minutes < 60) {
+            if (minutes > -60) {
                 return `Berlangsung dalam ${Math.abs(minutes.toFixed(0))} menit`;
             }
             const hours = duration.asHours();
@@ -129,7 +140,7 @@
         } else if (now.isAfter(end)) {
             const duration = moment.duration(now.diff(end));
             const minutes = duration.asMinutes();
-            if(minutes < 60) {
+            if (minutes < 60) {
                 return `Selesai pada ${minutes.toFixed(0)} menit yang lalu`;
             }
             const hours = duration.asHours();
@@ -178,8 +189,9 @@
                 <h3 x-text="$store.date.selectedDate?.format('DD MMMM YYYY')"
                     style="font-size: clamp(1rem, 2vw, 2rem);">
                 </h3>
-                <button @click="addScheduleModal" class="btn btn-primary position-absolute" :class="$store.date.selectedDate?.format('YYYY-MM-DD') < moment().format('YYYY-MM-DD') ? 'disabled' : ''" style="right: 10px;"
-                    tooltip="Tambah Jadwal">
+                <button @click="addScheduleModal" class="btn btn-primary position-absolute"
+                    :class="$store.date.selectedDate?.format('YYYY-MM-DD') < moment().format('YYYY-MM-DD') ? 'disabled' : ''"
+                    style="right: 10px;" tooltip="Tambah Jadwal">
                     <i class="fa fa-plus d-inline d-md-none"></i>
                     <span class="d-none d-md-inline">Tambah Jadwal</span></button>
 
@@ -218,9 +230,17 @@
 
                 <div class="p-3 mb-3 border rounded bg-light">
                     <!-- Schedule Name -->
-                    <h5 class="mb-2">
-                        <span x-text="schedule.name"></span>
-                    </h5>
+                    <div class="d-flex justify-content-between">
+                        <h5 class="mb-2">
+                            <span x-text="schedule.name"></span>
+                        </h5>
+                        <button @click="editScheduleModal(schedule.id)" class="btn btn-primary btn-sm d-none d-md-block"><i
+                                class="fa fa-pencil"></i></button>
+
+                        <button @click="editScheduleModal(schedule.id)"
+                            class="btn btn-primary btn-xs btn-icon d-md-none"><i class="fa fa-pencil"></i></button>
+                    </div>
+
 
                     <!-- Conditional Course or Associated Info -->
                     <p class="text-secondary mb-3">

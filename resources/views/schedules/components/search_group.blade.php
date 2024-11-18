@@ -4,6 +4,11 @@
             groupSuggestions: [],
             search: '',
             groups: [],
+            init() {
+                if(this.typeModel == '2'){
+                    this.groups = this.attendees;
+                }
+            },
             getGroups() {
                 if (this.search.length == 0) {
                     return;

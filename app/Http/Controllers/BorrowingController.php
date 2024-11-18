@@ -7,7 +7,7 @@ use App\Http\Requests;
 use App\Http\Requests\CreateBorrowingRequest;
 use App\Http\Requests\UpdateBorrowingRequest;
 use App\Repositories\BorrowingRepository;
-use Flash;
+use Laracasts\Flash\Flash;
 use App\Http\Controllers\AppBaseController;
 use Response;
 use Illuminate\Http\Request; 
@@ -38,9 +38,9 @@ class BorrowingController extends AppBaseController
      * @param BorrowingDataTable $borrowingDataTable
      * @return Response
      */
-    public function index(BorrowingDataTable $borrowingDataTable)
+    public function index()
     {
-        return $borrowingDataTable->render('borrowings.index');
+        return view('borrowings.index');
     }
 
     /**
@@ -50,15 +50,7 @@ class BorrowingController extends AppBaseController
      */
     public function create()
     {
-        $ = \App\Models\::all();
-        $ = \App\Models\::all();
-        $ = \App\Models\::all();
-        
-
-        return view('borrowings.create')
-            ->with('', $)
-            ->with('', $)
-            ->with('', $);
+        return view('borrowings.create');
     }
 
     /**
@@ -107,10 +99,6 @@ class BorrowingController extends AppBaseController
     public function edit($id)
     {
         
-        $ = \App\Models\::all();
-        $ = \App\Models\::all();
-        $ = \App\Models\::all();
-        
 
         $borrowing = $this->borrowingRepository->findWithoutFail($id);
 
@@ -120,10 +108,7 @@ class BorrowingController extends AppBaseController
         }
 
         return view('borrowings.edit')
-            ->with('borrowing', $borrowing)
-            ->with('', $)
-            ->with('', $)
-            ->with('', $);
+            ->with('borrowing', $borrowing);
     }
 
     /**

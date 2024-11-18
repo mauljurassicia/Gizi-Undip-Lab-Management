@@ -85,8 +85,6 @@ class ScheduleDataTable extends DataTable
             'name' => ['name' => 'name', 'title' => 'Nama Ruangan', 'data' => 'name'],
             'type' => ['name' => 'type', 'title' => 'Tipe', 'data' => 'type'],
             'volume',
-            'status',
-            'pic.name' => ['name' => 'pic_id', 'title' => 'PIC', ],
         ];
     }
 

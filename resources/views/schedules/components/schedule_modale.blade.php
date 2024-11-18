@@ -392,7 +392,7 @@
     }
 </script>
 <div class="modal fade" id="scheduleModal" tabindex="-1" aria-labelledby="scheduleModalLabel" aria-hidden="true"
-    x-data="scheduleModal()" x-init="$watch('courseId', (value) => console.log(value))" data-backdrop="static" data-keyboard="false">
+    x-data="scheduleModal()"  data-backdrop="static" data-keyboard="false">
     <div class="modal-dialog" @set-operational.window="setOperationalHours($event)"
         @set-edit.window="editModal($event.detail)">
         <div class="modal-content">

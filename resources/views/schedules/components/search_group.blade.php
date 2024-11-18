@@ -76,7 +76,7 @@
                     <td x-text="group.name" class="w-75"></td>
                     <td>
                         <button type="button" class="btn-delete btn btn-danger btn-xs"
-                            @click="groups.splice(groupsModal.indexOf(group), 1)">
+                            @click="groupsModal.splice(groupsModal.indexOf(group), 1)">
                             <i class="fa fa-trash"></i>
                         </button>
                         <input type="hidden" name="typeId[]" :value="group.id">

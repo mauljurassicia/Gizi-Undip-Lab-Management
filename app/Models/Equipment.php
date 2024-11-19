@@ -93,5 +93,8 @@ class Equipment extends Model
         return $this->getConnection()->getSchemaBuilder()->getColumnListing($this->getTable());
     }
 
+    public function room() {
+        return $this->belongsToMany(Room::class, 'equipment_rooms', 'equipment_id', 'room_id')->withPivot('quantity');
+    }
     
 }

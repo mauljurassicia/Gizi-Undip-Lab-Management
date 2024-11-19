@@ -44,49 +44,7 @@
                             Alat <i class="fa fa-dolly" style="width: 32px"></i></button>
                     @endcan
                     <!-- Modal -->
-                    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel"
-                        data-backdrop="static" data-keyboard="false">
-                        <div class="modal-dialog" role="document">
-                            <div class="modal-content">
-                                <div class="modal-header">
-                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
-                                            aria-hidden="true">&times;</span></button>
-                                    <h4 class="modal-title" id="myModalLabel">Pinjam Alat</h4>
-                                </div>
-                                <form action="{{ route('borrowings.store') }}" method="post">
-                                    @csrf
-                                    <div class="modal-body">
-                                        <div class="form-group">
-                                            <label for="laborant_id">Laboran</label>
-                                            <select name="laborant_id" id="laborant_id" class="form-control" required>
-                                                <option value="">-- Pilih Laboran --</option>
-                                            </select>
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="equipment_id">Alat</label>
-                                            <select name="equipment_id" id="equipment_id" class="form-control" required>
-                                                <option value="">-- Pilih Alat --</option>
-                                            </select>
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="start_date">Tanggal Pinjam</label>
-                                            <input type="date" name="start_date" id="start_date" class="form-control"
-                                                required>
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="end_date">Tanggal Kembali</label>
-                                            <input type="date" name="end_date" id="end_date" class="form-control"
-                                                required>
-                                        </div>
-                                    </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-default" data-dismiss="modal">Batal</button>
-                                        <button type="submit" class="btn btn-primary">Pinjam</button>
-                                    </div>
-                                </form>
-                            </div>
-                        </div>
-                    </div>
+                    @include('borrowings.components.modal')
 
                 </div>
             </div>

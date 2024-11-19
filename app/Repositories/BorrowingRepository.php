@@ -41,4 +41,25 @@ class BorrowingRepository extends BaseRepository
     {
         return Borrowing::class;
     }
+
+
+    public function getQuantityByRoomAndEquipment($room, $equipment, $startDate, $endDate) {
+        return $this->model
+            ->selectRaw('SUM(quantity) as total_quantity')
+            ->where('room_id', $room)
+            ->where('equipment_id', $equipment)
+            ->where(function ($query) use ($startDate, $endDate) {
+                $query->where(function ($query) use ($startDate, $endDate) {
+                    $query->where('start_date', '<=', $startDate)
+                        ->where('end_date', '>=', $startDate);
+                })->orWhere(function ($query) use ($startDate, $endDate) {
+                    $query->where('start_date', '<=', $endDate)
+                        ->where('end_date', '>=', $endDate);
+                })->orWhere(function ($query) use ($startDate, $endDate) {
+                    $query->where('start_date', '>=', $startDate)
+                        ->where('end_date', '<=', $endDate);
+                });
+            })
+            ->value('total_quantity') ?? 0;
+    }
 }

@@ -7,7 +7,7 @@ use App\Http\Requests;
 use App\Http\Requests\CreateLogBookRequest;
 use App\Http\Requests\UpdateLogBookRequest;
 use App\Repositories\LogBookRepository;
-use Flash;
+use Laracasts\Flash\Flash;
 use App\Http\Controllers\AppBaseController;
 use Response;
 use Illuminate\Http\Request; 
@@ -50,13 +50,7 @@ class LogBookController extends AppBaseController
      */
     public function create()
     {
-        $ = \App\Models\::all();
-        $ = \App\Models\::all();
-        
-
-        return view('log_books.create')
-            ->with('', $)
-            ->with('', $);
+        return view('log_books.create');
     }
 
     /**
@@ -103,11 +97,7 @@ class LogBookController extends AppBaseController
      * @return Response
      */
     public function edit($id)
-    {
-        
-        $ = \App\Models\::all();
-        $ = \App\Models\::all();
-        
+    {   
 
         $logBook = $this->logBookRepository->findWithoutFail($id);
 
@@ -117,9 +107,7 @@ class LogBookController extends AppBaseController
         }
 
         return view('log_books.edit')
-            ->with('logBook', $logBook)
-            ->with('', $)
-            ->with('', $);
+            ->with('logBook', $logBook);
     }
 
     /**
@@ -168,22 +156,4 @@ class LogBookController extends AppBaseController
         return redirect(route('logBooks.index'));
     }
 
-    /**
-     * Store data LogBook from an excel file in storage.
-     *
-     * @param Request $request
-     *
-     * @return Response
-     */
-    public function import(Request $request)
-    {
-        Excel::load($request->file('file'), function($reader) {
-            $reader->each(function ($item) {
-                $logBook = $this->logBookRepository->create($item->toArray());
-            });
-        });
-
-        Flash::success('Log Book saved successfully.');
-        return redirect(route('logBooks.index'));
-    }
 }

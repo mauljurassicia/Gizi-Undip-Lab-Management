@@ -105,5 +105,9 @@ class Borrowing extends Model
         return $this->belongsTo(Equipment::class);
     }
 
+    public function logBook() {
+        return $this->morphOne(LogBook::class, 'logbookable');
+    }
+
     
 }

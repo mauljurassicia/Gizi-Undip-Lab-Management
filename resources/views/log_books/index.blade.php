@@ -19,7 +19,7 @@
             <h4 class="mg-b-10">Log Books</h4>
 
             <p class="mg-b-30">
-                This is a list of your <code>Log Books</code>, you can manage by clicking on action buttons in this table.
+                Ini adalah daftar <code>Log Books</code> Anda, Anda dapat mengelolanya dengan mengklik tombol aksi di tabel ini.
             </p>
 
             <div class="d-sm-flex align-items-center justify-content-between mg-b-20 mg-lg-b-25 mg-xl-b-30">
@@ -29,7 +29,7 @@
 
                 <div class="d-none d-md-block">
                     @can('logBook-create')
-                        <a class="btn btn-sm btn-primary btn-uppercase" href="{!! route('logBooks.create') !!}"><i class="fa fa-plus"></i> Add New</a>
+                        <a class="btn btn-sm btn-primary btn-uppercase" href="{!! route('logBooks.create') !!}"><i class="fa fa-book"></i> Catat Log Book</a>
                     @endcan
                 </div>
             </div>

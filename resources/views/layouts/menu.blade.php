@@ -105,7 +105,7 @@
 @endcan
 
 @can('logBook-show')
-    <li class="{{ Request::is('logbooks*') ? 'active' : '' }} nav-item">
+    <li class="{{ Request::is('logBooks*') ? 'active' : '' }} nav-item">
         <a class="nav-link" href="{!! route('logBooks.index') !!}"><i class="fa fa-book"
                 style="width: 32px"></i><span>Logbook</span></a>
     </li>

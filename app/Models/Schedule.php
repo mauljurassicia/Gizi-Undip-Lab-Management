@@ -82,5 +82,9 @@ class Schedule extends Model
         return $this->morphedByMany('App\Models\Group', 'scheduleable');
     }
 
+    public function logBook() {
+        return $this->morphOne(LogBook::class, 'logbookable');
+    }
+
     
 }

@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use Eloquent as Model;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -36,10 +36,11 @@ class LogBook extends Model
 
     public $fillable = [
         'user_id',
-        'room_id',
         'type',
         'time',
-        'report'
+        'report',
+        'logbookable_id',
+        'logbookable_type'
     ];
 
     /**
@@ -63,6 +64,11 @@ class LogBook extends Model
 
     public function getTableColumns() {
         return $this->getConnection()->getSchemaBuilder()->getColumnListing($this->getTable());
+    }
+
+    public function logbookable()
+    {
+        return $this->morphTo();
     }
 
     

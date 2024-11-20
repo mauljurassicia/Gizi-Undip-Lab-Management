@@ -66,7 +66,8 @@ class Borrowing extends Model
         'end_date',
         'return_quantity',
         'return_date',
-        'report'
+        'report', 
+        'status'
     ];
 
     /**
@@ -94,6 +95,14 @@ class Borrowing extends Model
 
     public function getTableColumns() {
         return $this->getConnection()->getSchemaBuilder()->getColumnListing($this->getTable());
+    }
+
+    public function room() {
+        return $this->belongsTo(Room::class);
+    }
+
+    public function equipment() {
+        return $this->belongsTo(Equipment::class);
     }
 
     

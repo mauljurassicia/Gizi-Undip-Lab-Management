@@ -13,7 +13,7 @@ use Webcore\Generator\Common\BaseRepository;
  * @method Borrowing findWithoutFail($id, $columns = ['*'])
  * @method Borrowing find($id, $columns = ['*'])
  * @method Borrowing first($columns = ['*'])
-*/
+ */
 class BorrowingRepository extends BaseRepository
 {
     /**
@@ -43,10 +43,33 @@ class BorrowingRepository extends BaseRepository
     }
 
 
-    public function getQuantityByRoomAndEquipment($room, $equipment, $startDate, $endDate) {
+    public function getQuantityByRoomAndEquipment($room, $equipment, $startDate, $endDate)
+    {
         return $this->model
             ->selectRaw('SUM(quantity) as total_quantity')
             ->where('room_id', $room)
+            ->where('equipment_id', $equipment)
+            ->where(function ($query) use ($startDate, $endDate) {
+                $query->where(function ($query) use ($startDate, $endDate) {
+                    $query->where('start_date', '<=', $startDate)
+                        ->where('end_date', '>=', $startDate);
+                })->orWhere(function ($query) use ($startDate, $endDate) {
+                    $query->where('start_date', '<=', $endDate)
+                        ->where('end_date', '>=', $endDate);
+                })->orWhere(function ($query) use ($startDate, $endDate) {
+                    $query->where('start_date', '>=', $startDate)
+                        ->where('end_date', '<=', $endDate);
+                });
+            })
+            ->value('total_quantity') ?? 0;
+    }
+
+    public function getQuantityByRoomAndEquipmentExceptId($room, $equipment, $startDate, $endDate, $id)
+    {
+        return $this->model
+            ->selectRaw('SUM(quantity) as total_quantity')
+            ->where('room_id', $room)
+            ->where('id', '!=', $id)
             ->where('equipment_id', $equipment)
             ->where(function ($query) use ($startDate, $endDate) {
                 $query->where(function ($query) use ($startDate, $endDate) {

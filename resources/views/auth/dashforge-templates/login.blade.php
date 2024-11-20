@@ -48,7 +48,7 @@
 
     <header class="navbar navbar-header navbar-header-fixed">
         <a href="#" id="mainMenuOpen" class="burger-menu"><i data-feather="menu"></i></a>
-        <div class="navbar-brand">
+        <div class="navbar-brand ">
             <a href=" {{ url('/') }} " class="df-logo">
                 <img src="{{ asset('S1-Gizi.png') }}" alt="Webcore" width="120">
             </a>
@@ -58,7 +58,7 @@
     <div class="content content-fixed content-auth">
         <div class="container">
             <div class="media align-items-stretch justify-content-center ht-100p pos-relative">
-                <div class="media-body">
+                <div class="media-body d-none d-lg-flex">
                     <img src="{{ asset('lab-illustration.avif') }}" alt="" class="wd-100p" height="400">
                 </div>
                 <!-- media-body -->

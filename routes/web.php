@@ -92,7 +92,10 @@ Route::resource('logBooks', 'LogBookController');
 
 Route::post('borrowings/add', 'BorrowingController@addBorrowing')->name('borrowings.add');
 Route::get('borrowings/group', 'BorrowingController@getGroup')->name('borrowings.group');
-Route::resource('borrowings', 'BorrowingController');
+Route::get('borrowings/getBorrowings', 'BorrowingController@getBorrowings')->name('borrowings.get');
+Route::put('borrowings/{id}/update', 'BorrowingController@updateBorrowing')->name('borrowings.update');
+Route::delete('borrowings/{id}/delete', 'BorrowingController@deleteBorrowing')->name('borrowings.delete');
+Route::resource('borrowings', 'BorrowingController')->only(['index']);
 Route::get('borrowings/{room}/equipments', 'BorrowingController@getEquipmentByRoom')->where('room', '[0-9]+',)->name('borrowings.room.equipments');
 Route::get('borrowings/{room}/{equipment}/quantity', 'BorrowingController@getQuantityByRoomAndEquipment')->where('room', '[0-9]+')->where('equipment', '[0-9]+')->name('borrowings.room.equipment.quantity');
 // Route::post('importBorrowing', 'BorrowingController@import');

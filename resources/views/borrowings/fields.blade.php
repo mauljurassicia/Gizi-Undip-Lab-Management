@@ -1,9 +1,3 @@
-<!-- Room Id Field -->
-<div class="form-group col-sm-6">
-    {!! Form::label('room_id', 'Room Id:') !!}
-    {!! Form::number('room_id', null, ['class' => 'form-control']) !!}
-</div>
-
 <!-- Userable Type Field -->
 <div class="form-group col-sm-6">
     {!! Form::label('userable_type', 'Userable Type:', ['class' => 'd-block']) !!}

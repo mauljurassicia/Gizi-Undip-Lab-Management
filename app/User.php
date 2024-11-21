@@ -2,6 +2,9 @@
 
 namespace App;
 
+use App\Models\Borrowing;
+use App\Models\LogBook;
+use App\Models\Schedule;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -59,11 +62,10 @@ class User extends Authenticatable
      *
      * @var array
      */
-    public static $rules = [
+    public static $rules = [];
 
-    ];
-
-    public function getTableColumns() {
+    public function getTableColumns()
+    {
         return $this->getConnection()->getSchemaBuilder()->getColumnListing($this->getTable());
     }
     public function setPasswordAttribute($password)
@@ -83,6 +85,78 @@ class User extends Authenticatable
 
     public function schedules()
     {
-        return $this->morphMany('App\Models\Schedule', 'scheduleable');
+        return $this->morphedByMany(Schedule::class, 'scheduleable', 'scheduleables', 'scheduleable_id', 'schedule_id',);
+    }
+
+    public function groupSchedules()
+    {
+        if ($this->groups->isEmpty()) {
+            return Schedule::query()->whereNull('id');
+        }
+
+        // Start with the schedules of the first group
+        $query = $this->groups->first()->schedules();
+
+        // Union schedules from subsequent groups
+        foreach ($this->groups->slice(1) as $group) {
+            $query = $query->union($group->schedules());
+        }
+
+        return $query;
+    }
+
+    public function allSchedules()
+    {
+        $query = $this->schedules();
+
+        // Add schedules from all groups
+        if ($this->groups->isNotEmpty()) {
+            foreach ($this->groups as $group) {
+                $query = $query->union($group->schedules());
+            }
+        }
+
+        return $query;
+    }
+
+    public function logBooks()
+    {
+        return $this->morphMany(LogBook::class, 'userable');
+    }
+
+    public function borrowings()
+    {
+        return $this->morphMany(Borrowing::class, 'userable');
+    }
+
+    public function groupBorrowings()
+    {
+        if ($this->groups->isEmpty()) {
+            return Borrowing::query()->whereNull('id');
+        }
+
+        // Start with the borrowings of the first group
+        $query = $this->groups->first()->borrowings();
+
+        // Union borrowings from subsequent groups
+        foreach ($this->groups->slice(1) as $group) {
+            $query = $query->union($group->borrowings());
+        }
+
+        return $query;
+    }
+
+    public function allBorrowings()
+    {
+        $query = $this->borrowings();
+
+        // Add borrowings from all groups
+        if ($this->groups->isNotEmpty()) {
+            foreach ($this->groups as $group) {
+                $query = $query->union($group->borrowings());
+            }
+        }
+
+        return $query;
     }
 }

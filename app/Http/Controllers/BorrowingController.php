@@ -257,6 +257,47 @@ class BorrowingController extends AppBaseController
         }
     }
 
+    public function approveBorrowing($id){
+        $borrowing = $this->borrowingRepository->findWithoutFail($id);
+
+        /** @var User $user */
+        $user = Auth::user();
+        if(!$user->hasRole('laborant') && !$user->hasRole('administrator')){
+            return ResponseJson::make(ResponseCodeEnum::STATUS_UNATENTICATED, 'Unauthorized')->send();
+        }
+
+        if(empty($borrowing)){
+            return ResponseJson::make(ResponseCodeEnum::STATUS_NOT_FOUND, 'Borrowing not found')->send();
+        }
+
+        $borrowing->status = 'approved';
+
+        $borrowing->save();
+
+        return ResponseJson::make(ResponseCodeEnum::STATUS_OK, 'Borrowing approved')->send();
+        
+    }
+
+    public function rejectBorrowing($id){
+        $borrowing = $this->borrowingRepository->findWithoutFail($id);
+
+        /** @var User $user */
+        $user = Auth::user();
+        if(!$user->hasRole('laborant') && !$user->hasRole('administrator')){
+            return ResponseJson::make(ResponseCodeEnum::STATUS_UNATENTICATED, 'Unauthorized')->send();
+        }
+
+        if(empty($borrowing)){
+            return ResponseJson::make(ResponseCodeEnum::STATUS_NOT_FOUND, 'Borrowing not found')->send();
+        }
+
+        $borrowing->status = 'rejected';
+
+        $borrowing->save();
+
+        return ResponseJson::make(ResponseCodeEnum::STATUS_OK, 'Borrowing rejected')->send();
+    }
+
 
     public function getGroup(){
         if(!Auth::check()){

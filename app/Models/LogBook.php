@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * @SWG\Definition(
@@ -23,7 +22,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class LogBook extends Model
 {
-    use SoftDeletes;
 
     public $table = 'logbooks';
     
@@ -67,6 +65,11 @@ class LogBook extends Model
     }
 
     public function logbookable()
+    {
+        return $this->morphTo();
+    }
+
+    public function userable()
     {
         return $this->morphTo();
     }

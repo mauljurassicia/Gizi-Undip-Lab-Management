@@ -3,6 +3,8 @@
 namespace App\DataTables;
 
 use App\Models\LogBook;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 use Yajra\DataTables\Services\DataTable;
 use Yajra\DataTables\EloquentDataTable;
 
@@ -18,7 +20,13 @@ class LogBookDataTable extends DataTable
     {
         $dataTable = new EloquentDataTable($query);
 
-        return $dataTable->addColumn('action', 'log_books.datatables_actions');
+        return $dataTable->addColumn('action', 'log_books.datatables_actions')->editColumn('type', function ($data) {
+            return $data->type == 'in' ? '<span class="badge badge-success m-auto">Pinjam</span>' : '<span class="badge badge-danger m-auto">Kembali</span>';
+        })
+        ->editColumn('time', function ($data) {
+            return Carbon::parse($data->time)->format('d M Y, H:i');
+        })
+        ->rawColumns(['type', 'action']);
     }
 
     /**
@@ -29,7 +37,7 @@ class LogBookDataTable extends DataTable
      */
     public function query(LogBook $model)
     {
-        return $model->newQuery();
+        return $model->newQuery()->with(['userable', 'logbookable']);
     }
 
     /**
@@ -46,11 +54,7 @@ class LogBookDataTable extends DataTable
             ->parameters([
                 'dom'     => 'Bfrtip',
                 'order'   => [[0, 'desc']],
-                'buttons' => [
-                    'export',
-                    'reset',
-                    'reload',
-                ],
+                'buttons' => [],
                 'initComplete' => "function() {
                     this.api().columns().every(function() {
                         var column = this;
@@ -73,12 +77,18 @@ class LogBookDataTable extends DataTable
      */
     protected function getColumns()
     {
+        /** @var User $user */
+        $user = Auth::user();
         return [
-            'user_id',
-            'room_id',
-            'type',
+            'userable.name' => [
+                'name' => 'userable_id',
+                'title' => 'Pengguna',
+                'data' => 'userable.name',
+                'visible' => $user->hasRole('administrator') || $user->hasRole('laborant')
+            ],
+            'logbookable.name' => ['name' => 'logbookable_id', 'title' => 'Judul', 'data' => 'logbookable.name'],
+            'type' => ['name' => 'type', 'title' => 'Status', 'data' => 'type', 'searchable' => false, 'orderable' => false],
             'time',
-            'report'
         ];
     }
 
@@ -87,7 +97,7 @@ class LogBookDataTable extends DataTable
      *
      * @return string
      */
-    protected function filename():string
+    protected function filename(): string
     {
         return 'log_booksdatatable_' . time();
     }

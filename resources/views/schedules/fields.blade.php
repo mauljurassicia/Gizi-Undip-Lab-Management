@@ -4,6 +4,8 @@
     @include('schedules.components.schedule_modale')
 
     @include('schedules.components.hours')
+
+    @include('schedules.components.logbook_modale')
 </div>
 
 

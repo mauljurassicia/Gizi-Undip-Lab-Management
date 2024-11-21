@@ -54,9 +54,7 @@ class LaborantDataTable extends DataTable
                 'dom'     => 'Bfrtip',
                 'order'   => [[0, 'desc']],
                 'buttons' => [
-                    'export',
-                    'reset',
-                    'reload',
+                   
                 ],
                 'initComplete' => "function() {
                     this.api().columns().every(function() {

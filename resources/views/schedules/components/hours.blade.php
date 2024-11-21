@@ -179,6 +179,12 @@
                             });
                         }
                     })
+            },
+            checkIn(id) {
+                this.$dispatch('check-in', id);
+            },
+            checkOut(id) {
+                this.$dispatch('check-out', id);
             }
 
         }
@@ -326,17 +332,17 @@
                     <h5 class="mb-2 text-center">
                         <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
                     </h5>
-                </div>            
+                </div>
             </template>
             <template x-for="schedule in $store.schedule.schedules" :key="schedule.id">
 
                 <div class="p-3 mb-3 border rounded bg-light">
                     <!-- Schedule Name -->
-                    <div class="d-flex justify-content-between">
+                    <div class="d-flex justify-content-between align-items-start">
                         <h5 class="mb-2">
                             <span x-text="schedule.name"></span>
                         </h5>
-                        <div class="d-flex ">
+                        <div class="d-flex fit-content">
                             <button @click="editScheduleModal(schedule.id)"
                                 class="btn btn-primary btn-sm d-none d-md-block mr-2"><i
                                     class="fa fa-pencil"></i></button>
@@ -412,6 +418,19 @@
                         </template>
 
                     </div>
+
+
+                    <button @click="checkIn(schedule.id)" class="btn btn-primary btn-xs mt-2"
+                        :class="{
+                            'disabled': isSchedulePassed(schedule.end_schedule) && (moment().isAfter(schedule
+                                .end_schedule) || moment().isBefore(schedule.start_schedule)) || schedule.logBookIn
+                        }" :disabled="isSchedulePassed(schedule.end_schedule) && (moment().isAfter(schedule.end_schedule) || moment().isBefore(schedule.start_schedule)) || schedule.logBookIn"><i
+                            class="fa fa-sign-in-alt"></i>
+                        Hadir</button>
+                    <button @click="checkOut(schedule.id)" class="btn btn-danger btn-xs mt-2"
+                        :class="{'disabled': !isSchedulePassed(schedule.end_schedule) || schedule.logBookOut}" :disabled="!isSchedulePassed(schedule.end_schedule) || schedule.logBookOut">
+                        Keluar <i class="fa fa-sign-out-alt"></i></button>
+
                 </div>
 
             </template>

@@ -82,6 +82,7 @@ Route::resource('schedules', 'ScheduleController')->only(['index', 'edit', 'dest
 Route::get('schedules/room/{room}', 'ScheduleController@getScheduleByRoomAndDate')->name('schedules.rooms');
 Route::get('schedules/room/{room}/operationalHours', 'ScheduleController@getOperationalHoursByRoomAndDate')->name('schedules.operationalHours');
 Route::post('schedules/room/{room}', 'ScheduleController@addSchedule')->name('schedules.adds');
+Route::post('schedules/{id}/logbook', 'ScheduleController@addLogBook')->name('schedules.logbook.add');
 // Route::post('importSchedule', 'ScheduleController@import');
 
 Route::resource('laborants', 'LaborantController');
@@ -95,6 +96,8 @@ Route::get('borrowings/group', 'BorrowingController@getGroup')->name('borrowings
 Route::get('borrowings/getBorrowings', 'BorrowingController@getBorrowings')->name('borrowings.get');
 Route::put('borrowings/{id}/update', 'BorrowingController@updateBorrowing')->name('borrowings.update');
 Route::delete('borrowings/{id}/delete', 'BorrowingController@deleteBorrowing')->name('borrowings.delete');
+Route::post('borrowings/{id}/approved', 'BorrowingController@approveBorrowing')->name('borrowings.approved');
+Route::post('borrowings/{id}/rejected', 'BorrowingController@rejectBorrowing')->name('borrowings.rejected');
 Route::resource('borrowings', 'BorrowingController')->only(['index']);
 Route::get('borrowings/{room}/equipments', 'BorrowingController@getEquipmentByRoom')->where('room', '[0-9]+',)->name('borrowings.room.equipments');
 Route::get('borrowings/{room}/{equipment}/quantity', 'BorrowingController@getQuantityByRoomAndEquipment')->where('room', '[0-9]+')->where('equipment', '[0-9]+')->name('borrowings.room.equipment.quantity');

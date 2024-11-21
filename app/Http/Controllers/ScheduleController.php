@@ -8,6 +8,8 @@ use App\Helpers\ResponseJson;
 use App\Repositories\ScheduleRepository;
 use Laracasts\Flash\Flash;
 use App\Http\Controllers\AppBaseController;
+use App\Models\Group;
+use App\Models\LogBook;
 use App\Models\Schedule;
 use App\Repositories\CourseRepository;
 use App\Repositories\GroupRepository;
@@ -19,7 +21,6 @@ use Illuminate\Http\JsonResponse;
 use Response;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use PHPUnit\Framework\Attributes\Group;
 
 class ScheduleController extends AppBaseController
 {
@@ -166,7 +167,7 @@ class ScheduleController extends AppBaseController
             return ResponseJson::make(ResponseCodeEnum::STATUS_BAD_REQUEST, 'Date is required')->send();
         }
         $schedules = $this->scheduleRepository->where('room_id', $room)->whereDate('start_schedule', $request->query('date'))
-            ->whereDate('end_schedule', $request->query('date'))->with('course')->with('groups')->with('users')->get();
+            ->whereDate('end_schedule', $request->query('date'))->with('course')->with('groups')->with('users')->get()->append('logBookOut')->append('logBookIn');
 
         $schedules->each(function ($schedule) {
             $schedule->weeks = $this->scheduleRepository->where('grouped_schedule_code', $schedule->grouped_schedule_code)->whereNotNull('grouped_schedule_code')->count();
@@ -416,12 +417,10 @@ class ScheduleController extends AppBaseController
 
         $schedule->save();
 
-        foreach ($typeId as $id) {
-            if ($typeModel == 'App\User') {
-                $schedule->users()->attach($id);
-            } else if ($typeModel == 'App\model\Group') {
-                $schedule->groups()->attach($id);
-            }
+        if ($typeModel == 'App\User') {
+            $schedule->users()->sync($typeId);
+        } elseif ($typeModel == 'App\model\Group') {
+            $schedule->groups()->sync($typeId);
         }
 
         return true;
@@ -510,14 +509,14 @@ class ScheduleController extends AppBaseController
         $schedule->associated_info = $input['associated_info'];
         $schedule->save();
 
-        if($input['type_model'] !=1 && $input['type_model'] !=2){
+        if ($input['type_model'] != 1 && $input['type_model'] != 2) {
             return ResponseJson::make(ResponseCodeEnum::STATUS_BAD_REQUEST, 'Tipe Pengunjung harus diisi')->send();
-        }elseif($input['type_model'] == 1){
+        } elseif ($input['type_model'] == 1) {
             $typeId = $input['type_id'];
             $schedule->users()->detach();
             $schedule->groups()->detach();
             $schedule->users()->attach($typeId);
-        }elseif($input['type_model'] == 2){
+        } elseif ($input['type_model'] == 2) {
             $typeId = $input['type_id'];
             $schedule->users()->detach();
             $schedule->groups()->detach();
@@ -525,6 +524,45 @@ class ScheduleController extends AppBaseController
         }
 
         return ResponseJson::make(ResponseCodeEnum::STATUS_OK, 'Schedule updated successfully')->send();
+    }
+
+
+    public function addLogBook(Request $request, $id)
+    {
+        $schedule = $this->scheduleRepository->findWithoutFail($id);
+
+        if (empty($schedule)) {
+            return ResponseJson::make(ResponseCodeEnum::STATUS_NOT_FOUND, 'Schedule not found')->send();
+        }
+
+        $date = Carbon::parse($schedule->start_schedule)->format('Y-m-d');
+
+
+        $logBook = new LogBook([
+            'report' => $request->report,
+            'type' => $request->type,
+            'time' => $date . ' ' . $request->time,
+        ]);
+
+        /** @var User */
+        $user = Auth::user();
+
+        $groupSchedule = $user->groups()->whereHas('users', function ($query) use ($user) {
+            $query->where('users.id', $user->id);
+        })->first();
+
+        $userSchedule = $schedule->users()->where('users.id', $user->id)->first();
+
+        if(!$userSchedule && !$groupSchedule) {
+            return ResponseJson::make(ResponseCodeEnum::STATUS_UNATENTICATED, 'You are not allowed to add log book')->send();
+        }
+
+        $logBook->logbookable()->associate($schedule);
+
+        $logBook->userable()->associate($user);
+        $logBook->save();
+
+        return ResponseJson::make(ResponseCodeEnum::STATUS_OK, 'Log book added successfully')->send();
 
 
     }

@@ -92,6 +92,15 @@ class Group extends Model
     }
 
     public function schedules(){
-        return $this->morphMany(Schedule::class, 'scheduleable');
+        return $this->morphedByMany(Schedule::class, 'scheduleable', 'scheduleables', 'scheduleable_id', 'schedule_id' );
+    }
+
+    public function logBooks(){
+        return $this->morphMany(LogBook::class, 'logbookable');
+    }
+
+
+    public function borrowings(){
+        return $this->morphMany(Borrowing::class, 'userable');
     }
 }

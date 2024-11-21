@@ -84,6 +84,8 @@ class Borrowing extends Model
         'report' => 'string'
     ];
 
+    protected $appends = ['name'];
+
     /**
      * Validation rules
      *
@@ -105,8 +107,17 @@ class Borrowing extends Model
         return $this->belongsTo(Equipment::class);
     }
 
-    public function logBook() {
-        return $this->morphOne(LogBook::class, 'logbookable');
+    public function logBooks() {
+        return $this->morphMany(LogBook::class, 'logbookable');
+    }
+
+
+    public function userable() {
+        return $this->morphTo();
+    }
+
+    public function getNameAttribute() {
+        return $this->activity_name;
     }
 
     

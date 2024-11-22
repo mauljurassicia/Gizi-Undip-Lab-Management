@@ -48,7 +48,7 @@ class Borrowing extends Model
 {
 
     public $table = 'borrowings';
-    
+
     const CREATED_AT = 'created_at';
     const UPDATED_AT = 'updated_at';
 
@@ -68,7 +68,7 @@ class Borrowing extends Model
         'end_date',
         'return_quantity',
         'return_date',
-        'report', 
+        'report',
         'status'
     ];
 
@@ -93,58 +93,63 @@ class Borrowing extends Model
      *
      * @var array
      */
-    public static $rules = [
-        
-    ];
+    public static $rules = [];
 
-    public function getTableColumns() {
+    public function getTableColumns()
+    {
         return $this->getConnection()->getSchemaBuilder()->getColumnListing($this->getTable());
     }
 
-    public function room() {
+    public function room()
+    {
         return $this->belongsTo(Room::class);
     }
 
-    public function equipment() {
+    public function equipment()
+    {
         return $this->belongsTo(Equipment::class);
     }
 
-    public function logBooks() {
+    public function logBooks()
+    {
         return $this->morphMany(LogBook::class, 'logbookable');
     }
 
 
-    public function userable() {
+    public function userable()
+    {
         return $this->morphTo();
     }
 
-    public function getNameAttribute() {
+    public function getNameAttribute()
+    {
         return $this->activity_name;
     }
 
-    public function getLogBookInAttribute() {
-         /** @var User $user */
-         $user = Auth::user();
-         $userExist = $this->logBooks()
-         ->where('type', 'in')
-         ->whereHasMorph('userable', [User::class, Group::class], function ($query) use ($user) {
-             $query->when($query->getModel() instanceof User, function ($q) use ($user) {
-                 $q->where('id', $user->id);
-             })->when($query->getModel() instanceof Group, function ($q) use ($user) {
-                 $q->whereHas('users', function ($subQuery) use ($user) {
-                     $subQuery->where('users.id', $user->id);
-                 });
-             });
-         })->exists();
- 
-         return $userExist;
-        
+    public function getLogBookInAttribute()
+    {
+        /** @var User $user */
+        $user = Auth::user();
+        $userExist = $this->logBooks()
+            ->where('type', 'in')
+            ->whereHasMorph('userable', [User::class, Group::class], function ($query) use ($user) {
+                $query->when($query->getModel() instanceof User, function ($q) use ($user) {
+                    $q->where('id', $user->id);
+                })->when($query->getModel() instanceof Group, function ($q) use ($user) {
+                    $q->whereHas('users', function ($subQuery) use ($user) {
+                        $subQuery->where('users.id', $user->id);
+                    });
+                });
+            })->exists();
+
+        return $userExist;
     }
 
-    public function getLogBookOutAttribute() {
-            /** @var User $user */
-            $user = Auth::user();
-            $userExist = $this->logBooks()
+    public function getLogBookOutAttribute()
+    {
+        /** @var User $user */
+        $user = Auth::user();
+        $userExist = $this->logBooks()
             ->where('type', 'out')
             ->whereHasMorph('userable', [User::class, Group::class], function ($query) use ($user) {
                 $query->when($query->getModel() instanceof User, function ($q) use ($user) {
@@ -155,9 +160,28 @@ class Borrowing extends Model
                     });
                 });
             })->exists();
-    
-            return $userExist;
+
+        return $userExist;
     }
 
-    
+    public function getNotAllowedAttribute()
+    {
+        /** @var User $user */
+        $user = Auth::user();
+
+        if ($user->hasRole('administrator') || $user->hasRole('laborant')) {
+            return false;
+        }
+
+        // Handle different userable types
+        if ($this->userable_type === User::class) {
+            return $this->userable_id !== $user->id;
+        }
+
+        if ($this->userable_type === Group::class) {
+            return !$user->groups->contains($this->userable_id);
+        }
+
+        return true; // Not allowed if userable is invalid/null
+    }
 }

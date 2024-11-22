@@ -143,6 +143,44 @@ class LogBookController extends AppBaseController
             $userable = $activity->userable;
         }
 
+        $logBookExists = $this->logBookRepository->where('userable_id', $userable->id)
+            ->where('userable_type', get_class($userable))
+            ->where('logbookable_id', $activity->id)
+            ->where('logbookable_type', get_class($activity))
+            ->where('type', $input['type'] == 1 ? 'in' : 'out')
+            ->exists();
+
+        if ($logBookExists) {
+            Flash::error('Log book already exists');
+            return back()->withInput();
+        }
+
+        if($input['type'] == 2) {
+            $logBookExists = $this->logBookRepository->where('userable_id', $userable->id)
+                ->where('userable_type', get_class($userable))
+                ->where('logbookable_id', $activity->id)
+                ->where('logbookable_type', get_class($activity))
+                ->where('type', 'in')
+                ->exists();
+
+            if (!$logBookExists) {
+                Flash::error('Log book check-in does not exist yet. Please check-in first.');
+                return back()->withInput();
+            }
+
+
+            if($activity instanceof Borrowing && $activity->quantity < $request->input('quantity')) {
+                Flash::error('You cannot return more than what you borrowed. You can only return ' . $activity->quantity);
+                return back()->withInput();
+            }
+
+            if($activity instanceof Borrowing) {
+                $activity->return_quantity = $request->input('quantity');
+                $activity->save();
+            }
+
+        }
+
 
 
         $logBook = new LogBook([
@@ -238,6 +276,12 @@ class LogBookController extends AppBaseController
         if (empty($logBook)) {
             Flash::error('Log Book not found');
             return redirect(route('logBooks.index'));
+        }
+
+        if ($logBook->logbookable instanceof Borrowing) {
+            $borrowing = $logBook->logbookable;
+            $borrowing->status = 'approved';
+            $borrowing->save();
         }
 
         $this->logBookRepository->delete($id);

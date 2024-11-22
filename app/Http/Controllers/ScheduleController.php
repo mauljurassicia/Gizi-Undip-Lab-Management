@@ -87,9 +87,7 @@ class ScheduleController extends AppBaseController
         $room = $this->roomRepository->findWithoutFail($id);
         $courses = $this->courseRepository->all()->pluck('name', 'id');
 
-        $groups = $user->groups()->get();
-
-
+        $groups = $user->groups()->where('status', 'active')->get();
 
         if (empty($room)) {
             Flash::error('Schedule not found');
@@ -167,7 +165,7 @@ class ScheduleController extends AppBaseController
             return ResponseJson::make(ResponseCodeEnum::STATUS_BAD_REQUEST, 'Date is required')->send();
         }
         $schedules = $this->scheduleRepository->where('room_id', $room)->whereDate('start_schedule', $request->query('date'))
-            ->whereDate('end_schedule', $request->query('date'))->with('course')->with('groups')->with('users')->get()->append('logBookOut')->append('logBookIn');
+            ->whereDate('end_schedule', $request->query('date'))->with('course')->with('groups')->with('users')->get()->append('logBookOut')->append('logBookIn')->append('NotAllowed');
 
         $schedules->each(function ($schedule) {
             $schedule->weeks = $this->scheduleRepository->where('grouped_schedule_code', $schedule->grouped_schedule_code)->whereNotNull('grouped_schedule_code')->count();
@@ -358,6 +356,7 @@ class ScheduleController extends AppBaseController
             return false;
         }
 
+
         $operationalHours = $operationalHours->$dayName;
 
         if ($input['start_time'] < $operationalHours->start || $input['end_time'] > $operationalHours->end) {
@@ -386,6 +385,7 @@ class ScheduleController extends AppBaseController
         if ($existingSchedule) {
             return false;
         }
+
 
         $schedule = new Schedule();
         $schedule->room_id = $room->id;
@@ -573,4 +573,35 @@ class ScheduleController extends AppBaseController
 
 
     }
+
+    public function approveSchedule($id){
+        /** @var User $user */
+        $user = Auth::user();
+
+        if (!$user->hasRole('administrator') && !$user->hasRole('laborant')) {
+            return ResponseJson::make(ResponseCodeEnum::STATUS_UNATENTICATED, 'Unauthorized')->send();
+        }
+
+        $schedule = Schedule::find($id);
+        $schedule->status = "approved";
+        $schedule->save();
+
+        return ResponseJson::make(ResponseCodeEnum::STATUS_OK, 'Schedule approved successfully')->send();
+    }
+
+    public function rejectSchedule($id){
+        /** @var User $user */
+        $user = Auth::user();
+
+        if (!$user->hasRole('administrator') && !$user->hasRole('laborant')) {
+            return ResponseJson::make(ResponseCodeEnum::STATUS_UNATENTICATED, 'Unauthorized')->send();
+        }
+
+        $schedule = Schedule::find($id);
+        $schedule->status = "rejected";
+        $schedule->save();
+
+        return ResponseJson::make(ResponseCodeEnum::STATUS_OK, 'Schedule rejected successfully')->send();
+    }
+
 }

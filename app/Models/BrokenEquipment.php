@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use Eloquent as Model;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -59,6 +59,10 @@ class BrokenEquipment extends Model
 
     public function getTableColumns() {
         return $this->getConnection()->getSchemaBuilder()->getColumnListing($this->getTable());
+    }
+
+    public function logBook(){
+        return $this->belongsTo(LogBook::class, 'logbook_id');
     }
 
     

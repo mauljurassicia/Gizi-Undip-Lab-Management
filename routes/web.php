@@ -83,6 +83,8 @@ Route::get('schedules/room/{room}', 'ScheduleController@getScheduleByRoomAndDate
 Route::get('schedules/room/{room}/operationalHours', 'ScheduleController@getOperationalHoursByRoomAndDate')->name('schedules.operationalHours');
 Route::post('schedules/room/{room}', 'ScheduleController@addSchedule')->name('schedules.adds');
 Route::post('schedules/{id}/logbook', 'ScheduleController@addLogBook')->name('schedules.logbook.add');
+Route::post('schedules/{id}/approved', 'ScheduleController@approveSchedule')->name('schedules.approved');
+Route::post('schedules/{id}/rejected', 'ScheduleController@rejectSchedule')->name('schedules.rejected');
 // Route::post('importSchedule', 'ScheduleController@import');
 
 Route::resource('laborants', 'LaborantController');

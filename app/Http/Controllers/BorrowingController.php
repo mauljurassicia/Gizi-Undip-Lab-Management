@@ -257,6 +257,30 @@ class BorrowingController extends AppBaseController
 
             return ResponseJson::make(ResponseCodeEnum::STATUS_OK, 'Borrowings found', $borrowings)->send();
         }
+
+        $borrowings = $this->borrowingRepository->when($request->has("searchEquipment"), function ($query) {
+            return $query->whereHas('equipment', function ($query) {
+                return $query->where('name', 'like', '%' . request('searchEquipment') . '%');
+            });
+        })->when($request->has("roomFilter"), function ($query) {
+            return $query->where('room_id', request('roomFilter'));
+        })->when($request->has("statusFilter"), function ($query) {
+            return $query->where('status', request('statusFilter'));
+        })->whereHasMorph('userable', [User::class, Group::class], function ($query) use ($user) {
+            $query->when($query->getModel() instanceof User, function ($q) use ($user) {
+                $q->where('id', $user->id);
+            })->when($query->getModel() instanceof Group, function ($q) use ($user) {
+                $q->whereHas('users', function ($subQuery) use ($user) {
+                    $subQuery->where('users.id', $user->id);
+                });
+            });
+        })->with(['room', 'equipment'])->get()->append('logBookOut')->append('logBookIn');
+
+        if(empty($borrowings)) {
+            return ResponseJson::make(ResponseCodeEnum::STATUS_NOT_FOUND, 'Borrowings not found')->send();
+        }
+
+        return ResponseJson::make(ResponseCodeEnum::STATUS_OK, 'Borrowings found', $borrowings)->send();
     }
 
     public function approveBorrowing($id)

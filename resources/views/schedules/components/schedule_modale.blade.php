@@ -17,6 +17,7 @@
             scheduleId: 0,
             groups: [],
             guests: [],
+            groupId: 0,
             checkStartTime() {
                 if (this.startTime < this.operationalHours.start) {
                     this.startTime = this.operationalHours.start;
@@ -152,16 +153,31 @@
                 }
 
                 let typeIds = [...document.querySelectorAll('input[name="typeId[]"]')].map(el => el.value);
-
-                if (typeIds.length == 0) {
+                if (this.groupId == 0 && this.typeModel == 2 && typeIds.length == 0) {
                     Swal.fire({
                         title: 'Error!',
-                        text: "Pengunjung harus diisi",
+                        text: "Kelompok harus diisi",
                         icon: 'error',
                         confirmButtonText: 'Ok'
                     })
                     return;
                 }
+
+                if (this.groupId != 0 && this.typeModel == 2 && typeIds.length == 0) {
+                    typeIds.push(this.groupId);
+                }
+
+                @if (auth()->user()->hasRole('laborant') || auth()->user()->hasRole('administrator'))
+                    if (typeIds.length == 0) {
+                        Swal.fire({
+                            title: 'Error!',
+                            text: "Pengunjung harus diisi",
+                            icon: 'error',
+                            confirmButtonText: 'Ok'
+                        })
+                        return;
+                    }
+                @endif
 
                 if (!this.checkStartTime()) return;
                 if (!this.checkEndTime()) return;
@@ -241,6 +257,7 @@
                     this.groups = [];
                     this.guests = [];
                     this.scheduleId = 0;
+                    this.groupId = 0;
                 }, 500);
             },
             editModal(schedule) {
@@ -392,7 +409,7 @@
     }
 </script>
 <div class="modal fade" id="scheduleModal" tabindex="-1" aria-labelledby="scheduleModalLabel" aria-hidden="true"
-    x-data="scheduleModal()"  data-backdrop="static" data-keyboard="false">
+    x-data="scheduleModal()" data-backdrop="static" data-keyboard="false">
     <div class="modal-dialog" @set-operational.window="setOperationalHours($event)"
         @set-edit.window="editModal($event.detail)">
         <div class="modal-content">
@@ -517,7 +534,7 @@
                             @if ($groups->count() == 0 && (!Auth::user()->hasRole('administrator') && !Auth::user()->hasRole('laborant')))
                                 <p class="text-muted m-0">Anda belum memiliki grup.</p>
                             @elseif ($groups->count() > 0 && (!Auth::user()->hasRole('administrator') && !Auth::user()->hasRole('laborant')))
-                                {!! Form::select('group_id', ['0' => 'Pilih Grup'] + $groups->toArray(), null, [
+                                {!! Form::select('group_id', ['0' => 'Pilih Grup'] + $groups->pluck('name', 'id')->toArray(), null, [
                                     'class' => 'form-control',
                                     'x-model' => 'groupId',
                                 ]) !!}
@@ -531,15 +548,17 @@
 
                     </template>
 
-                    <template x-if="typeModel == 1 ">
-                        <div>
+                    @if (Auth::user()->hasRole('administrator') || Auth::user()->hasRole('laborant'))
+                        <template x-if="typeModel == 1 ">
+                            <div>
 
-                            @include('schedules.components.search_guest')
+                                @include('schedules.components.search_guest')
 
 
-                        </div>
+                            </div>
 
-                    </template>
+                        </template>
+                    @endif
 
 
                     <div>

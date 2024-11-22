@@ -34,8 +34,8 @@
     {!! Form::select(
         'status',
         [
-            1 => 'Active',
-            0 => 'Inactive',
+            'active' => 'Active',
+            'inactive' => 'Inactive',
         ],
         @$group->status,
         ['class' => 'form-control', 'required'],
@@ -227,7 +227,7 @@
 
 @section('scripts')
     <!-- Relational Form table -->
-    <script src="https://unpkg.com/alpinejs"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.3/dist/cdn.min.js"></script>
     <script>
         $(document).ready(function() {
             $('.dropify').dropify({

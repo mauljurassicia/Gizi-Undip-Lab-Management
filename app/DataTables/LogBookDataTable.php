@@ -26,7 +26,10 @@ class LogBookDataTable extends DataTable
         ->editColumn('time', function ($data) {
             return Carbon::parse($data->time)->format('d M Y, H:i');
         })
-        ->rawColumns(['type', 'action']);
+        ->editColumn('logbookable_type', function ($data) {
+            return $data->logbookable_type == 'App\Models\schedule' ? '<span class="badge badge-primary m-auto">Pinjam Ruang</span>' : '<span class="badge badge-primary m-auto">Pinjam Alat</span>';
+        })
+        ->rawColumns(['type', 'action', 'logbookable_type']);
     }
 
     /**
@@ -87,8 +90,9 @@ class LogBookDataTable extends DataTable
                 'visible' => $user->hasRole('administrator') || $user->hasRole('laborant')
             ],
             'logbookable.name' => ['name' => 'logbookable_id', 'title' => 'Judul', 'data' => 'logbookable.name'],
+            'logbookable_type' => ['name' => 'logbookable_type', 'title' => 'Tipe', 'data' => 'logbookable_type'],
             'type' => ['name' => 'type', 'title' => 'Status', 'data' => 'type', 'searchable' => false, 'orderable' => false],
-            'time',
+            'time' => ['name' => 'time', 'title' => 'Waktu', 'data' => 'time', 'searchable' => false, 'orderable' => false],
         ];
     }
 

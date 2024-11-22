@@ -14,7 +14,7 @@
     <link rel="shortcut icon" type="image/x-icon" href="{{ asset('undip.ico') }}">
     {{-- <link rel="manifest" href="site.webmanifest"> --}}
 
-    <title>Webcore - Web Backend Generate</title>
+    <title>Login - Lab Monitoring</title>
 
     <!-- vendor css -->
     <link href="{{ asset('vendor/dashforge/lib/@fortawesome/fontawesome-free/css/all.min.css') }}" rel="stylesheet">
@@ -82,7 +82,7 @@
                         <div class="form-group">
                             <div class="d-flex justify-content-between mg-b-5">
                                 <label class="mg-b-0-f">Password</label>
-                                <a href="{{ url('/password/reset') }}" class="tx-13">Forgot password?</a>
+                                {{-- <a href="{{ url('/password/reset') }}" class="tx-13">Forgot password?</a> --}}
                             </div>
                             <input type="password" name="password" class="form-control"
                                 placeholder="Enter your password">
@@ -93,6 +93,7 @@
                             @endif
                         </div>
                         <button class="btn btn-brand-02 btn-block">Sign In</button>
+                        <a class="btn btn-brand-01 btn-block" href="{{ url('/register') }}">Sign Up</a>
                     </div>
                 </form>
             </div>

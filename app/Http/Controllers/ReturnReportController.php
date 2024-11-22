@@ -7,7 +7,7 @@ use App\Http\Requests;
 use App\Http\Requests\CreateReturnReportRequest;
 use App\Http\Requests\UpdateReturnReportRequest;
 use App\Repositories\ReturnReportRepository;
-use Flash;
+use Laracasts\Flash\Flash;
 use App\Http\Controllers\AppBaseController;
 use Response;
 use Illuminate\Http\Request; 
@@ -50,15 +50,9 @@ class ReturnReportController extends AppBaseController
      */
     public function create()
     {
-        $ = \App\Models\::all();
-        $ = \App\Models\::all();
-        $ = \App\Models\::all();
         
 
-        return view('return_reports.create')
-            ->with('', $)
-            ->with('', $)
-            ->with('', $);
+        return view('return_reports.create');
     }
 
     /**
@@ -107,10 +101,6 @@ class ReturnReportController extends AppBaseController
     public function edit($id)
     {
         
-        $ = \App\Models\::all();
-        $ = \App\Models\::all();
-        $ = \App\Models\::all();
-        
 
         $returnReport = $this->returnReportRepository->findWithoutFail($id);
 
@@ -120,10 +110,7 @@ class ReturnReportController extends AppBaseController
         }
 
         return view('return_reports.edit')
-            ->with('returnReport', $returnReport)
-            ->with('', $)
-            ->with('', $)
-            ->with('', $);
+            ->with('returnReport', $returnReport);
     }
 
     /**

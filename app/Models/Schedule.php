@@ -125,5 +125,16 @@ class Schedule extends Model
         return $userExist;
     }
 
+    public function getNotAllowedAttribute() {
+        $user = Auth::user();
+        $groups = $this->groups()->whereHas('users', function ($query) use ($user) {
+            $query->where('users.id', $user->id);
+        })->first();
+
+        $user = $this->users()->where('users.id', $user->id)->first();
+
+        return !$user && !$groups;
+    }
+
     
 }

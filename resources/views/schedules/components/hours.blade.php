@@ -185,7 +185,62 @@
             },
             checkOut(id) {
                 this.$dispatch('check-out', id);
-            }
+            },
+            approveSchedule(id) {
+                fetch(`{{ route('schedules.approved', ['id' => ':id']) }}`.replace(':id', id), {
+                        method: 'post',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        },
+                    })
+                    .then(res => res.json())
+                    .then(res => {
+                        if (res.valid) {
+                            this.$store.schedule.getSchedules();
+                            Swal.fire({
+                                title: res.message,
+                                icon: 'success'
+                            });
+                        } else {
+                            Swal.fire({
+                                title: 'Error!',
+                                text: "Jadwal gagal disetujui",
+                                icon: 'error',
+                                confirmButtonText: 'Ok'
+                            });
+                        }
+                    })
+
+            },
+
+            rejectSchedule(id) {
+                fetch(`{{ route('schedules.rejected', ['id' => ':id']) }}`.replace(':id', id), {
+                        method: 'post',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        },
+                    })
+                    .then(res => res.json())
+                    .then(res => {
+                        if (res.valid) {
+                            this.$store.schedule.getSchedules();
+                            Swal.fire({
+                                title: res.message,
+                                icon: 'success'
+                            });
+                        } else {
+                            Swal.fire({
+                                title: 'Error!',
+                                text: "Jadwal gagal ditolak",
+                                icon: 'error',
+                                confirmButtonText: 'Ok'
+                            });
+                        }
+
+                    })
+            },
 
         }
     }
@@ -267,7 +322,7 @@
         </style>
 
         <!-- Header with Date -->
-        <div class="date-header bg-gray-200 py-2" style="position: sticky; top: 0;">
+        <div class="date-header bg-gray-200 py-2" style="position: sticky; top: 0; z-index: 1;">
             <div class="d-flex align-items-center justify-content-center position-relative w-100">
                 <button @click="$store.calendar.isVisible = true; $store.date.selectedDate = null"
                     class="btn btn-light position-absolute" style="left: 10px;">
@@ -344,15 +399,15 @@
                         </h5>
                         <div class="d-flex fit-content">
                             <button @click="editScheduleModal(schedule.id)"
-                                class="btn btn-primary btn-sm d-none d-md-block mr-2"><i
+                                class="btn btn-primary btn-sm d-none d-md-block mr-2" :disabled="schedule.NotAllowed" ><i
                                     class="fa fa-pencil"></i></button>
                             <button @click="editScheduleModal(schedule.id)"
-                                class="btn btn-primary btn-xs btn-icon d-md-none mr-1"><i
+                                class="btn btn-primary btn-xs btn-icon d-md-none mr-1" :disabled="schedule.NotAllowed" ><i
                                     class="fa fa-pencil"></i></button>
                             <button @click="deleteScheduleModal(schedule.id)"
-                                class="btn btn-danger btn-xs btn-icon d-md-none"><i class="fa fa-trash"></i></button>
+                                class="btn btn-danger btn-xs btn-icon d-md-none" :disabled="schedule.NotAllowed" ><i class="fa fa-trash"></i></button>
                             <button @click="deleteScheduleModal(schedule.id)"
-                                class="btn btn-danger btn-sm d-none d-md-block"><i class="fa fa-trash"></i></button>
+                                class="btn btn-danger btn-sm d-none d-md-block" :disabled="schedule.NotAllowed" ><i class="fa fa-trash"></i></button>
                         </div>
 
                     </div>
@@ -403,8 +458,7 @@
                                 'bg-warning': schedule.status === 'pending',
                                 'bg-success': (schedule.status === 'approved' && !isSchedulePassed(schedule
                                     .end_schedule)) || schedule.status === 'finished',
-                                'bg-danger': schedule.status === 'canceled',
-                                'bg-warning': schedule.status === 'rejected',
+                                'bg-danger': schedule.status === 'canceled' || schedule.status === 'rejected',
                                 'bg-secondary': isSchedulePassed(schedule.end_schedule) && schedule
                                     .status !== 'finished'
                             }"
@@ -419,16 +473,32 @@
 
                     </div>
 
+                    @if (auth()->user()->hasRole('administrator') || auth()->user()->hasRole('laborant'))
+                        <div>
+                            <label class="form-label fw-bold">Setujui:</label>
+                            <button @click="approveSchedule(schedule.id)" class="btn btn-success btn-xs mt-2"
+                                :class="{ 'disabled': schedule.status !== 'pending' }"
+                                :disabled="schedule.status !== 'pending'"><i class="fa fa-check"></i></button>
+                            <button @click="rejectSchedule(schedule.id)" class="btn btn-danger btn-xs mt-2"
+                                :class="{ 'disabled': schedule.status !== 'pending' }"
+                                :disabled="schedule.status !== 'pending'"><i class="fa fa-times"></i></button>
+                        </div>
+                    @endif
+
 
                     <button @click="checkIn(schedule.id)" class="btn btn-primary btn-xs mt-2"
                         :class="{
                             'disabled': isSchedulePassed(schedule.end_schedule) && (moment().isAfter(schedule
                                 .end_schedule) || moment().isBefore(schedule.start_schedule)) || schedule.logBookIn
-                        }" :disabled="isSchedulePassed(schedule.end_schedule) && (moment().isAfter(schedule.end_schedule) || moment().isBefore(schedule.start_schedule)) || schedule.logBookIn"><i
+                        }"
+                        :disabled="isSchedulePassed(schedule.end_schedule) && (moment().isAfter(schedule.end_schedule) || moment()
+                                .isBefore(schedule.start_schedule)) || schedule.logBookIn || schedule
+                            .status !=='approved' || schedule.NotAllowed"><i
                             class="fa fa-sign-in-alt"></i>
                         Hadir</button>
                     <button @click="checkOut(schedule.id)" class="btn btn-danger btn-xs mt-2"
-                        :class="{'disabled': !isSchedulePassed(schedule.end_schedule) || schedule.logBookOut}" :disabled="!isSchedulePassed(schedule.end_schedule) || schedule.logBookOut">
+                        :class="{ 'disabled': !isSchedulePassed(schedule.end_schedule) || schedule.logBookOut }"
+                        :disabled="!isSchedulePassed(schedule.end_schedule) || schedule.logBookOut || schedule.NotAllowed">
                         Keluar <i class="fa fa-sign-out-alt"></i></button>
 
                 </div>

@@ -1,86 +1,97 @@
 <li class="nav-label mg-t-25">Menu</li>
 
 <li class="{{ Request::is('dashboard*') ? 'active' : '' }} nav-item">
-    <a class="nav-link" href="{!! route('dashboard') !!}"><i data-feather="home"></i><span>Home</span>
+    <a class="nav-link" href="{!! route('dashboard') !!}"><i data-feather="home"></i><span>Home</span></a>
 </li>
 
-<li class="nav-label mg-t-25">User Management</li>
+@canany(['role-show', 'user-show', 'permissiongroup-show', 'permission-show'])
+    <li class="nav-label mg-t-25">User Management</li>
 
-<li class="{{ Request::is('roles*') ? 'active' : '' }} nav-item">
-    <a class="nav-link" href="{!! route('roles.index') !!}"><i data-feather="lock"></i><span>Roles</span></a>
-</li>
-
-<li class="{{ Request::is('users*') ? 'active' : '' }} nav-item">
-    <a class="nav-link" href="{!! route('users.index') !!}"><i data-feather="user-plus"></i><span>Users</span></a>
-</li>
-
-<li class="{{ Request::is('permissiongroups*') ? 'active' : '' }} nav-item">
-    <a class="nav-link" href="{!! route('permissiongroups.index') !!}"><i data-feather="user-check"></i><span>Permissions
-            Group</span></a>
-</li>
-
-<li class="{{ Request::is('permissions*') ? 'active' : '' }} nav-item">
-    <a class="nav-link" href="{!! route('permissions.index') !!}"><i data-feather="user-check"></i><span>Permissions</span></a>
-</li>
-
-<li class="nav-label mg-t-25">Manajemen Departemen</li>
-
-@can('course-show')
-    <li class="{{ Request::is('courses*') ? 'active' : '' }} nav-item">
-        <a class="nav-link" href="{!! route('courses.index') !!}"><i class="fa fa-graduation-cap"
-                style="width: 32px"></i><span>Mata Kuliah</span></a>
+    <li class="{{ Request::is('roles*') ? 'active' : '' }} nav-item">
+        <a class="nav-link" href="{!! route('roles.index') !!}"><i data-feather="lock"></i><span>Roles</span></a>
     </li>
-@endcan
 
-@can('teacher-show')
-    <li class="{{ Request::is('teachers*') ? 'active' : '' }} nav-item">
-        <a class="nav-link" href="{!! route('teachers.index') !!}"><i class="fa fa-user-tie"
-                style="width: 32px"></i><span>Dosen</span></a>
+    <li class="{{ Request::is('users*') ? 'active' : '' }} nav-item">
+        <a class="nav-link" href="{!! route('users.index') !!}"><i data-feather="user-plus"></i><span>Users</span></a>
     </li>
-@endcan
 
-@can('student-show')
-    <li class="{{ Request::is('students*') ? 'active' : '' }} nav-item">
-        <a class="nav-link" href="{!! route('students.index') !!}"><i class="fa fa-user-graduate"
-                style="width: 32px"></i><span>Mahasiswa</span></a>
+    <li class="{{ Request::is('permissiongroups*') ? 'active' : '' }} nav-item">
+        <a class="nav-link" href="{!! route('permissiongroups.index') !!}"><i data-feather="user-check"></i><span>Permissions
+                Group</span></a>
     </li>
-@endcan
 
-@can('guest-show')
-    <li class="{{ Request::is('guests*') ? 'active' : '' }} nav-item">
-        <a class="nav-link" href="{!! route('guests.index') !!}"><i class="fa fa-address-book"
-                style="width: 32px"></i><span>Guest</span></a>
+    <li class="{{ Request::is('permissions*') ? 'active' : '' }} nav-item">
+        <a class="nav-link" href="{!! route('permissions.index') !!}"><i data-feather="user-check"></i><span>Permissions</span></a>
     </li>
-@endcan
+@endcanany
 
-@can('group-show')
-    <li class="{{ Request::is('groups*') ? 'active' : '' }} nav-item">
-        <a class="nav-link" href="{!! route('groups.index') !!}"><i class="fa fa-users"
-                style="width: 32px"></i><span>Grup</span></a>
-    </li>
-@endcan
+@canany(['course-show', 'teacher-show', 'student-show', 'guest-show', 'group-show'])
 
-<li class="nav-label mg-t-25">Manajemen Lab</li>
+    <li class="nav-label mg-t-25">Manajemen Departemen</li>
 
-<li class="{{ Request::is('laborants*') ? 'active' : '' }} nav-item">
-    <a class="nav-link" href="{!! route('laborants.index') !!}"><i class="fa fa-id-card-clip"
-            style="width: 32px"></i><span>Laborant</span></a>
-</li>
+    @can('course-show')
+        <li class="{{ Request::is('courses*') ? 'active' : '' }} nav-item">
+            <a class="nav-link" href="{!! route('courses.index') !!}"><i class="fa fa-graduation-cap"
+                    style="width: 32px"></i><span>Mata Kuliah</span></a>
+        </li>
+    @endcan
+
+    @can('teacher-show')
+        <li class="{{ Request::is('teachers*') ? 'active' : '' }} nav-item">
+            <a class="nav-link" href="{!! route('teachers.index') !!}"><i class="fa fa-user-tie"
+                    style="width: 32px"></i><span>Dosen</span></a>
+        </li>
+    @endcan
+
+    @can('student-show')
+        <li class="{{ Request::is('students*') ? 'active' : '' }} nav-item">
+            <a class="nav-link" href="{!! route('students.index') !!}"><i class="fa fa-user-graduate"
+                    style="width: 32px"></i><span>Mahasiswa</span></a>
+        </li>
+    @endcan
+
+    @can('guest-show')
+        <li class="{{ Request::is('guests*') ? 'active' : '' }} nav-item">
+            <a class="nav-link" href="{!! route('guests.index') !!}"><i class="fa fa-address-book"
+                    style="width: 32px"></i><span>Guest</span></a>
+        </li>
+    @endcan
+
+    @can('group-show')
+        <li class="{{ Request::is('groups*') ? 'active' : '' }} nav-item">
+            <a class="nav-link" href="{!! route('groups.index') !!}"><i class="fa fa-users"
+                    style="width: 32px"></i><span>Grup</span></a>
+        </li>
+    @endcan
+
+@endcanany
+
+@canany(['laborant-show', 'equipment-show', 'room-show'])
+    <li class="nav-label mg-t-25">Manajemen Lab</li>
+
+    @can('laborant-show')
+        <li class="{{ Request::is('laborants*') ? 'active' : '' }} nav-item">
+            <a class="nav-link" href="{!! route('laborants.index') !!}"><i class="fa fa-id-card-clip"
+                    style="width: 32px"></i><span>Laborant</span></a>
+        </li>
+    @endcan
 
 
-@can('equipment-show')
-    <li class="{{ Request::is('equipment*') ? 'active' : '' }} nav-item">
-        <a class="nav-link" href="{!! route('equipment.index') !!}"><i class="fa fa-microscope" style="width: 32px"></i><span>Alat
-                Lab</span></a>
-    </li>
-@endcan
+    @can('equipment-show')
+        <li class="{{ Request::is('equipment*') ? 'active' : '' }} nav-item">
+            <a class="nav-link" href="{!! route('equipment.index') !!}"><i class="fa fa-microscope" style="width: 32px"></i><span>Alat
+                    Lab</span></a>
+        </li>
+    @endcan
 
-@can('room-show')
-    <li class="{{ Request::is('rooms*') ? 'active' : '' }} nav-item">
-        <a class="nav-link" href="{!! route('rooms.index') !!}"><i class="fa fa-door-open"
-                style="width: 32px"></i><span>Ruangan</span></a>
-    </li>
-@endcan
+    @can('room-show')
+        <li class="{{ Request::is('rooms*') ? 'active' : '' }} nav-item">
+            <a class="nav-link" href="{!! route('rooms.index') !!}"><i class="fa fa-door-open"
+                    style="width: 32px"></i><span>Ruangan</span></a>
+        </li>
+    @endcan
+
+@endcanany
 
 
 
@@ -112,14 +123,13 @@
 @endcan
 
 
-<li class="{{ Request::is('logbooks*') ? 'active' : '' }} nav-item">
-    <a class="nav-link" href="{!! route('courses.index') !!}"><i class="fa fa-heart-crack"
+<li class="{{ Request::is('brokenEquipments*') ? 'active' : '' }} nav-item">
+    <a class="nav-link" href="{!! route('brokenEquipments.index') !!}"><i class="fa fa-heart-crack"
             style="width: 32px"></i><span>Barang Rusak/ Hilang</span></a>
 </li>
 
 
-<li class="{{ Request::is('logbooks*') ? 'active' : '' }} nav-item">
-    <a class="nav-link" href="{!! route('courses.index') !!}"><i class="fa fa-receipt"
+<li class="{{ Request::is('returnReports*') ? 'active' : '' }} nav-item">
+    <a class="nav-link" href="{!! route('returnReports.index') !!}"><i class="fa fa-receipt"
             style="width: 32px"></i><span>Pengembalian</span></a>
 </li>
-

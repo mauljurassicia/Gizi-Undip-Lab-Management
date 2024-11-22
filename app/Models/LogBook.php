@@ -74,5 +74,9 @@ class LogBook extends Model
         return $this->morphTo();
     }
 
+    public function brokenEquipment() {
+        return $this->hasMany(BrokenEquipment::class, 'logbook_id');
+    }
+
     
 }

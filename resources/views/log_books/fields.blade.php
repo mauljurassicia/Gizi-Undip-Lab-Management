@@ -4,7 +4,9 @@
         return {
             activityType: null,
             type: null,
-            activityId: null
+            activityId: null,
+            date: null,
+            time: null
         }
     }
 </script>
@@ -38,21 +40,32 @@
 
     </template>
     <template x-if="activityType == 2">
-        <div class="form-group col-sm-6">
-            {!! Form::label('activity_id', 'Jadwal Pinjam Alat:', ['class' => 'd-block', 'required']) !!}
-            @if ($borrowings->count() == 0)
-                <div class="alert alert-danger">
-                    Tidak Ada Jadwal Pinjam Alat
+        <div>
+            <div class="form-group col-sm-6">
+                {!! Form::label('activity_id', 'Jadwal Pinjam Alat:', ['class' => 'd-block', 'required']) !!}
+                @if ($borrowings->count() == 0)
+                    <div class="alert alert-danger">
+                        Tidak Ada Jadwal Pinjam Alat
+                    </div>
+                @else
+                    {!! Form::select('activity_id', $borrowings->pluck('activity_name', 'id')->toArray(), null, [
+                        'class' => 'form-control',
+                        'required',
+                        'placeholder' => '-- Pilih Jadwal Pinjam Alat --',
+                        'x-model' => 'activityId',
+                    ]) !!}
+                @endif
+
+
+            </div>
+            <template x-if="activityType == 2 && type == 2">
+                <div class="form-group col-sm-6">
+                    {!! Form::label('quantity', 'Jumlah Alat Kembali:', ['class' => 'd-block', 'required']) !!}
+                    {!! Form::number('quantity', null, ['class' => 'form-control', 'required', 'min' => '0']) !!}
                 </div>
-            @else
-                {!! Form::select('activity_id', $borrowings->pluck('activity_name', 'id')->toArray(), null, [
-                    'class' => 'form-control',
-                    'required',
-                    'placeholder' => '-- Pilih Jadwal Pinjam Alat --',
-                    'x-model' => 'activityId',
-                ]) !!}
-            @endif
+            </template>
         </div>
+
     </template>
 
     <!-- Type Field -->
@@ -66,20 +79,26 @@
         ]) !!}
     </div>
 
+    <!-- Time Field -->
+    <div class="form-group col-sm-6">
+        {!! Form::label('date', 'Date:') !!}
+        {!! Form::date('date', null, ['class' => 'form-control date', 'x-model' => 'date', 'required'], 'required') !!}
+    </div>
+
+    <div class="form-group col-sm-6">
+        {!! Form::label('time', 'Time:') !!}
+        {!! Form::time('time', null, ['class' => 'form-control', 'required', 'x-model' => 'time']) !!}
+    </div>
+
+    <div class="form-group col-sm-6">
+        <button type="button" class="btn btn-primary mt-2"
+            @click.prevent="date = moment().format('YYYY-MM-DD'); time = moment().format('HH:mm');">Sekarang</button>
+    </div>
+
 
 </div>
 
 
-<!-- Time Field -->
-<div class="form-group col-sm-6">
-    {!! Form::label('date', 'Date:') !!}
-    {!! Form::date('date', null, ['class' => 'form-control date'], 'required') !!}
-</div>
-
-<div class="form-group col-sm-6">
-    {!! Form::label('time', 'Time:') !!}
-    {!! Form::time('time', null, ['class' => 'form-control', 'required']) !!}
-</div>
 
 
 

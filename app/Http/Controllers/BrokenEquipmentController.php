@@ -7,7 +7,7 @@ use App\Http\Requests;
 use App\Http\Requests\CreateBrokenEquipmentRequest;
 use App\Http\Requests\UpdateBrokenEquipmentRequest;
 use App\Repositories\BrokenEquipmentRepository;
-use Flash;
+use Laracasts\Flash\Flash;
 use App\Http\Controllers\AppBaseController;
 use Response;
 use Illuminate\Http\Request; 
@@ -50,15 +50,9 @@ class BrokenEquipmentController extends AppBaseController
      */
     public function create()
     {
-        $ = \App\Models\::all();
-        $ = \App\Models\::all();
-        $ = \App\Models\::all();
         
 
-        return view('broken_equipments.create')
-            ->with('', $)
-            ->with('', $)
-            ->with('', $);
+        return view('broken_equipments.create');
     }
 
     /**
@@ -107,10 +101,6 @@ class BrokenEquipmentController extends AppBaseController
     public function edit($id)
     {
         
-        $ = \App\Models\::all();
-        $ = \App\Models\::all();
-        $ = \App\Models\::all();
-        
 
         $brokenEquipment = $this->brokenEquipmentRepository->findWithoutFail($id);
 
@@ -120,10 +110,7 @@ class BrokenEquipmentController extends AppBaseController
         }
 
         return view('broken_equipments.edit')
-            ->with('brokenEquipment', $brokenEquipment)
-            ->with('', $)
-            ->with('', $)
-            ->with('', $);
+            ->with('brokenEquipment', $brokenEquipment);
     }
 
     /**

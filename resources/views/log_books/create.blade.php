@@ -3,11 +3,11 @@
 @section('contents')
     <div class="content">
         <div class="container">
-            @include('dashforge-templates::common.errors')
+            @include('flash::message')
 
             <h4 id="section1" class="mg-b-10">Log Book</h4>
 
-            <p class="mg-b-30">Please, fill all required fields before click save button.</p>
+            <p class="mg-b-30">Harap, isi semua bidang yang diperlukan sebelum mengklik tombol simpan.</p>
 
             <div style="margin-right: -15px;margin-left: -15px;">
                 <div data-label="Create" class="df-example demo-forms services-forms">

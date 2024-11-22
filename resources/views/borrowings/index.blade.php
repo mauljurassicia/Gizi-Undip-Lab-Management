@@ -168,6 +168,12 @@
                                     })
                                 }
                             })
+                        },
+                        openLogBookModal(borrowing, type) {
+                            this.$dispatch('open-modal', {
+                                borrowing: borrowing,
+                                type: type
+                            })
                         }
                     }
                 }
@@ -185,6 +191,7 @@
                     @endcan
                     <!-- Modal -->
                     @include('borrowings.components.modal')
+                    @include('borrowings.components.logbook_modal')
 
                 </div>
             </div>
@@ -236,7 +243,8 @@
                                             :class="{
                                                 'bg-warning text-dark': borrowing.status === 'pending',
                                                 'bg-success text-white': borrowing.status === 'approved',
-                                                'bg-danger text-white': borrowing.status === 'rejected'
+                                                'bg-info text-white': borrowing.status === 'returned',
+                                                 'bg-danger text-white': borrowing.status === 'rejected' || borrowing.status === 'cancelled'
                                             }"
                                             x-text="borrowing.status">
 
@@ -260,11 +268,11 @@
                                         @endif
                                     </div>
                                     <div class="mt-2">
-                                        <button type="button" class="btn btn-success btn-sm" :disabled="borrowing.status !== 'approved'"
-                                            @click="openLogBookModal(borrowing, true)">
+                                        <button type="button" class="btn btn-success btn-sm" :disabled="borrowing.status !== 'approved' || borrowing.logBookIn"
+                                            @click="openLogBookModal(borrowing, true)" >
                                             <i class="fa fa-sign-in-alt"></i> Log Book In
                                         </button>
-                                        <button type="button" class="btn btn-danger btn-sm" :disabled="borrowing.status !== 'approved'"
+                                        <button type="button" class="btn btn-danger btn-sm" :disabled="borrowing.status !== 'approved' || !borrowing.logBookIn || borrowing.logBookOut"
                                             @click="openLogBookModal(borrowing, false)">
                                             <i class="fa fa-sign-out-alt"></i> Log Book Out
                                         </button>
@@ -274,11 +282,11 @@
                                 <div class="card-footer">
                                     <div class="d-flex justify-content-between">
                                         <button type="button" class="btn btn-primary btn-sm"
-                                            @click="editBorrowing(borrowing)">
+                                            @click="editBorrowing(borrowing)" :disabled="borrowing.status !== 'pending'">
                                             <i class="fa fa-edit"></i> Edit
                                         </button>
                                         <button type="button" class="btn btn-danger btn-sm"
-                                            @click="deleteBorrowing(borrowing)">
+                                            @click="deleteBorrowing(borrowing)" :disabled="borrowing.status !== 'pending'">
                                             <i class="fa fa-trash"></i> Hapus
                                         </button>
                                     </div>

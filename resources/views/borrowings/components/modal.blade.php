@@ -27,7 +27,7 @@
             },
             checkVisibilitySchedule() {
                 if (this.equipmentId && this.startDate && this.endDate && (moment(this.endDate).diff(moment(this
-                        .startDate), 'days') > 0)) {
+                        .startDate), 'days') >= 0)) {
                     this.fetchCurrentEquipmentQuantity();
                 }
             },

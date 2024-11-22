@@ -98,6 +98,7 @@ Route::put('borrowings/{id}/update', 'BorrowingController@updateBorrowing')->nam
 Route::delete('borrowings/{id}/delete', 'BorrowingController@deleteBorrowing')->name('borrowings.delete');
 Route::post('borrowings/{id}/approved', 'BorrowingController@approveBorrowing')->name('borrowings.approved');
 Route::post('borrowings/{id}/rejected', 'BorrowingController@rejectBorrowing')->name('borrowings.rejected');
+Route::post('borrowings/{id}/logbook', 'BorrowingController@addLogBook')->name('borrowings.logbook.add');
 Route::resource('borrowings', 'BorrowingController')->only(['index']);
 Route::get('borrowings/{room}/equipments', 'BorrowingController@getEquipmentByRoom')->where('room', '[0-9]+',)->name('borrowings.room.equipments');
 Route::get('borrowings/{room}/{equipment}/quantity', 'BorrowingController@getQuantityByRoomAndEquipment')->where('room', '[0-9]+')->where('equipment', '[0-9]+')->name('borrowings.room.equipment.quantity');

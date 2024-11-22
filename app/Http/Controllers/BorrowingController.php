@@ -12,6 +12,7 @@ use App\Repositories\BorrowingRepository;
 use Laracasts\Flash\Flash;
 use App\Http\Controllers\AppBaseController;
 use App\Models\Group;
+use App\Models\LogBook;
 use App\Repositories\RoomRepository;
 use App\User;
 use Carbon\Carbon;
@@ -67,7 +68,7 @@ class BorrowingController extends AppBaseController
     {
         $room = $this->roomRepository->findWithoutFail($room);
 
-        if(empty($room)){
+        if (empty($room)) {
             return ResponseJson::make(ResponseCodeEnum::STATUS_NOT_FOUND, 'Room not found')->send();
         }
 
@@ -85,30 +86,30 @@ class BorrowingController extends AppBaseController
     {
         $room = $this->roomRepository->findWithoutFail($room);
 
-        if(empty($room)){
+        if (empty($room)) {
             return ResponseJson::make(ResponseCodeEnum::STATUS_NOT_FOUND, 'Room not found')->send();
         }
 
         $equipment = $room->equipment->where('id', $equipment)->first();
 
-        if(empty($equipment)){
+        if (empty($equipment)) {
             return ResponseJson::make(ResponseCodeEnum::STATUS_NOT_FOUND, 'Equipment not found')->send();
         }
 
         $startDate = Carbon::parse($request->query('start_date'));
         $endDate = Carbon::parse($request->query('end_date'));
 
-        if(! $startDate->isValid() || ! $endDate->isValid()){
+        if (! $startDate->isValid() || ! $endDate->isValid()) {
             return ResponseJson::make(ResponseCodeEnum::STATUS_BAD_REQUEST, 'Start date or end date is not valid')->send();
         }
 
-        if($request->has('isEdit') && $request->input('isEdit') == 'true'){
+        if ($request->has('isEdit') && $request->input('isEdit') == 'true') {
             $usedQuantity = $this->borrowingRepository->getQuantityByRoomAndEquipmentExceptId($room->id, $equipment->id, $startDate, $endDate, $request->query('id'));
-        } else{
+        } else {
             $usedQuantity = $this->borrowingRepository->getQuantityByRoomAndEquipment($room->id, $equipment->id, $startDate, $endDate);
         }
 
-        
+
 
         $quantity = $room->equipment()->withPivot('quantity')->where('equipment_id', $equipment->id)->first()?->pivot->quantity;
 
@@ -118,8 +119,9 @@ class BorrowingController extends AppBaseController
     }
 
 
-    public function addBorrowing(Request $request){
-        if(!Auth::check()){
+    public function addBorrowing(Request $request)
+    {
+        if (!Auth::check()) {
             return ResponseJson::make(ResponseCodeEnum::STATUS_UNATENTICATED, 'Unauthorized')->send();
         }
 
@@ -128,21 +130,21 @@ class BorrowingController extends AppBaseController
 
         $room = $this->roomRepository->findWithoutFail($request->input('roomId'));
 
-        if(empty($room)){
+        if (empty($room)) {
             return ResponseJson::make(ResponseCodeEnum::STATUS_NOT_FOUND, 'Room not found')->send();
         }
 
         $equipment = $room->equipment->where('id', $request->input('equipmentId'))->first();
 
-        if(empty($equipment)){
+        if (empty($equipment)) {
             return ResponseJson::make(ResponseCodeEnum::STATUS_NOT_FOUND, 'Equipment not found')->send();
         }
 
         $startDate = Carbon::parse($request->input('startDate'));
-        $endDate = Carbon::parse($request->input('endDate'));   
+        $endDate = Carbon::parse($request->input('endDate'));
 
 
-        if(! $startDate->isValid() || ! $endDate->isValid()){
+        if (! $startDate->isValid() || ! $endDate->isValid()) {
             return ResponseJson::make(ResponseCodeEnum::STATUS_BAD_REQUEST, 'Start date or end date is not valid')->send();
         }
 
@@ -153,11 +155,11 @@ class BorrowingController extends AppBaseController
 
         $remainQuantity = $quantity - $usedQuantity;
 
-        if($remainQuantity < $request->input('quantity')){
+        if ($remainQuantity < $request->input('quantity')) {
             return ResponseJson::make(ResponseCodeEnum::STATUS_BAD_REQUEST, 'Quantity is not enough')->send();
         }
 
-        
+
 
         $this->borrowingRepository->create([
             'room_id' => $room->id,
@@ -176,47 +178,48 @@ class BorrowingController extends AppBaseController
         return ResponseJson::make(ResponseCodeEnum::STATUS_OK, 'Borrowing added')->send();
     }
 
-    public function updateBorrowing(Request $request, $id){
-        if(!Auth::check()){
+    public function updateBorrowing(Request $request, $id)
+    {
+        if (!Auth::check()) {
             return ResponseJson::make(ResponseCodeEnum::STATUS_UNATENTICATED, 'Unathorized')->send();
         }
 
-           /** @var User */
-           $user = Auth::user();
+        /** @var User */
+        $user = Auth::user();
 
-           $room = $this->roomRepository->findWithoutFail($request->input('roomId'));
-   
-           if(empty($room)){
-               return ResponseJson::make(ResponseCodeEnum::STATUS_NOT_FOUND, 'Room not found')->send();
-           }
-   
-           $equipment = $room->equipment->where('id', $request->input('equipmentId'))->first();
-   
-           if(empty($equipment)){
-               return ResponseJson::make(ResponseCodeEnum::STATUS_NOT_FOUND, 'Equipment not found')->send();
-           }
-   
-           $startDate = Carbon::parse($request->input('startDate'));
-           $endDate = Carbon::parse($request->input('endDate'));   
-   
-   
-           if(! $startDate->isValid() || ! $endDate->isValid()){
-               return ResponseJson::make(ResponseCodeEnum::STATUS_BAD_REQUEST, 'Start date or end date is not valid')->send();
-           }
+        $room = $this->roomRepository->findWithoutFail($request->input('roomId'));
 
-           $usedQuantity = $this->borrowingRepository->getQuantityByRoomAndEquipmentExceptId($room->id, $equipment->id, $startDate, $endDate, $id);
+        if (empty($room)) {
+            return ResponseJson::make(ResponseCodeEnum::STATUS_NOT_FOUND, 'Room not found')->send();
+        }
 
-           $quantity = $room->equipment()->withPivot('quantity')->where('equipment_id', $equipment->id)->first()?->pivot->quantity;
-   
-           $remainQuantity = $quantity - $usedQuantity;
-   
-           if($remainQuantity < $request->input('quantity')){
-               return ResponseJson::make(ResponseCodeEnum::STATUS_BAD_REQUEST, 'Quantity is not enough')->send();
-           }
-   
+        $equipment = $room->equipment->where('id', $request->input('equipmentId'))->first();
+
+        if (empty($equipment)) {
+            return ResponseJson::make(ResponseCodeEnum::STATUS_NOT_FOUND, 'Equipment not found')->send();
+        }
+
+        $startDate = Carbon::parse($request->input('startDate'));
+        $endDate = Carbon::parse($request->input('endDate'));
 
 
-           $this->borrowingRepository->update([
+        if (! $startDate->isValid() || ! $endDate->isValid()) {
+            return ResponseJson::make(ResponseCodeEnum::STATUS_BAD_REQUEST, 'Start date or end date is not valid')->send();
+        }
+
+        $usedQuantity = $this->borrowingRepository->getQuantityByRoomAndEquipmentExceptId($room->id, $equipment->id, $startDate, $endDate, $id);
+
+        $quantity = $room->equipment()->withPivot('quantity')->where('equipment_id', $equipment->id)->first()?->pivot->quantity;
+
+        $remainQuantity = $quantity - $usedQuantity;
+
+        if ($remainQuantity < $request->input('quantity')) {
+            return ResponseJson::make(ResponseCodeEnum::STATUS_BAD_REQUEST, 'Quantity is not enough')->send();
+        }
+
+
+
+        $this->borrowingRepository->update([
             'room_id' => $room->id,
             'equipment_id' => $equipment->id,
             'start_date' => $startDate,
@@ -230,43 +233,43 @@ class BorrowingController extends AppBaseController
         ], $id);
 
         return ResponseJson::make(ResponseCodeEnum::STATUS_OK, 'Borrowing updated')->send();
-   
-
     }
 
-    public function getBorrowings(Request $request){
-        if(!Auth::check()){
+    public function getBorrowings(Request $request)
+    {
+        if (!Auth::check()) {
             return ResponseJson::make(ResponseCodeEnum::STATUS_UNATENTICATED, 'Unauthorized')->send();
         }
 
         /** @var User */
         $user = Auth::user();
 
-        if($user->hasRole('administrator') || $user->hasRole('laborant')){
-            $borrowings = $this->borrowingRepository->when($request->has("searchEquipment"), function($query){
-                return $query->whereHas('equipment', function($query){
+        if ($user->hasRole('administrator') || $user->hasRole('laborant')) {
+            $borrowings = $this->borrowingRepository->when($request->has("searchEquipment"), function ($query) {
+                return $query->whereHas('equipment', function ($query) {
                     return $query->where('name', 'like', '%' . request('searchEquipment') . '%');
                 });
-            })->when($request->has("roomFilter"), function($query){
+            })->when($request->has("roomFilter"), function ($query) {
                 return $query->where('room_id', request('roomFilter'));
-            })->when($request->has("statusFilter"), function($query){
+            })->when($request->has("statusFilter"), function ($query) {
                 return $query->where('status', request('statusFilter'));
-            })->with(['room', 'equipment'])->get();
+            })->with(['room', 'equipment'])->get()->append('logBookOut')->append('logBookIn');
 
             return ResponseJson::make(ResponseCodeEnum::STATUS_OK, 'Borrowings found', $borrowings)->send();
         }
     }
 
-    public function approveBorrowing($id){
+    public function approveBorrowing($id)
+    {
         $borrowing = $this->borrowingRepository->findWithoutFail($id);
 
         /** @var User $user */
         $user = Auth::user();
-        if(!$user->hasRole('laborant') && !$user->hasRole('administrator')){
+        if (!$user->hasRole('laborant') && !$user->hasRole('administrator')) {
             return ResponseJson::make(ResponseCodeEnum::STATUS_UNATENTICATED, 'Unauthorized')->send();
         }
 
-        if(empty($borrowing)){
+        if (empty($borrowing)) {
             return ResponseJson::make(ResponseCodeEnum::STATUS_NOT_FOUND, 'Borrowing not found')->send();
         }
 
@@ -275,19 +278,19 @@ class BorrowingController extends AppBaseController
         $borrowing->save();
 
         return ResponseJson::make(ResponseCodeEnum::STATUS_OK, 'Borrowing approved')->send();
-        
     }
 
-    public function rejectBorrowing($id){
+    public function rejectBorrowing($id)
+    {
         $borrowing = $this->borrowingRepository->findWithoutFail($id);
 
         /** @var User $user */
         $user = Auth::user();
-        if(!$user->hasRole('laborant') && !$user->hasRole('administrator')){
+        if (!$user->hasRole('laborant') && !$user->hasRole('administrator')) {
             return ResponseJson::make(ResponseCodeEnum::STATUS_UNATENTICATED, 'Unauthorized')->send();
         }
 
-        if(empty($borrowing)){
+        if (empty($borrowing)) {
             return ResponseJson::make(ResponseCodeEnum::STATUS_NOT_FOUND, 'Borrowing not found')->send();
         }
 
@@ -298,9 +301,66 @@ class BorrowingController extends AppBaseController
         return ResponseJson::make(ResponseCodeEnum::STATUS_OK, 'Borrowing rejected')->send();
     }
 
+    public function addLogBook(Request $request, $id)
+    {
 
-    public function getGroup(){
-        if(!Auth::check()){
+        $borrowing = $this->borrowingRepository->findWithoutFail($id);
+
+        if (empty($borrowing)) {
+            return ResponseJson::make(ResponseCodeEnum::STATUS_NOT_FOUND, 'Borrowing not found')->send();
+        }
+
+        $datetime = Carbon::parse($request->input('date') . ' ' . $request->input('time'));
+
+        if (! $datetime->isValid()) {
+            return ResponseJson::make(ResponseCodeEnum::STATUS_BAD_REQUEST, 'Date is not valid')->send();
+        }
+
+        $logBook = new LogBook([
+            'report' => $request->input('report'),
+            'time' => $datetime,
+            'type' => $request->input('type'),
+        ]);
+
+        $userId = auth()->id(); // assuming this is how you get the current user ID
+
+        $userSchedule = $borrowing->userable()
+            ->where(function ($query) use ($userId) {
+                $query->where(function ($q) use ($userId) {
+                    $q->where('userable_type', 'App\Models\User')
+                        ->where('id', $userId);
+                })
+                    ->orWhere(function ($q) use ($userId) {
+                        $q->where('userable_type', 'App\Models\Group')
+                            ->whereHas('users', function ($groupQuery) use ($userId) {
+                                $groupQuery->where('users.id', $userId);
+                            });
+                    });
+            })
+            ->first();
+
+        if (!$userSchedule) {
+            return ResponseJson::make(ResponseCodeEnum::STATUS_UNATENTICATED, 'Unauthorized')->send();
+        }
+
+        $logBook->userable()->associate($userSchedule);
+        $logBook->logbookable()->associate($borrowing);
+
+        $logBook->save();
+
+        if ($request->input('type') == 'out') {
+            $borrowing->status = 'returned';
+            $borrowing->save();
+            $borrowing->return_quantity = $request->input('quantity');
+        }
+
+        return ResponseJson::make(ResponseCodeEnum::STATUS_OK, 'Log book added')->send();
+    }
+
+
+    public function getGroup()
+    {
+        if (!Auth::check()) {
             return redirect(route('login'));
         }
 
@@ -309,7 +369,7 @@ class BorrowingController extends AppBaseController
 
         $groups = $user->groups;
 
-        if(empty($groups)){
+        if (empty($groups)) {
             return ResponseJson::make(ResponseCodeEnum::STATUS_NOT_FOUND, 'Group not found')->send();
         }
 
@@ -420,12 +480,14 @@ class BorrowingController extends AppBaseController
         $borrowing = $this->borrowingRepository->findWithoutFail($id);
 
         if (empty($borrowing)) {
-            return ResponseJson::make(ResponseCodeEnum::STATUS_NOT_FOUND, 'Borrowing not found')->send();   
+            return ResponseJson::make(ResponseCodeEnum::STATUS_NOT_FOUND, 'Borrowing not found')->send();
         }
+
+        $borrowing->logBooks()->delete();
 
         $this->borrowingRepository->delete($id);
 
-        return ResponseJson::make(ResponseCodeEnum::STATUS_OK, 'Borrowing deleted successfully')->send();   
+        return ResponseJson::make(ResponseCodeEnum::STATUS_OK, 'Borrowing deleted successfully')->send();
     }
 
     /**

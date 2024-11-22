@@ -454,8 +454,15 @@ class ScheduleController extends AppBaseController
         }
 
         if (!is_null($request->query('group') && $request->query('group') == '1')) {
+
+            $schedules = $this->scheduleRepository->where('grouped_schedule_code', $schedule->grouped_schedule_code)->get();
+
+            foreach ($schedules as $schedule) {
+                $schedule->logBooks()->delete();
+            }
             $this->scheduleRepository->where('grouped_schedule_code', $schedule->grouped_schedule_code)->delete();
         } else {
+            $schedule->logBooks()->delete();
             $schedule->delete();
         }
 
@@ -547,7 +554,7 @@ class ScheduleController extends AppBaseController
         /** @var User */
         $user = Auth::user();
 
-        $groupSchedule = $user->groups()->whereHas('users', function ($query) use ($user) {
+        $groupSchedule = $schedule->groups()->whereHas('users', function ($query) use ($user) {
             $query->where('users.id', $user->id);
         })->first();
 

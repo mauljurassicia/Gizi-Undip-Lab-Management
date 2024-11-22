@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
+use App\User;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Auth;
 
 /**
  * @SWG\Definition(
@@ -118,6 +120,43 @@ class Borrowing extends Model
 
     public function getNameAttribute() {
         return $this->activity_name;
+    }
+
+    public function getLogBookInAttribute() {
+         /** @var User $user */
+         $user = Auth::user();
+         $userExist = $this->logBooks()
+         ->where('type', 'in')
+         ->whereHasMorph('userable', [User::class, Group::class], function ($query) use ($user) {
+             $query->when($query->getModel() instanceof User, function ($q) use ($user) {
+                 $q->where('id', $user->id);
+             })->when($query->getModel() instanceof Group, function ($q) use ($user) {
+                 $q->whereHas('users', function ($subQuery) use ($user) {
+                     $subQuery->where('users.id', $user->id);
+                 });
+             });
+         })->exists();
+ 
+         return $userExist;
+        
+    }
+
+    public function getLogBookOutAttribute() {
+            /** @var User $user */
+            $user = Auth::user();
+            $userExist = $this->logBooks()
+            ->where('type', 'out')
+            ->whereHasMorph('userable', [User::class, Group::class], function ($query) use ($user) {
+                $query->when($query->getModel() instanceof User, function ($q) use ($user) {
+                    $q->where('id', $user->id);
+                })->when($query->getModel() instanceof Group, function ($q) use ($user) {
+                    $q->whereHas('users', function ($subQuery) use ($user) {
+                        $subQuery->where('users.id', $user->id);
+                    });
+                });
+            })->exists();
+    
+            return $userExist;
     }
 
     

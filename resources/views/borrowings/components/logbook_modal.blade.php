@@ -5,10 +5,14 @@
             isCheckin: false,
             isCheckout: false,
             report: '',
+            hasReport: false,
             time: null,
             date: null,
             returnQuantity: 0,
             maxReturn: 0,
+            brokenQuantity: 0,
+            brokenReport: '',
+            brokenImage: null,
             checkin(detail) {
                 this.activityId = detail;
                 $('#logbookModal').modal('show');
@@ -58,6 +62,38 @@
                     return;
                 }
 
+                if (this.isCheckout && this.hasReport && !this.brokenQuantity) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops...',
+                        text: 'Tolong isi laporan kerusakan !',
+                    });
+
+                    return;
+                }
+
+                if (this.isCheckout && (this.brokenQuantity > this.maxReturn)) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops...',
+                        text: 'Jumlah kerusakan melebihi jumlah barang yang dipinjam !',
+                    });
+                    this.brokenQuantity = this.maxReturn;
+
+                    return;
+                }
+
+                if (this.isCheckout && ((Number(this.returnQuantity) + Number(this.brokenQuantity)) != Number(this
+                        .maxReturn))) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops...',
+                        text: 'Jumlah barang yang dikembalikan + kerusakan tidak sama dengan jumlah barang yang dipinjam !',
+                    })
+
+                    return;
+                }
+
                 fetch(`{{ route('borrowings.logbook.add', ['id' => ':id']) }}?type=${this.isCheckin ? 'in' : 'out'}`
                     .replace(':id', this.activityId), {
                         method: 'post',
@@ -70,7 +106,12 @@
                             date: this.date,
                             time: this.time,
                             report: this.report,
-                            return: this.returnQuantity
+                            return: this.returnQuantity,
+                            brokenReport: this.brokenReport,
+                            brokenImage: this.brokenImage,
+                            brokenQuantity: this.brokenQuantity,
+                            hasReport: this.hasReport
+
                         })
                     }).then(response => response.json()).then(data => {
                     if (data.valid) {
@@ -104,6 +145,20 @@
                     this.checkin(detail.borrowing.id);
                 } else {
                     this.checkout(detail.borrowing);
+                }
+            },
+            reportBroken() {
+                if (this.hasReport) {
+                    this.hasReport = false;
+                } else {
+                    this.hasReport = true;
+                }
+            },
+            uploadBrokenImage(event) {
+                const reader = new FileReader();
+                reader.readAsDataURL(event.target.files[0]);
+                reader.onload = e => {
+                    this.brokenImage = e.target.result;
                 }
             }
         }
@@ -143,6 +198,39 @@
                     <label for="report">Laporan</label>
                     <textarea class="form-control" id="report" rows="3" x-model="report" name="report"></textarea>
                 </div>
+
+                <template x-if="isCheckout">
+                    <div>
+                        <template x-if="!hasReport">
+                            <button type="button" class="btn btn-danger mt-2 w-100" @click.prevent="reportBroken">Lapor
+                                Kerusakan <i class="fa fa-exclamation-triangle"></i></button>
+                        </template>
+                        <template x-if="hasReport">
+                            <div>
+                                <div class="form-group">
+                                    <label for="return">Jumlah Kerusakan</label>
+                                    <input type="number" class="form-control" id="brokenQuantity"
+                                        :max="maxReturn - returnQuantity" x-model="brokenQuantity"
+                                        name="returnQuantity"></input>
+                                </div>
+                                <div class="form-group">
+                                    <label for="report">Laporan Kerusakan</label>
+                                    <textarea class="form-control" id="report" rows="3" x-model="report" name="report"></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label for="brokenImage">Gambar Kerusakan</label>
+                                    <input type="file" class="form-control" id="brokenImage" accept="image/*"
+                                        x-on:change="uploadBrokenImage($event)">
+                                </div>
+                                <button type="button" class="btn btn-warning mt-2 mb-2 w-100"
+                                    @click.prevent="reportBroken">Batalkan Laporan Kerusakan <i
+                                        class="fa fa-redo"></i></button>
+                            </div>
+                        </template>
+                    </div>
+
+                </template>
+
 
             </div>
             <div class="modal-footer">

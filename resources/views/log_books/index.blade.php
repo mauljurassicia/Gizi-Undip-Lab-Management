@@ -27,7 +27,7 @@
 
                 </div>
 
-                <div class="d-none d-md-block">
+                <div class="d-block">
                     @can('logBook-create')
                         <a class="btn btn-sm btn-primary btn-uppercase" href="{!! route('logBooks.create') !!}"><i class="fa fa-book"></i> Catat Log Book</a>
                     @endcan

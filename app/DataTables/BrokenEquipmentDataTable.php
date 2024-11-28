@@ -18,7 +18,17 @@ class BrokenEquipmentDataTable extends DataTable
     {
         $dataTable = new EloquentDataTable($query);
 
-        return $dataTable->addColumn('action', 'broken_equipments.datatables_actions');
+        return $dataTable->addColumn('action', 'broken_equipments.datatables_actions')
+        ->editColumn('broken_date', function ($data) {
+            return date('d F Y', strtotime($data->broken_date));
+        })
+        ->editColumn('return_date', function ($data) {
+            if($data->return_date == null){
+                return '-';
+            }
+            return date('d F Y', strtotime($data->return_date));
+        })
+        ->rawColumns(['action']);
     }
 
     /**
@@ -29,7 +39,7 @@ class BrokenEquipmentDataTable extends DataTable
      */
     public function query(BrokenEquipment $model)
     {
-        return $model->newQuery();
+        return $model->newQuery()->with(['room', 'equipment', 'user']);
     }
 
     /**
@@ -47,9 +57,6 @@ class BrokenEquipmentDataTable extends DataTable
                 'dom'     => 'Bfrtip',
                 'order'   => [[0, 'desc']],
                 'buttons' => [
-                    'export',
-                    'reset',
-                    'reload',
                 ],
                 'initComplete' => "function() {
                     this.api().columns().every(function() {
@@ -74,12 +81,12 @@ class BrokenEquipmentDataTable extends DataTable
     protected function getColumns()
     {
         return [
-            'room_id',
-            'user_id',
-            'equipment_id',
-            'quantity',
-            'broken_date',
-            'return_date'
+            'room.name' => ['name' => 'room_id', 'title' => 'Ruangan', 'data' => 'room.name'],
+            'user.name' => ['name' => 'user_id', 'title' => 'Pengguna', 'data' => 'user.name'],
+            'equipment.name' => ['name' => 'equipment_id', 'title' => 'Alat', 'data' => 'equipment.name'],
+            'quantity' => ['name' => 'quantity', 'title' => 'Jumlah', 'data' => 'quantity'],
+            'broken_date' => ['name' => 'broken_date', 'title' => 'Tgl. Rusak', 'data' => 'broken_date'],
+            'return_date' => ['name' => 'return_date', 'title' => 'Tgl. Kembali', 'data' => 'return_date'],
         ];
     }
 

@@ -497,8 +497,9 @@
                             class="fa fa-sign-in-alt"></i>
                         Hadir</button>
                     <button @click="checkOut(schedule.id)" class="btn btn-danger btn-xs mt-2"
-                        :class="{ 'disabled': !isSchedulePassed(schedule.end_schedule) || schedule.logBookOut }"
-                        :disabled="!isSchedulePassed(schedule.end_schedule) || schedule.logBookOut || schedule.NotAllowed">
+                        :class="{ 'disabled': !isSchedulePassed(schedule.end_schedule) || schedule.logBookOut ||
+                            schedule.NotAllowed }"
+                        :disabled="!isSchedulePassed(schedule.end_schedule) || schedule.logBookOut || schedule.NotAllowed || schedule.status !=='approved' || !schedule.logBookIn">
                         Keluar <i class="fa fa-sign-out-alt"></i></button>
 
                 </div>

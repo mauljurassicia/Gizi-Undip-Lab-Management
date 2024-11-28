@@ -8,13 +8,16 @@ use App\Helpers\ResponseJson;
 use App\Repositories\ScheduleRepository;
 use Laracasts\Flash\Flash;
 use App\Http\Controllers\AppBaseController;
+use App\Models\BrokenEquipment;
 use App\Models\Group;
 use App\Models\LogBook;
 use App\Models\Schedule;
+use App\Repositories\BrokenEquipmentRepository;
 use App\Repositories\CourseRepository;
 use App\Repositories\GroupRepository;
 use App\Repositories\RoomRepository;
 use App\Repositories\UserRepository;
+use App\Services\SaveFileService;
 use App\User;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
@@ -39,6 +42,11 @@ class ScheduleController extends AppBaseController
     /** @var GroupRepository */
     private $groupRepository;
 
+    /** @var BrokenEquipmentRepository */
+    private $brokenEquipmentRepository;
+
+    /** @var SaveFileService */
+    private $saveFileService;
 
 
     public function __construct(
@@ -47,6 +55,8 @@ class ScheduleController extends AppBaseController
         CourseRepository $courseRepo,
         UserRepository $userRepository,
         GroupRepository $groupRepository,
+        BrokenEquipmentRepository $brokenEquipmentRepository,
+        SaveFileService $saveFileService
     ) {
         $this->middleware('auth');
         $this->middleware('can:schedule-edit', ['only' => ['edit']]);
@@ -60,6 +70,8 @@ class ScheduleController extends AppBaseController
         $this->courseRepository = $courseRepo;
         $this->userRepository = $userRepository;
         $this->groupRepository = $groupRepository;
+        $this->brokenEquipmentRepository = $brokenEquipmentRepository;
+        $this->saveFileService = $saveFileService;
     }
 
     /**
@@ -88,6 +100,7 @@ class ScheduleController extends AppBaseController
         $courses = $this->courseRepository->all()->pluck('name', 'id');
 
         $groups = $user->groups()->where('status', 'active')->get();
+        $equipments = $room->equipment()->get();
 
         if (empty($room)) {
             Flash::error('Schedule not found');
@@ -97,7 +110,8 @@ class ScheduleController extends AppBaseController
         return view('schedules.edit')
             ->with('room', $room)
             ->with('courses', $courses)
-            ->with('groups', $groups);
+            ->with('groups', $groups)
+            ->with('equipments', $equipments);
     }
 
     /**
@@ -560,7 +574,7 @@ class ScheduleController extends AppBaseController
 
         $userSchedule = $schedule->users()->where('users.id', $user->id)->first();
 
-        if(!$userSchedule && !$groupSchedule) {
+        if (!$userSchedule && !$groupSchedule) {
             return ResponseJson::make(ResponseCodeEnum::STATUS_UNATENTICATED, 'You are not allowed to add log book')->send();
         }
 
@@ -569,12 +583,26 @@ class ScheduleController extends AppBaseController
         $logBook->userable()->associate($user);
         $logBook->save();
 
+        foreach ($request->input('brokenItems') as $item) {
+            $this->brokenEquipmentRepository->create([
+                'logbook_id' => $logBook->id,
+                'room_id' => $schedule->room_id,
+                'equipment_id' => $item['equipmentId'],
+                'user_id' => $user->id,
+                'quantity' => $item['quantity'],
+                'report' => $item['report'],
+                'image' => $item['image'] ? $this->saveFileService->setImage(base64ToFile($item['image']))->setStorage('broken')->handle() : null,
+                'broken_date' => $date
+            ]);
+        }
+
+
+
         return ResponseJson::make(ResponseCodeEnum::STATUS_OK, 'Log book added successfully')->send();
-
-
     }
 
-    public function approveSchedule($id){
+    public function approveSchedule($id)
+    {
         /** @var User $user */
         $user = Auth::user();
 
@@ -589,7 +617,8 @@ class ScheduleController extends AppBaseController
         return ResponseJson::make(ResponseCodeEnum::STATUS_OK, 'Schedule approved successfully')->send();
     }
 
-    public function rejectSchedule($id){
+    public function rejectSchedule($id)
+    {
         /** @var User $user */
         $user = Auth::user();
 
@@ -603,5 +632,4 @@ class ScheduleController extends AppBaseController
 
         return ResponseJson::make(ResponseCodeEnum::STATUS_OK, 'Schedule rejected successfully')->send();
     }
-
 }

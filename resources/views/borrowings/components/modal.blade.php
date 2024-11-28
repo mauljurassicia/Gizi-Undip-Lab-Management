@@ -8,7 +8,6 @@
                 });
                 this.$watch('equipmentId', () => {
                     this.equipment = this.equipments.find(equipment => equipment.id == this.equipmentId);
-                    console.log(this.equipmentId);
                 });
 
                 this.$watch('borrowerType', () => {
@@ -248,8 +247,10 @@
                 this.endDate = moment(borrowing.end_date).format('YYYY-MM-DD');
                 this.quantity = borrowing.quantity;
                 this.remainingQuantity = borrowing.quantity;
-                this.borrowerType = borrowing.userable_type == "App\Models\Group" ? 2 : 1;
-                this.groupId = borrowing.group_id;
+                this.borrowerType = borrowing.userable_type == "App\\Models\\Group" ? 2 : 1;
+                setTimeout(() => {
+                    this.groupId = borrowing.userable_id;
+                }, 100);
                 this.activityName = borrowing.activity_name;
                 this.description = borrowing.description;
 

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -19,8 +20,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class BrokenEquipment extends Model
 {
-    use SoftDeletes;
-
     public $table = 'broken_equipments';
     
     const CREATED_AT = 'created_at';
@@ -36,7 +35,10 @@ class BrokenEquipment extends Model
         'equipment_id',
         'quantity',
         'broken_date',
-        'return_date'
+        'return_date',
+        'logbook_id',
+        'report',
+        'image'
     ];
 
     /**
@@ -63,6 +65,18 @@ class BrokenEquipment extends Model
 
     public function logBook(){
         return $this->belongsTo(LogBook::class, 'logbook_id');
+    }
+
+    public function equipment(){
+        return $this->belongsTo(Equipment::class, 'equipment_id');
+    }
+
+    public function room(){
+        return $this->belongsTo(Room::class, 'room_id');
+    }
+
+    public function user(){
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     

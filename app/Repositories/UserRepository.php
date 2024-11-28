@@ -32,4 +32,34 @@ class UserRepository extends BaseRepository
     {
         return User::class;
     }
+
+    public function getTeacherCount(){
+        return User::whereHas('roles', function ($query) {
+            $query->where('name', 'teacher'); 
+        })->count();
+    }
+
+    public function getStudentCount(){
+        return User::whereHas('roles', function ($query) {
+            $query->where('name', 'student'); 
+        })->count();
+    }
+
+    public function getGuestCount(){
+        return User::whereHas('roles', function ($query) {
+            $query->where('name', 'guest'); 
+        })->count();
+    }
+
+    public function getLaborantCount(){
+        return User::whereHas('roles', function ($query) {
+            $query->where('name', 'laborant'); 
+        })->count();
+    }
+
+    public function getTotalCountExceptAdmin(){
+        return User::whereHas('roles', function ($query) {
+            $query->where('name', '!=', 'administrator'); 
+        })->count();
+    }
 }

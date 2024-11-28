@@ -28,7 +28,7 @@
 
                 </div>
 
-                <div class="d-none d-md-block">
+                <div class="d-block">
                     @can('brokenEquipment-create')
                         <a class="btn btn-sm btn-primary btn-uppercase" href="{!! route('brokenEquipments.create') !!}"><i
                                 class="fa fa-plus"></i> Add New</a>

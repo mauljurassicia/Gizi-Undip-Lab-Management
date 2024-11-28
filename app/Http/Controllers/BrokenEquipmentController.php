@@ -9,6 +9,7 @@ use App\Http\Requests\UpdateBrokenEquipmentRequest;
 use App\Repositories\BrokenEquipmentRepository;
 use Laracasts\Flash\Flash;
 use App\Http\Controllers\AppBaseController;
+use App\Repositories\RoomRepository;
 use Response;
 use Illuminate\Http\Request; 
 use Illuminate\Support\Facades\Auth; 
@@ -20,7 +21,11 @@ class BrokenEquipmentController extends AppBaseController
     /** @var  BrokenEquipmentRepository */
     private $brokenEquipmentRepository;
 
-    public function __construct(BrokenEquipmentRepository $brokenEquipmentRepo)
+    /** @var RoomRepository*/
+    private $roomRepository;
+
+    public function __construct(BrokenEquipmentRepository $brokenEquipmentRepo,
+    RoomRepository $roomRepo)
     {
         $this->middleware('auth');
         $this->middleware('can:brokenEquipment-edit', ['only' => ['edit']]);
@@ -30,6 +35,7 @@ class BrokenEquipmentController extends AppBaseController
         $this->middleware('can:brokenEquipment-delete', ['only' => ['delete']]);
         $this->middleware('can:brokenEquipment-create', ['only' => ['create']]);
         $this->brokenEquipmentRepository = $brokenEquipmentRepo;
+        $this->roomRepository = $roomRepo;
     }
 
     /**
@@ -50,9 +56,9 @@ class BrokenEquipmentController extends AppBaseController
      */
     public function create()
     {
-        
+        $rooms = $this->roomRepository->get();
 
-        return view('broken_equipments.create');
+        return view('broken_equipments.create')->with('rooms', $rooms);
     }
 
     /**
@@ -65,6 +71,8 @@ class BrokenEquipmentController extends AppBaseController
     public function store(CreateBrokenEquipmentRequest $request)
     {
         $input = $request->all();
+
+        dd($input);
 
         $brokenEquipment = $this->brokenEquipmentRepository->create($input);
 

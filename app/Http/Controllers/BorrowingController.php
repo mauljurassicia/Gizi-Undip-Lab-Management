@@ -13,7 +13,9 @@ use Laracasts\Flash\Flash;
 use App\Http\Controllers\AppBaseController;
 use App\Models\Group;
 use App\Models\LogBook;
+use App\Repositories\BrokenEquipmentRepository;
 use App\Repositories\RoomRepository;
+use App\Services\SaveFileService;
 use App\User;
 use Carbon\Carbon;
 use Response;
@@ -30,9 +32,17 @@ class BorrowingController extends AppBaseController
     /** @var  RoomRepository */
     private $roomRepository;
 
+    /** @var  BrokenEquipmentRepository */
+    private $brokenEquipmentRepository;
+
+    /** @var  SaveFileService */
+    private $saveFileService;
+
     public function __construct(
         BorrowingRepository $borrowingRepo,
-        RoomRepository $roomRepo
+        RoomRepository $roomRepo,
+        BrokenEquipmentRepository $brokenEquipmentRepo,
+        SaveFileService $saveFileService
     ) {
         $this->middleware('auth');
         $this->middleware('can:borrowing-edit', ['only' => ['edit']]);
@@ -43,6 +53,8 @@ class BorrowingController extends AppBaseController
         $this->middleware('can:borrowing-create', ['only' => ['create']]);
         $this->borrowingRepository = $borrowingRepo;
         $this->roomRepository = $roomRepo;
+        $this->brokenEquipmentRepository = $brokenEquipmentRepo;
+        $this->saveFileService = $saveFileService;
     }
 
     /**
@@ -168,7 +180,7 @@ class BorrowingController extends AppBaseController
             'end_date' => $endDate,
             'quantity' => $request->input('quantity'),
             'userable_type' => $request->input('borrowerType') == 1 ? 'App\User' : 'App\Models\Group',
-            'userable_id' => $request->input('borrowerType') == 1 ? $user->id : $request->input('borrowerId'),
+            'userable_id' => $request->input('borrowerType') == 1 ? $user->id : $request->input('groupId'),
             'activity_name' => $request->input('activityName'),
             'description' => $request->input('description'),
             'status' => 'pending'
@@ -226,7 +238,7 @@ class BorrowingController extends AppBaseController
             'end_date' => $endDate,
             'quantity' => $request->input('quantity'),
             'userable_type' => $request->input('borrowerType') == 1 ? 'App\User' : 'App\Models\Group',
-            'userable_id' => $request->input('borrowerType') == 1 ? $user->id : $request->input('borrowerId'),
+            'userable_id' => $request->input('borrowerType') == 1 ? $user->id : $request->input('groupId'),
             'activity_name' => $request->input('activityName'),
             'description' => $request->input('description'),
             'status' => 'pending'
@@ -253,7 +265,7 @@ class BorrowingController extends AppBaseController
                 return $query->where('room_id', request('roomFilter'));
             })->when($request->has("statusFilter"), function ($query) {
                 return $query->where('status', request('statusFilter'));
-            })->with(['room', 'equipment'])->get()->append('logBookOut')->append('logBookIn');
+            })->with(['room', 'equipment'])->orderBy('start_date', 'desc')->orderBy('id', 'desc')->get()->append('logBookOut')->append('logBookIn');
 
             return ResponseJson::make(ResponseCodeEnum::STATUS_OK, 'Borrowings found', $borrowings)->send();
         }
@@ -274,9 +286,9 @@ class BorrowingController extends AppBaseController
                     $subQuery->where('users.id', $user->id);
                 });
             });
-        })->with(['room', 'equipment'])->get()->append('logBookOut')->append('logBookIn');
+        })->with(['room', 'equipment'])->orderBY('start_date', 'desc')->orderBy('id', 'desc')->get()->append('logBookOut')->append('logBookIn');
 
-        if(empty($borrowings)) {
+        if (empty($borrowings)) {
             return ResponseJson::make(ResponseCodeEnum::STATUS_NOT_FOUND, 'Borrowings not found')->send();
         }
 
@@ -350,18 +362,24 @@ class BorrowingController extends AppBaseController
 
         $userSchedule = $borrowing->userable()
             ->where(function ($query) use ($userId) {
-                $query->where(function ($q) use ($userId) {
-                    $q->where('userable_type', 'App\Models\User')
-                        ->where('id', $userId);
-                })
-                    ->orWhere(function ($q) use ($userId) {
-                        $q->where('userable_type', 'App\Models\Group')
-                            ->whereHas('users', function ($groupQuery) use ($userId) {
-                                $groupQuery->where('users.id', $userId);
+                $query->whereHasMorph('userable', ['App\Models\User', 'App\Models\Group'], function ($morphQuery) use ($userId) {
+                    $morphQuery->where(function ($q) use ($userId, $morphQuery) {
+                        // Direct user match
+                        $q->when($morphQuery->getModel() instanceof User, function ($userQuery) use ($userId) {
+                            $userQuery->where('id', $userId);
+                        })
+                            // Group with user match
+                            ->when($morphQuery->getModel() instanceof Group, function ($groupQuery) use ($userId) {
+                                $groupQuery->whereHas('users', function ($userGroupQuery) use ($userId) {
+                                    $userGroupQuery->where('users.id', $userId);
+                                });
                             });
                     });
+                });
             })
             ->first();
+
+
 
         if (!$userSchedule) {
             return ResponseJson::make(ResponseCodeEnum::STATUS_UNATENTICATED, 'Unauthorized')->send();
@@ -376,6 +394,20 @@ class BorrowingController extends AppBaseController
             $borrowing->status = 'returned';
             $borrowing->save();
             $borrowing->return_quantity = $request->input('quantity');
+
+
+            if ($request->input('hasReport') && $request->input('brokenQuantity') > 0) {
+                $this->brokenEquipmentRepository->create([
+                    'quantity' => $request->input('brokenQuantity'),
+                    'image' => $request->input('brokenImage') ? $this->saveFileService->setStorage('broken')->setImage(base64ToFile($request->input('brokenImage')))->handle() : null,
+                    'logbook_id' => $logBook->id,
+                    'report' => $request->input('brokenReport'),
+                    'equipment_id' => $borrowing->equipment_id,
+                    'room_id' => $borrowing->room_id,
+                    'broken_date' => $request->input('date'),
+                    'user_id' => Auth::user()->id
+                ]);
+            }
         }
 
         return ResponseJson::make(ResponseCodeEnum::STATUS_OK, 'Log book added')->send();

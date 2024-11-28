@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\DataTables\ReturnReportDataTable;
-use App\Http\Requests;
 use App\Http\Requests\CreateReturnReportRequest;
 use App\Http\Requests\UpdateReturnReportRequest;
 use App\Repositories\ReturnReportRepository;
@@ -11,8 +10,6 @@ use Laracasts\Flash\Flash;
 use App\Http\Controllers\AppBaseController;
 use Response;
 use Illuminate\Http\Request; 
-use Illuminate\Support\Facades\Auth; 
-use Illuminate\Support\Facades\Storage; 
 use Maatwebsite\Excel\Facades\Excel; 
 
 class ReturnReportController extends AppBaseController

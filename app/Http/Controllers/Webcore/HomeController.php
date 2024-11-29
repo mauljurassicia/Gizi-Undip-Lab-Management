@@ -10,13 +10,14 @@ use Illuminate\Support\Facades\Validator;
 
 use App\Http\Controllers\AppBaseController;
 use App\Repositories\BorrowingRepository;
+use App\Repositories\BrokenEquipmentRepository;
 use App\Repositories\EquipmentRepository;
+use App\Repositories\ReturnReportRepository;
 use App\Repositories\RoomRepository;
 use App\Repositories\ScheduleRepository;
 use App\User;
 use App\Repositories\UserRepository;
 use Laracasts\Flash\Flash;
-use Response;
 use File;
 
 
@@ -36,6 +37,12 @@ class HomeController extends AppBaseController
     /** @var EquipmentRepository */
     private $equipmentRepository;
 
+    /** @var BrokenEquipmentRepository */
+    private $brokenEquipmentRepository;
+
+    /** @var ReturnReportRepository */
+    private $returnReportRepository;
+
 
     /**
      * Create a new controller instance.
@@ -47,7 +54,9 @@ class HomeController extends AppBaseController
         ScheduleRepository $scheduleRepo,
         BorrowingRepository $borrowingRepo,
         RoomRepository $roomRepo,
-        EquipmentRepository $equipmentRepo    
+        EquipmentRepository $equipmentRepo,
+        BrokenEquipmentRepository $brokenEquipmentRepo,
+        ReturnReportRepository $returnReportRepo
     ) {
         $this->middleware('auth');
         $this->userRepository = $userRepo;
@@ -55,6 +64,8 @@ class HomeController extends AppBaseController
         $this->borrowingRepository = $borrowingRepo;
         $this->roomRepository = $roomRepo;
         $this->equipmentRepository = $equipmentRepo;
+        $this->brokenEquipmentRepository = $brokenEquipmentRepo;
+        $this->returnReportRepository = $returnReportRepo;
     }
 
     /**
@@ -84,6 +95,8 @@ class HomeController extends AppBaseController
             ->sum(function ($equipment) {
                 return $equipment->room->sum('pivot.quantity');
             });
+        $brokenEquipmentCount = $this->brokenEquipmentRepository->getBrokenEquipmentCount();
+        $returnReportCount = $this->returnReportRepository->getReturnReportCount();
 
 
         return view('home')
@@ -100,7 +113,9 @@ class HomeController extends AppBaseController
             ->with('totalUserCount', $totalUserCount)
             ->with('roomCount', $roomCount)
             ->with('equipmentTotalType', $equipmentTotalType)
-            ->with('equipmentTotal', $equipmentTotal);
+            ->with('equipmentTotal', $equipmentTotal)
+            ->with('brokenEquipmentCount', $brokenEquipmentCount)
+            ->with('returnReportCount', $returnReportCount);
     }
 
 

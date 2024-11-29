@@ -272,10 +272,10 @@
                         </div><!-- card-footer -->
                     </div><!-- card -->
                 </div><!-- col --> --}}
-                <div class="col-lg-4 col-md-6 mg-t-10">
-                    <div class="card">
-                        <div class="card-body pd-y-20 pd-x-25">
-                            <div class="row row-sm">
+                <div class="col-lg-4 col-md-6 mg-t-10 h-100">
+                    <div class="card h-100">
+                        <div class="card-body pd-y-20 pd-x-25 h-100 d-flex flex-column">
+                            <div class="row row-sm flex-grow-1">
                                 <div class="col-7">
                                     <h3 class="tx-normal tx-rubik tx-spacing--1 mg-b-5">{{ $roomCount }}</h3>
                                     <h6 class="tx-12 tx-semibold tx-uppercase tx-spacing-1 tx-primary mg-b-5">Ruangan
@@ -283,18 +283,18 @@
                                     <p class="tx-11 tx-color-03 mg-b-0">Jumlah ruangan yang tersedia.</p>
                                 </div>
                                 <div class="col-5">
-                                    <div class="chart-ten">
-                                        <div id="flotChart3" class="flot-chart"></div>
+                                    <div class="chart-ten h-100">
+                                        <div id="flotChart3" class="flot-chart h-100"></div>
                                     </div>
                                 </div>
                             </div>
                         </div><!-- card-body -->
                     </div><!-- card -->
                 </div><!-- col -->
-                <div class="col-lg-4 col-md-6 mg-t-10">
-                    <div class="card">
-                        <div class="card-body pd-y-20 pd-x-25">
-                            <div class="row row-sm">
+                <div class="col-lg-4 col-md-6 mg-t-10 h-100">
+                    <div class="card h-100">
+                        <div class="card-body pd-y-20 pd-x-25 h-100 d-flex flex-column">
+                            <div class="row row-sm flex-grow-1">
                                 <div class="col-7">
                                     <h3 class="tx-normal tx-rubik tx-spacing--1 mg-b-5">{{ $equipmentTotalType }}</h3>
                                     <h6 class="tx-12 tx-semibold tx-uppercase tx-spacing-1 tx-teal mg-b-5">Jenis Peralatan
@@ -302,32 +302,74 @@
                                     <p class="tx-11 tx-color-03 mg-b-0">Jumlah jenis peralatan yang tersedia.</p>
                                 </div>
                                 <div class="col-5">
-                                    <div class="chart-ten">
-                                        <div id="flotChart4" class="flot-chart"></div>
+                                    <div class="chart-ten h-100">
+                                        <div id="flotChart4" class="flot-chart h-100"></div>
                                     </div>
                                 </div>
                             </div>
                         </div><!-- card-body -->
                     </div><!-- card -->
                 </div><!-- col -->
-                <div class="col-lg-4 col-md-6 mg-t-10">
-                    <div class="card">
-                        <div class="card-body pd-y-20 pd-x-25">
-                            <div class="row row-sm">
+                <div class="col-lg-4 col-md-6 mg-t-10 h-100">
+                    <div class="card h-100">
+                        <div class="card-body pd-y-20 pd-x-25 h-100 d-flex flex-column">
+                            <div class="row row-sm flex-grow-1">
                                 <div class="col-7">
                                     <h3 class="tx-normal tx-rubik tx-spacing--1 mg-b-5">{{ $equipmentTotal }}</h3>
-                                    <h6 class="tx-12 tx-semibold tx-uppercase tx-spacing-1 tx-pink mg-b-5">Total Peralatan</h6>
+                                    <h6 class="tx-12 tx-semibold tx-uppercase tx-spacing-1 tx-pink mg-b-5">Total Peralatan
+                                    </h6>
                                     <p class="tx-11 tx-color-03 mg-b-0">Jumlah total peralatan yang tersedia.</p>
                                 </div>
                                 <div class="col-5">
-                                    <div class="chart-ten">
-                                        <div id="flotChart5" class="flot-chart"></div>
+                                    <div class="chart-ten h-100">
+                                        <div id="flotChart5" class="flot-chart h-100"></div>
                                     </div>
                                 </div>
                             </div>
                         </div><!-- card-body -->
                     </div><!-- card -->
                 </div><!-- col -->
+                <div class="col-lg-4 col-md-6 mg-t-10 h-100">
+                    <div class="card h-100">
+                        <div class="card-body pd-y-20 pd-x-25 h-100 d-flex flex-column">
+                            <div class="row row-sm flex-grow-1">
+                                <div class="col-7">
+                                    <h3 class="tx-normal tx-rubik tx-spacing--1 mg-b-5">{{ $brokenEquipmentCount }}</h3>
+                                    <h6 class="tx-12 tx-semibold tx-uppercase tx-spacing-1 tx-pink mg-b-5">Peralatan Rusak
+                                    </h6>
+                                    <p class="tx-11 tx-color-03 mg-b-0">Jumlah peralatan yang rusak.</p>
+                                </div>
+                                <div class="col-5">
+                                    <div class="chart-ten h-100">
+                                        <div id="flotChart6" class="flot-chart h-100"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div><!-- card-body -->
+                    </div><!-- card -->
+                </div><!-- col -->
+                <div class="col-lg-4 col-md-6 mg-t-10 h-100">
+                    <div class="card h-100">
+                        <div class="card-body pd-y-20 pd-x-25 h-100 d-flex flex-column">
+                            <div class="row row-sm flex-grow-1">
+                                <div class="col-7">
+                                    <h3 class="tx-normal tx-rubik tx-spacing--1 mg-b-5">{{ $returnReportCount }}</h3>
+                                    <h6 class="tx-12 tx-semibold tx-uppercase tx-spacing-1 tx-teal mg-b-5">Peralatan
+                                        Dikembalikan</h6>
+                                    <p class="tx-11 tx-color-03 mg-b-0">Jumlah peralatan yang dikembalikan.</p>
+                                </div>
+                                <div class="col-5">
+                                    <div class="chart-ten h-100">
+                                        <div id="flotChart7" class="flot-chart h-100"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div><!-- card-body -->
+                    </div><!-- card -->
+                </div><!-- col -->
+
+
+                <!-- col -->
                 {{-- <div class="col-lg-6 mg-t-10">
                     <div class="card">
                         <div class="card-header d-flex align-items-start justify-content-between">

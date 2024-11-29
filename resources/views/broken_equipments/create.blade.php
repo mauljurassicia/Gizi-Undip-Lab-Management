@@ -11,7 +11,7 @@
 
             <div style="margin-right: -15px;margin-left: -15px;">
                 <div data-label="Create" class="df-example demo-forms services-forms">
-                    {!! Form::open(['route' => 'brokenEquipments.store']) !!}
+                    {!! Form::open(['route' => 'brokenEquipments.store', 'files' => true]) !!}
                         @include('broken_equipments.fields')
                     {!! Form::close() !!}
                 </div>

@@ -9,7 +9,7 @@
         {{--@include('return_reports.version')--}}
     {{--</section>--}}
     <div class="content">
-        <h4 class="mg-b-30">Return Report</h4>
+        <h4 class="mg-b-30">Laporan Pengembalian</h4>
 
         <div class="box box-primary">
             <div class="box-body">

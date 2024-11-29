@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use Eloquent as Model;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -30,7 +30,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class ReturnReport extends Model
 {
-    use SoftDeletes;
 
     public $table = 'return_reports';
     
@@ -42,13 +41,13 @@ class ReturnReport extends Model
 
 
     public $fillable = [
-        'room_id',
-        'user_id',
-        'equipment_id',
+        'broken_equipment_id',
+        'status',
         'quantity',
         'price',
         'return_date',
-        'additional'
+        'additional',
+        'image'
     ];
 
     /**
@@ -72,6 +71,10 @@ class ReturnReport extends Model
 
     public function getTableColumns() {
         return $this->getConnection()->getSchemaBuilder()->getColumnListing($this->getTable());
+    }
+
+    public function brokenEquipment(){
+        return $this->belongsTo('App\Models\BrokenEquipment');
     }
 
     

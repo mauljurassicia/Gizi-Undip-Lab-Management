@@ -1,60 +1,80 @@
-<!-- Id Field -->
-<div class="form-group">
-    {!! Form::label('id', 'Id:') !!}
-    <p>{!! $returnReport->id !!}</p>
-</div>
+<div class="container-fluid">
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-4 col-sm-6">
+                    <div class="form-group">
+                        <label class="text-muted">ID</label>
+                        <p class="font-weight-bold">{{ $returnReport->id }}</p>
+                    </div>
+                </div>
+                <div class="col-md-4 col-sm-6">
+                    <div class="form-group">
+                        <label class="text-muted">Nama Ruang</label>
+                        <p class="font-weight-bold">{{ $returnReport->brokenEquipment->room->name }}</p>
+                    </div>
+                </div>
+                <div class="col-md-4 col-sm-6">
+                    <div class="form-group">
+                        <label class="text-muted">Nama Pengguna</label>
+                        <p class="font-weight-bold">{{ $returnReport->brokenEquipment->user->name }}</p>
+                    </div>
+                </div>
+                <div class="col-md-4 col-sm-6">
+                    <div class="form-group">
+                        <label class="text-muted">Nama Peralatan</label>
+                        <p class="font-weight-bold">{{ $returnReport->brokenEquipment->equipment->name }}</p>
+                    </div>
+                </div>
+                <div class="col-md-4 col-sm-6">
+                    <div class="form-group">
+                        <label class="text-muted">Kuantitas</label>
+                        <p class="font-weight-bold">{{ $returnReport->quantity }}</p>
+                    </div>
+                </div>
+                <div class="col-md-4 col-sm-6">
+                    <div class="form-group">
+                        <label class="text-muted">Tunai</label>
+                        <p class="font-weight-bold">Rp. {{ number_format($returnReport->price, 0, ',', '.') }}</p>
+                    </div>
+                </div>
+                <div class="col-md-4 col-sm-6">
+                    <div class="form-group">
+                        <label class="text-muted">Tanggal Pengembalian</label>
+                        <p class="font-weight-bold">{{ \Carbon\Carbon::parse($returnReport->return_date)->format('d-m-Y') }}</p>
+                    </div>
+                </div>
+                <div class="col-md-4 col-sm-6">
+                    <div class="form-group">
+                        <label class="text-muted">Additional</label>
+                        <p class="font-weight-bold">{{ $returnReport->additional ?? '-' }}</p>
+                    </div>
+                </div>
+                <div class="col-md-4 col-sm-6">
+                    <div class="form-group">
+                        <label class="text-muted">Status</label>
+                        <div>
+                            @if ($returnReport->status == 'accepted')
+                                <span class="badge badge-success">Sudah Dikembalikan</span>
+                            @elseif ($returnReport->status == 'rejected')
+                                <span class="badge badge-danger">Ditolak</span>
+                            @else
+                                <span class="badge badge-secondary">Dalam Proses Review</span>
+                            @endif
+                        </div>
+                        <div class="mt-2">
+                            <button type="button" class="btn btn-success btn-sm mr-2" data-toggle="modal" data-target="#modal-terima">
+                                Terima
+                            </button>
+                            <button type="button" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#modal-tolak">
+                                Tolak
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-<!-- Room Id Field -->
-<div class="form-group">
-    {!! Form::label('room_id', 'Room Id:') !!}
-    <p>{!! $returnReport->room_id !!}</p>
+    <!-- Modals can be added here if needed -->
 </div>
-
-<!-- User Id Field -->
-<div class="form-group">
-    {!! Form::label('user_id', 'User Id:') !!}
-    <p>{!! $returnReport->user_id !!}</p>
-</div>
-
-<!-- Equipment Id Field -->
-<div class="form-group">
-    {!! Form::label('equipment_id', 'Equipment Id:') !!}
-    <p>{!! $returnReport->equipment_id !!}</p>
-</div>
-
-<!-- Quantity Field -->
-<div class="form-group">
-    {!! Form::label('quantity', 'Quantity:') !!}
-    <p>{!! $returnReport->quantity !!}</p>
-</div>
-
-<!-- Price Field -->
-<div class="form-group">
-    {!! Form::label('price', 'Price:') !!}
-    <p>{!! $returnReport->price !!}</p>
-</div>
-
-<!-- Return Date Field -->
-<div class="form-group">
-    {!! Form::label('return_date', 'Return Date:') !!}
-    <p>{!! $returnReport->return_date !!}</p>
-</div>
-
-<!-- Additional Field -->
-<div class="form-group">
-    {!! Form::label('additional', 'Additional:') !!}
-    <p>{!! $returnReport->additional !!}</p>
-</div>
-
-<!-- Created At Field -->
-<div class="form-group">
-    {!! Form::label('created_at', 'Created At:') !!}
-    <p>{!! $returnReport->created_at !!}</p>
-</div>
-
-<!-- Updated At Field -->
-<div class="form-group">
-    {!! Form::label('updated_at', 'Updated At:') !!}
-    <p>{!! $returnReport->updated_at !!}</p>
-</div>
-

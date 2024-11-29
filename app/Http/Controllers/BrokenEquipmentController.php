@@ -3,18 +3,17 @@
 namespace App\Http\Controllers;
 
 use App\DataTables\BrokenEquipmentDataTable;
-use App\Http\Requests;
 use App\Http\Requests\CreateBrokenEquipmentRequest;
 use App\Http\Requests\UpdateBrokenEquipmentRequest;
 use App\Repositories\BrokenEquipmentRepository;
 use Laracasts\Flash\Flash;
 use App\Http\Controllers\AppBaseController;
 use App\Repositories\RoomRepository;
+use App\Services\SaveFileService;
 use Response;
-use Illuminate\Http\Request; 
-use Illuminate\Support\Facades\Auth; 
-use Illuminate\Support\Facades\Storage; 
-use Maatwebsite\Excel\Facades\Excel; 
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Maatwebsite\Excel\Facades\Excel;
 
 class BrokenEquipmentController extends AppBaseController
 {
@@ -24,9 +23,14 @@ class BrokenEquipmentController extends AppBaseController
     /** @var RoomRepository*/
     private $roomRepository;
 
-    public function __construct(BrokenEquipmentRepository $brokenEquipmentRepo,
-    RoomRepository $roomRepo)
-    {
+    /** @var SaveFileService */
+    private $saveFileService;
+
+    public function __construct(
+        BrokenEquipmentRepository $brokenEquipmentRepo,
+        RoomRepository $roomRepo,
+        SaveFileService $saveFileService
+    ) {
         $this->middleware('auth');
         $this->middleware('can:brokenEquipment-edit', ['only' => ['edit']]);
         $this->middleware('can:brokenEquipment-store', ['only' => ['store']]);
@@ -36,6 +40,7 @@ class BrokenEquipmentController extends AppBaseController
         $this->middleware('can:brokenEquipment-create', ['only' => ['create']]);
         $this->brokenEquipmentRepository = $brokenEquipmentRepo;
         $this->roomRepository = $roomRepo;
+        $this->saveFileService = $saveFileService;
     }
 
     /**
@@ -72,7 +77,11 @@ class BrokenEquipmentController extends AppBaseController
     {
         $input = $request->all();
 
-        dd($input);
+        $input['user_id'] = Auth::user()->id;
+
+        if ($request->hasFile('image')) {
+            $input['image'] = $this->saveFileService->setImage($request->file('image'))->setStorage('broken')->handle();
+        }
 
         $brokenEquipment = $this->brokenEquipmentRepository->create($input);
 
@@ -108,8 +117,8 @@ class BrokenEquipmentController extends AppBaseController
      */
     public function edit($id)
     {
-        
 
+        $rooms = $this->roomRepository->get();
         $brokenEquipment = $this->brokenEquipmentRepository->findWithoutFail($id);
 
         if (empty($brokenEquipment)) {
@@ -118,7 +127,8 @@ class BrokenEquipmentController extends AppBaseController
         }
 
         return view('broken_equipments.edit')
-            ->with('brokenEquipment', $brokenEquipment);
+            ->with('brokenEquipment', $brokenEquipment)
+            ->with('rooms', $rooms);
     }
 
     /**
@@ -176,7 +186,7 @@ class BrokenEquipmentController extends AppBaseController
      */
     public function import(Request $request)
     {
-        Excel::load($request->file('file'), function($reader) {
+        Excel::load($request->file('file'), function ($reader) {
             $reader->each(function ($item) {
                 $brokenEquipment = $this->brokenEquipmentRepository->create($item->toArray());
             });

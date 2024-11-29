@@ -36,4 +36,8 @@ class ReturnReportRepository extends BaseRepository
     {
         return ReturnReport::class;
     }
+
+    public function getReturnReportCount() {
+        return $this->model->sum('quantity');
+    }
 }

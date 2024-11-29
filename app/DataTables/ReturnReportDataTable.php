@@ -18,7 +18,16 @@ class ReturnReportDataTable extends DataTable
     {
         $dataTable = new EloquentDataTable($query);
 
-        return $dataTable->addColumn('action', 'return_reports.datatables_actions');
+        return $dataTable->addColumn('action', 'return_reports.datatables_actions')
+        ->editColumn('status', function ($data) {
+            return $data->status == 'pending' ?
+                '<span class="badge badge-warning">Pending</span>' : ($data->status == 'approved' ?
+                    '<span class="badge badge-success">Approved</span>' : '<span class="badge badge-danger">Rejected</span>');
+        })
+        ->addColumn('brokenEquipment', function ($data) {
+            return $data->brokenEquipment->room->name . ' - ' . $data->brokenEquipment->equipment->name;
+        })
+        ->editColumn('price', function ($data) { return 'Rp. ' . number_format($data->price, 0, ',', '.'); })->rawColumns(['status', 'action']);
     }
 
     /**
@@ -29,7 +38,7 @@ class ReturnReportDataTable extends DataTable
      */
     public function query(ReturnReport $model)
     {
-        return $model->newQuery();
+        return $model->newQuery()->with(['brokenEquipment', 'brokenEquipment.room', 'brokenEquipment.equipment']);
     }
 
     /**
@@ -47,9 +56,6 @@ class ReturnReportDataTable extends DataTable
                 'dom'     => 'Bfrtip',
                 'order'   => [[0, 'desc']],
                 'buttons' => [
-                    'export',
-                    'reset',
-                    'reload',
                 ],
                 'initComplete' => "function() {
                     this.api().columns().every(function() {
@@ -74,13 +80,12 @@ class ReturnReportDataTable extends DataTable
     protected function getColumns()
     {
         return [
-            'room_id',
-            'user_id',
-            'equipment_id',
-            'quantity',
-            'price',
-            'return_date',
-            'additional'
+            'brokenEquipment' => ['title' => 'Peralatan Rusak', 'data' => 'brokenEquipment', 'searchable' => false],
+            'quantity' => ['title' => 'Jumlah', 'data' => 'quantity'],
+            'price' => ['title' => 'Tunai', 'data' => 'price'],
+            'return_date' => ['title' => 'Tanggal Pengembalian', 'data' => 'return_date'],
+            'status',
+
         ];
     }
 

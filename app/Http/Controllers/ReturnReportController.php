@@ -8,17 +8,29 @@ use App\Http\Requests\UpdateReturnReportRequest;
 use App\Repositories\ReturnReportRepository;
 use Laracasts\Flash\Flash;
 use App\Http\Controllers\AppBaseController;
+use App\Repositories\BrokenEquipmentRepository;
+use App\Services\SaveFileService;
 use Response;
-use Illuminate\Http\Request; 
-use Maatwebsite\Excel\Facades\Excel; 
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ReturnReportController extends AppBaseController
 {
     /** @var  ReturnReportRepository */
     private $returnReportRepository;
 
-    public function __construct(ReturnReportRepository $returnReportRepo)
-    {
+    /** @var  BrokenEquipmentRepository */
+    private $brokenEquipmentRepository;
+
+    /** @var  SaveFileService */
+    private $saveFileService;
+
+    public function __construct(
+        ReturnReportRepository $returnReportRepo,
+        BrokenEquipmentRepository $brokenEquipmentRepo,
+        SaveFileService $saveFileService
+    ) {
         $this->middleware('auth');
         $this->middleware('can:returnReport-edit', ['only' => ['edit']]);
         $this->middleware('can:returnReport-store', ['only' => ['store']]);
@@ -27,6 +39,8 @@ class ReturnReportController extends AppBaseController
         $this->middleware('can:returnReport-delete', ['only' => ['delete']]);
         $this->middleware('can:returnReport-create', ['only' => ['create']]);
         $this->returnReportRepository = $returnReportRepo;
+        $this->brokenEquipmentRepository = $brokenEquipmentRepo;
+        $this->saveFileService = $saveFileService;
     }
 
     /**
@@ -47,9 +61,23 @@ class ReturnReportController extends AppBaseController
      */
     public function create()
     {
-        
+        /** @var User $user */
+        $user = Auth::user();
 
-        return view('return_reports.create');
+        if ($user->hasRole('administrator')) {
+            $brokenEquipments = $this->brokenEquipmentRepository->whereNull('return_date')->get();
+        } else {
+            $brokenEquipments = $this->brokenEquipmentRepository->where('user_id', $user->id)->whereNull('return_date')->get();
+        }
+
+
+        if ($brokenEquipments->isEmpty()) {
+            Flash::error('Anda tidak memiliki laporan peralatan rusak');
+            return redirect(route('returnReports.index'));
+        }
+
+        return view('return_reports.create')
+            ->with('brokenEquipments', $brokenEquipments);
     }
 
     /**
@@ -62,6 +90,22 @@ class ReturnReportController extends AppBaseController
     public function store(CreateReturnReportRequest $request)
     {
         $input = $request->all();
+
+        $brokenEquipment = $this->brokenEquipmentRepository->findWithoutFail($input['broken_equipment_id']);
+
+        if (empty($brokenEquipment)) {
+            Flash::error('Laporan peralatan rusak tidak ditemukan');
+            return redirect(route('returnReports.index'));
+        }
+
+        if ($brokenEquipment->user_id != Auth::user()->id) {
+            Flash::error('Anda tidak memiliki akses untuk laporan peralatan ini');
+            return redirect(route('returnReports.index'));
+        }
+
+        if ($request->hasFile('image')) {
+            $input['image'] = $this->saveFileService->setImage($request->file('image'))->setStorage('returnReport')->handle();
+        }
 
         $returnReport = $this->returnReportRepository->create($input);
 
@@ -97,7 +141,21 @@ class ReturnReportController extends AppBaseController
      */
     public function edit($id)
     {
-        
+         /** @var User $user */
+         $user = Auth::user();
+
+         if ($user->hasRole('administrator')) {
+             $brokenEquipments = $this->brokenEquipmentRepository->whereNull('return_date')->get();
+         } else {
+             $brokenEquipments = $this->brokenEquipmentRepository->where('user_id', $user->id)->whereNull('return_date')->get();
+         }
+ 
+ 
+         if ($brokenEquipments->isEmpty()) {
+             Flash::error('Anda tidak memiliki laporan peralatan rusak');
+             return redirect(route('returnReports.index'));
+         }
+
 
         $returnReport = $this->returnReportRepository->findWithoutFail($id);
 
@@ -107,7 +165,8 @@ class ReturnReportController extends AppBaseController
         }
 
         return view('return_reports.edit')
-            ->with('returnReport', $returnReport);
+            ->with('returnReport', $returnReport)
+            ->with('brokenEquipments', $brokenEquipments);
     }
 
     /**
@@ -128,6 +187,23 @@ class ReturnReportController extends AppBaseController
         }
 
         $input = $request->all();
+
+        $brokenEquipment = $this->brokenEquipmentRepository->findWithoutFail($input['broken_equipment_id']);
+
+        if (empty($brokenEquipment)) {
+            Flash::error('Laporan peralatan rusak tidak ditemukan');
+            return redirect(route('returnReports.index'));
+        }
+
+        if ($brokenEquipment->user_id != Auth::user()->id) {
+            Flash::error('Anda tidak memiliki akses untuk laporan peralatan ini');
+            return redirect(route('returnReports.index'));
+        }
+
+        if ($request->hasFile('image')) {
+            $input['image'] = $this->saveFileService->setImage($request->file('image'))->setStorage('returnReport')->setModel($returnReport->image)->handle();
+        }
+
         $returnReport = $this->returnReportRepository->update($input, $id);
 
         Flash::success('Return Report updated successfully.');
@@ -165,7 +241,7 @@ class ReturnReportController extends AppBaseController
      */
     public function import(Request $request)
     {
-        Excel::load($request->file('file'), function($reader) {
+        Excel::load($request->file('file'), function ($reader) {
             $reader->each(function ($item) {
                 $returnReport = $this->returnReportRepository->create($item->toArray());
             });

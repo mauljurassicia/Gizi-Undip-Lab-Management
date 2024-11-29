@@ -35,4 +35,8 @@ class BrokenEquipmentRepository extends BaseRepository
     {
         return BrokenEquipment::class;
     }
+
+    public function getBrokenEquipmentCount() {
+        return $this->model->sum('quantity');
+    }
 }

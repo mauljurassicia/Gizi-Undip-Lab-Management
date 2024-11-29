@@ -6,13 +6,15 @@
             equipmentId: 0,
             equipments: [],
             equipment: null,
+            quantity: 0,
             init() {
                 this.$watch('roomId', () => {
                     this.fetchEquipment();
-                    this.equipmentId = null;
+                    this.equipmentId = 0;
                 });
                 this.$watch('equipmentId', () => {
                     this.equipment = this.equipments.find(equipment => equipment.id == this.equipmentId);
+                    this.quantity = 0;
                 });
             },
             async fetchEquipment() {
@@ -23,7 +25,7 @@
         }
     }
 </script>
-<div x-data="room">
+<div x-data="room" x-ref="room">
     <div class="form-group col-sm-6">
         {!! Form::label('room_id', 'Ruangan:') !!}
         {!! Form::select('room_id', ['0' => '-- Pilih Ruangan --'] + $rooms->pluck('name', 'id')->toArray(), null, [
@@ -45,13 +47,21 @@
 
     </div>
 
+    <!-- Quantity Field -->
+    <div class="form-group col-sm-6">
+        {!! Form::label('quantity', 'Kuantitas:') !!}
+        {!! Form::number('quantity', null, [
+            'class' => 'form-control',
+            'required',
+            'x-model' => 'quantity',
+            'min' => '0',
+            ':max' => 'equipment?.pivot?.quantity ?? 0',
+        ]) !!}
+    </div>
+
 </div>
 
-<!-- Quantity Field -->
-<div class="form-group col-sm-6">
-    {!! Form::label('quantity', 'Kuantitas:') !!}
-    {!! Form::number('quantity', null, ['class' => 'form-control']) !!}
-</div>
+
 
 <!-- Broken Date Field -->
 <div class="form-group col-sm-6">
@@ -83,7 +93,7 @@
 
 <!-- Submit Field -->
 <div class="form-group col-sm-12">
-    {!! Form::submit('Save', ['class' => 'btn btn-primary']) !!}
+    <button class="btn btn-primary" onclick="checkComponentState(); return false" type="button">Simpan</button>
     <a href="{!! route('brokenEquipments.index') !!}" class="btn btn-light">Cancel</a>
 </div>
 
@@ -92,6 +102,55 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.14.3/dist/cdn.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
+    <script>
+        function checkComponentState() {
+            const roomComponent = document.querySelector('[x-ref="room"]')._x_dataStack;
+            const roomId = roomComponent[0].roomId;
+            const equipmentId = roomComponent[0].equipmentId;
+            const quantity = roomComponent[0].quantity;
+            if (roomId == 0) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: 'Pilih ruangan terlebih dahulu',
+                });
+
+                return;
+            }
+
+            if (equipmentId == 0) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: 'Pilih alat terlebih dahulu',
+                });
+
+                return;
+            }
+
+            if (quantity < 1) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: 'Kuantitas tidak boleh kurang dari 1',
+                });
+
+                return;
+            }
+
+            if(quantity > roomComponent[0].equipment?.pivot?.quantity) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: 'Jumlah alat yang dipinjam melebihi jumlah alat yang tersedia !',
+                });
+
+                return;
+            }
+
+            $('form').submit();
+        }
+    </script>
     <script>
         $(document).ready(function() {
             $('.dropify').dropify({

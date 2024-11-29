@@ -1,42 +1,45 @@
-<!-- Id Field -->
-<div class="form-group">
-    {!! Form::label('id', 'Id:') !!}
-    <p>{!! $course->id !!}</p>
-</div>
+<div class="container-fluid">
+    <div class="card">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <strong class="text-muted">ID:</strong>
+                        <p class="card-text">{{ $course->id }}</p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <strong class="text-muted">Name:</strong>
+                        <p class="card-text">{{ $course->name }}</p>
+                    </div>
+                </div>
+            </div>
 
-<!-- Name Field -->
-<div class="form-group">
-    {!! Form::label('name', 'Name:') !!}
-    <p>{!! $course->name !!}</p>
-</div>
+            <div class="form-group mt-3">
+                <strong class="text-muted">Description:</strong>
+                <p class="card-text">{{ $course->description ?? 'Tidak Ada Deskripsi' }}</p>
+            </div>
 
-<!-- Description Field -->
-<div class="form-group">
-    {!! Form::label('description', 'Description:') !!}
-    <p>{!! $course->description !!}</p>
-</div>
+            <div class="row mt-3">
+                @if($course->banner)
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <strong class="text-muted">Banner:</strong>
+                        <img src="{{ $course->banner }}" alt="Course Banner" class="img-fluid rounded shadow-sm">
+                    </div>
+                </div>
+                @endif
 
-<!-- Banner Field -->
-<div class="form-group">
-    {!! Form::label('banner', 'Banner:') !!}
-    <p>{!! $course->banner !!}</p>
+                @if($course->thumbnail)
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <strong class="text-muted">Thumbnail:</strong>
+                        <img src="{{ $course->thumbnail }}" alt="Course Thumbnail" class="img-fluid rounded shadow-sm">
+                    </div>
+                </div>
+                @endif
+            </div>
+        </div>
+    </div>
 </div>
-
-<!-- Thumbnail Field -->
-<div class="form-group">
-    {!! Form::label('thumbnail', 'Thumbnail:') !!}
-    <p>{!! $course->thumbnail !!}</p>
-</div>
-
-<!-- Created At Field -->
-<div class="form-group">
-    {!! Form::label('created_at', 'Created At:') !!}
-    <p>{!! $course->created_at !!}</p>
-</div>
-
-<!-- Updated At Field -->
-<div class="form-group">
-    {!! Form::label('updated_at', 'Updated At:') !!}
-    <p>{!! $course->updated_at !!}</p>
-</div>
-

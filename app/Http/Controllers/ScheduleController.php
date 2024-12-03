@@ -179,7 +179,10 @@ class ScheduleController extends AppBaseController
             return ResponseJson::make(ResponseCodeEnum::STATUS_BAD_REQUEST, 'Date is required')->send();
         }
         $schedules = $this->scheduleRepository->where('room_id', $room)->whereDate('start_schedule', $request->query('date'))
-            ->whereDate('end_schedule', $request->query('date'))->with('course')->with('groups')->with('users')->get()->append('logBookOut')->append('logBookIn')->append('NotAllowed')->append('creatorRole');
+            ->whereDate('end_schedule', $request->query('date'))->with('course')
+            ->with('groups')
+            ->with('coverLetter')
+            ->with('users')->get()->append('logBookOut')->append('logBookIn')->append('NotAllowed')->append('creatorRole');
 
         $schedules->each(function ($schedule) {
             $schedule->weeks = $this->scheduleRepository->where('grouped_schedule_code', $schedule->grouped_schedule_code)->whereNotNull('grouped_schedule_code')->count();
@@ -226,6 +229,11 @@ class ScheduleController extends AppBaseController
         }
 
         $successAssigns = 0;
+
+
+        if($input['coverLetter']){
+            $input['coverLetter'] = $this->saveFileService->setImage(base64ToFile($input['coverLetter']))->setStorage('coverLetter')->handle();
+        }
 
         if (is_array($dates)) {
             $input['grouped_schedule_code'] = strtoupper(substr(str_shuffle(MD5(microtime())), 0, 7));
@@ -438,6 +446,12 @@ class ScheduleController extends AppBaseController
             $schedule->groups()->sync($typeId);
         }
 
+        if($input['coverLetter']){
+            $schedule->coverLetter()->create([
+                'image' => $input['coverLetter']
+            ]);
+        }
+
         return true;
     }
 
@@ -470,15 +484,17 @@ class ScheduleController extends AppBaseController
 
         if (!is_null($request->query('group') && $request->query('group') == '1')) {
 
-            $schedules = $this->scheduleRepository->where('grouped_schedule_code', $schedule->grouped_schedule_code)->get();
+            $schedules = $this->scheduleRepository->where('grouped_schedule_code', $schedule->grouped_schedule_code)->whereNotNull('grouped_schedule_code')->get();
 
             foreach ($schedules as $schedule) {
                 $schedule->logBooks()->delete();
+                $schedule->coverLetter()->delete(); 
             }
-            $this->scheduleRepository->where('grouped_schedule_code', $schedule->grouped_schedule_code)->delete();
+            $this->scheduleRepository->where('grouped_schedule_code', $schedule->grouped_schedule_code)->whereNotNull('grouped_schedule_code')->delete();
         } else {
             $schedule->logBooks()->delete();
             $schedule->delete();
+            $schedule->coverLetter()->delete();
         }
 
         return ResponseJson::make(ResponseCodeEnum::STATUS_OK, 'Schedule deleted successfully')->send();

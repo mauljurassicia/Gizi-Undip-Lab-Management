@@ -158,7 +158,7 @@ class Schedule extends Model
         return !$user && !$groups;
     }
 
-    public function cover_letter(){
+    public function coverLetter(){
         return $this->morphOne(CoverLetter::class, 'cover_letterable');
     }
 

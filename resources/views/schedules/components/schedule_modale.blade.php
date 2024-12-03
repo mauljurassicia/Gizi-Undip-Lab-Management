@@ -198,7 +198,8 @@
                             type_model: this.typeModel,
                             weeks: this.weeks,
                             type_id: typeIds,
-                            associated_info: this.associatedInfo
+                            associated_info: this.associatedInfo,
+                            coverLetter: this.coverLetter
 
                         }),
                     })
@@ -216,6 +217,7 @@
                             this.isEdit = false;
                             this.groups = [];
                             this.guests = [];
+                            this.coverLetter = null;
 
                             Swal.fire({
                                 title: res.message,
@@ -261,6 +263,7 @@
                     this.guests = [];
                     this.scheduleId = 0;
                     this.groupId = 0;
+                    this.coverLetter = null;
                 }, 500);
             },
             editModal(schedule) {
@@ -279,14 +282,15 @@
                 this.associatedInfo = schedule.associated_info;
                 this.scheduleId = schedule.id;
             },
-            showModal(schedule) {
+            async showModal(schedule) {
                 this.isShow = true;
                 this.isEdit = false;
                 this.name = schedule.name;
                 this.courseId = schedule.course_id;
                 this.startTime = moment(schedule.start_schedule).format('HH:mm');
                 this.endTime = moment(schedule.end_schedule).format('HH:mm');
-                this.typeSchedules = schedule.schedule_type == "onetime" ? 1 : (schedule.schedule_type == "weekly" ? 2 :
+                this.typeSchedules = schedule.schedule_type == "onetime" ? 1 : (schedule.schedule_type == "weekly" ?
+                    2 :
                     3);
                 this.typeModel = schedule.users.length > 0 ? 1 : 2;
                 this.weeks = schedule.weeks;
@@ -294,10 +298,70 @@
                 this.guests = schedule.users;
                 this.associatedInfo = schedule.associated_info;
                 this.scheduleId = schedule.id;
+                this.coverLetter = schedule.cover_letter ? await (await fetch('/' + schedule.cover_letter.image))
+                    .blob()
+                    .then(b => new Promise((resolve, reject) => {
+                        const reader = new FileReader();
+                        reader.onloadend = () => resolve(reader.result);
+                        reader.onerror = reject;
+                        reader.readAsDataURL(b);
+                    })) : null;
 
             },
-            showFile(){
+            showCoverLetter() {
+                if (this.coverLetter) {
+                    const isImage = this.coverLetter.match(/^data:image\//);
+                    const isPDF = this.coverLetter.match(/^data:application\/pdf/);
 
+                    if (isImage) {
+                        // If it's an image, display it in FancyBox
+                        $.fancybox.open({
+                            src: this.coverLetter,
+                            type: 'image',
+                            opts: {
+                                afterLoad: () => {
+                                    $('.fancybox-image').css('max-height', '100vh');
+                                }
+                            }
+                        });
+                    } else if (isPDF) {
+                        // If it's a PDF, embed it in FancyBox
+                        $.fancybox.open({
+                            src: this.coverLetter,
+                            type: 'iframe',
+                            opts: {
+                                iframe: {
+                                    css: {
+                                        width: '100%',
+                                        height: '100%',
+                                    }
+                                }
+                            }
+                        });
+                    } else {
+                     Swal.fire({
+                         title: 'Error!',
+                         text: "File tidak valid",
+                         icon: 'error',
+                         confirmButtonText: 'Ok'
+                     })
+                    }
+                } else {
+                    Swal.fire({
+                        title: 'Error!',
+                        text: "File tidak ada",
+                        icon: 'error',
+                        confirmButtonText: 'Ok'
+                    })
+                }
+            },
+            uploadCoverLetter(event) {
+                const file = event.target.files[0];
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => {
+                    this.coverLetter = reader.result;
+                };
             },
             updateSchedule() {
                 if (!this.name) {
@@ -393,6 +457,7 @@
                             weeks: this.weeks,
                             type_id: typeIds,
                             associated_info: this.associatedInfo,
+                            coverLetter: this.coverLetter
                         }),
                     })
                     .then(res => res.json())
@@ -409,6 +474,7 @@
                             this.isEdit = false;
                             this.groups = [];
                             this.guests = [];
+                            this.coverLetter = null;
 
                             Swal.fire({
                                 title: res.message,
@@ -613,14 +679,22 @@
                     @if (!Auth::user()->hasRole('administrator') && !Auth::user()->hasRole('laborant'))
                         <div>
                             {!! Form::label('cover_letter', 'Surat Pengantar:', ['class' => 'mt-3']) !!}
-                            {!! Form::file('cover_letter', ['class' => 'form-control', 'x-model' => 'coverLetter']) !!}
+                            {!! Form::file('cover_letter', [
+                                'class' => 'form-control',
+                                'accept' => 'application/pdf,image/*',
+                                'x-on:change' => 'uploadCoverLetter($event)',
+                            ]) !!}
                         </div>
                     @else
-                    <template x-if="isShow">
-                        <div>
-                            {!! Form::label('cover_letter', 'Surat Pengantar:', ['class' => 'mt-3']) !!}
-                            
-                        </div>
+                        <template x-if="isShow">
+                            <div>
+                                {!! Form::label('cover_letter', 'Surat Pengantar:', ['class' => 'mt-3']) !!}
+                                <button type="button" class="btn btn-primary d-block w-100"
+                                    @click.prevent="showCoverLetter"><i class="fa fa-eye"></i> Lihat File
+                                    Pengantar</button>
+
+                            </div>
+                        </template>
                     @endif
 
                 </div>

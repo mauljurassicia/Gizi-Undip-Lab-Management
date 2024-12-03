@@ -102,14 +102,14 @@ if (!function_exists('base64ToFile')) {
     function base64ToFile($base64, $filename = null)
     {
         // Remove data URI scheme if present
-        $base64 = preg_replace('/^data:image\/\w+;base64,/', '', $base64);
+        $base64 = preg_replace('/^data:[\w\/\-\.]+;base64,/', '', $base64);
         
         // Decode the base64 string
-        $imageData = base64_decode($base64);
+        $fileData = base64_decode($base64);
         
         // Detect the MIME type
         $finfo = finfo_open(FILEINFO_MIME_TYPE);
-        $mimeType = finfo_buffer($finfo, $imageData);
+        $mimeType = finfo_buffer($finfo, $fileData);
         finfo_close($finfo);
         
         // Map MIME types to extensions
@@ -120,10 +120,13 @@ if (!function_exists('base64ToFile')) {
             'image/webp' => '.webp',
             'image/bmp' => '.bmp',
             'image/svg+xml' => '.svg',
+            'application/pdf' => '.pdf',
+            'application/msword' => '.doc',
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document' => '.docx',
         ];
         
         // Determine the extension
-        $extension = $extensionMap[$mimeType] ?? '.png'; // Default to .png if unknown
+        $extension = $extensionMap[$mimeType] ?? '.bin'; // Default to .bin if unknown
         
         // Generate filename if not provided
         if (!$filename) {
@@ -136,8 +139,8 @@ if (!function_exists('base64ToFile')) {
         $tempDir = sys_get_temp_dir();
         $tempFilePath = $tempDir . '/' . uniqid('base64_') . $extension;
         
-        // Write the decoded image data to the temporary file
-        file_put_contents($tempFilePath, $imageData);
+        // Write the decoded file data to the temporary file
+        file_put_contents($tempFilePath, $fileData);
         
         // Create an UploadedFile
         $file = new UploadedFile(
@@ -150,4 +153,5 @@ if (!function_exists('base64ToFile')) {
         
         return $file;
     }
+    
 }

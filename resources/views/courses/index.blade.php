@@ -8,7 +8,7 @@
                     <nav aria-label="breadcrumb">
                         <ol class="breadcrumb breadcrumb-style1 mg-b-10">
                             <li class="breadcrumb-item"><a href="{{ route('dashboard') }}">Home</a></li>
-                            <li class="breadcrumb-item active" aria-current="page">Courses</li>
+                            <li class="breadcrumb-item active" aria-current="page">Mata Kuliah</li>
                         </ol>
                     </nav>
                 </div>
@@ -16,10 +16,10 @@
 
             @include('flash::message')
 
-            <h4 class="mg-b-10">Courses</h4>
+            <h4 class="mg-b-10">Mata Kuliah</h4>
 
             <p class="mg-b-30">
-                This is a list of your <code>Courses</code>, you can manage by clicking on action buttons in this table.
+                Ini adalah daftar <code>Mata Kuliah</code> Anda, Anda dapat mengelolanya dengan mengklik tombol tindakan di tabel ini.
             </p>
 
             <div class="d-sm-flex align-items-center justify-content-between mg-b-20 mg-lg-b-25 mg-xl-b-30">
@@ -29,7 +29,8 @@
 
                 <div class="d-none d-md-block">
                     @can('course-create')
-                        <a class="btn btn-sm btn-primary btn-uppercase" href="{!! route('courses.create') !!}"><i class="fa fa-plus"></i> Add New</a>
+                        <a class="btn btn-sm btn-primary btn-uppercase" href="{!! route('courses.create') !!}"><i
+                                class="fa fa-plus"></i> Tambah Mata Kuliah</a>
                     @endcan
                 </div>
             </div>
@@ -41,4 +42,3 @@
     </div>
     <!-- /.content -->
 @endsection
-

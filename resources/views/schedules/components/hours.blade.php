@@ -102,6 +102,22 @@
 
                 this.$dispatch('set-edit', schedule);
             },
+            showScheduleModal(id) {
+              const schedule = this.$store.schedule.getSchedule(id);
+              if (!schedule) {
+                  Swal.fire({
+                      title: 'Error!',
+                      text: "Jadwal tidak ditemukan",
+                      icon: 'error',
+                      confirmButtonText: 'Ok'
+                  });
+                  return;
+              }
+
+              $('#scheduleModal').modal('show');
+
+              this.$dispatch('set-show', schedule);
+            },
             async deleteScheduleModal(id) {
                 const schedule = this.$store.schedule.getSchedule(id);
 
@@ -398,16 +414,26 @@
                             <span x-text="schedule.name"></span>
                         </h5>
                         <div class="d-flex fit-content">
+
+                            @if (Auth::user()->hasRole('administrator') || Auth::user()->hasRole('laborant'))
+                                <button @click="showScheduleModal(schedule.id)"
+                                    class="btn btn-info btn-xs btn-icon mr-1"><i class="fa fa-eye"></i></button>
+                            @endif
                             <button @click="editScheduleModal(schedule.id)"
-                                class="btn btn-primary btn-sm d-none d-md-block mr-2" :disabled="schedule.NotAllowed" ><i
+                                class="btn btn-primary btn-sm d-none d-md-block mr-2" :disabled="schedule.NotAllowed"><i
                                     class="fa fa-pencil"></i></button>
                             <button @click="editScheduleModal(schedule.id)"
-                                class="btn btn-primary btn-xs btn-icon d-md-none mr-1" :disabled="schedule.NotAllowed" ><i
-                                    class="fa fa-pencil"></i></button>
+                                class="btn btn-primary btn-xs btn-icon d-md-none mr-1"
+                                :disabled="schedule.NotAllowed"><i class="fa fa-pencil"></i></button>
+
+
+
                             <button @click="deleteScheduleModal(schedule.id)"
-                                class="btn btn-danger btn-xs btn-icon d-md-none" :disabled="schedule.NotAllowed" ><i class="fa fa-trash"></i></button>
+                                class="btn btn-danger btn-xs btn-icon d-md-none" :disabled="schedule.NotAllowed"><i
+                                    class="fa fa-trash"></i></button>
                             <button @click="deleteScheduleModal(schedule.id)"
-                                class="btn btn-danger btn-sm d-none d-md-block" :disabled="schedule.NotAllowed" ><i class="fa fa-trash"></i></button>
+                                class="btn btn-danger btn-sm d-none d-md-block" :disabled="schedule.NotAllowed"><i
+                                    class="fa fa-trash"></i></button>
                         </div>
 
                     </div>
@@ -497,9 +523,12 @@
                             class="fa fa-sign-in-alt"></i>
                         Hadir</button>
                     <button @click="checkOut(schedule.id)" class="btn btn-danger btn-xs mt-2"
-                        :class="{ 'disabled': !isSchedulePassed(schedule.end_schedule) || schedule.logBookOut ||
-                            schedule.NotAllowed }"
-                        :disabled="!isSchedulePassed(schedule.end_schedule) || schedule.logBookOut || schedule.NotAllowed || schedule.status !=='approved' || !schedule.logBookIn">
+                        :class="{
+                            'disabled': !isSchedulePassed(schedule.end_schedule) || schedule.logBookOut ||
+                                schedule.NotAllowed
+                        }"
+                        :disabled="!isSchedulePassed(schedule.end_schedule) || schedule.logBookOut || schedule.NotAllowed ||
+                            schedule.status !=='approved' || !schedule.logBookIn">
                         Keluar <i class="fa fa-sign-out-alt"></i></button>
 
                 </div>

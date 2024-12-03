@@ -14,10 +14,12 @@
             weeks: 1,
             associatedInfo: "",
             isEdit: false,
+            isShow: false,
             scheduleId: 0,
             groups: [],
             guests: [],
             groupId: 0,
+            coverLetter: null,
             checkStartTime() {
                 if (this.startTime < this.operationalHours.start) {
                     this.startTime = this.operationalHours.start;
@@ -254,6 +256,7 @@
                     this.weeks = 1;
                     this.associatedInfo = "";
                     this.isEdit = false;
+                    this.isShow = false;
                     this.groups = [];
                     this.guests = [];
                     this.scheduleId = 0;
@@ -262,6 +265,7 @@
             },
             editModal(schedule) {
                 this.isEdit = true;
+                this.isShow = false;
                 this.name = schedule.name;
                 this.courseId = schedule.course_id;
                 this.startTime = moment(schedule.start_schedule).format('HH:mm');
@@ -274,6 +278,26 @@
                 this.weeks = schedule.weeks;
                 this.associatedInfo = schedule.associated_info;
                 this.scheduleId = schedule.id;
+            },
+            showModal(schedule) {
+                this.isShow = true;
+                this.isEdit = false;
+                this.name = schedule.name;
+                this.courseId = schedule.course_id;
+                this.startTime = moment(schedule.start_schedule).format('HH:mm');
+                this.endTime = moment(schedule.end_schedule).format('HH:mm');
+                this.typeSchedules = schedule.schedule_type == "onetime" ? 1 : (schedule.schedule_type == "weekly" ? 2 :
+                    3);
+                this.typeModel = schedule.users.length > 0 ? 1 : 2;
+                this.weeks = schedule.weeks;
+                this.groups = schedule.groups;
+                this.guests = schedule.users;
+                this.associatedInfo = schedule.associated_info;
+                this.scheduleId = schedule.id;
+
+            },
+            showFile(){
+
             },
             updateSchedule() {
                 if (!this.name) {
@@ -411,7 +435,7 @@
 <div class="modal fade" id="scheduleModal" tabindex="-1" aria-labelledby="scheduleModalLabel" aria-hidden="true"
     x-data="scheduleModal()" data-backdrop="static" data-keyboard="false">
     <div class="modal-dialog" @set-operational.window="setOperationalHours($event)"
-        @set-edit.window="editModal($event.detail)">
+        @set-edit.window="editModal($event.detail)" @set-show.window="showModal($event.detail)">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="scheduleModalLabel">Buat Jadwal</h5>
@@ -427,6 +451,7 @@
                         'placeholder' => 'Contoh: Praktikum Makanan',
                         'x-model' => 'name',
                         'required',
+                        ':readonly' => 'isShow',
                     ]) !!}
                     <template x-if="!name">
                         <p class="tx-danger tx-12 tx-bold mg-t-10 ">Nama Kegiatan harus diisi!</p>
@@ -443,7 +468,7 @@
                             '3' => 'Kunjungan Bulanan',
                         ],
                         null,
-                        ['class' => 'form-control', 'x-model' => 'typeSchedules', ':disabled' => 'isEdit'],
+                        ['class' => 'form-control', 'x-model' => 'typeSchedules', ':disabled' => 'isEdit', ':readonly' => 'isShow'],
                     ) !!}
                     <template x-if="typeSchedules == 0">
                         <p class="tx-danger tx-12 tx-bold mg-t-10 ">Silahkan pilih tipe kunjungan!</p>
@@ -470,6 +495,7 @@
                                 'x-model' => 'weeks',
                                 'required',
                                 ':disabled' => 'isEdit',
+                                ':readonly' => 'isShow',
                             ]) !!}
                             <template x-if="!weeks || weeks <= 0">
                                 <p class="tx-danger tx-12 tx-bold mg-t-10 ">Durasi Jadwal harus diisi!</p>
@@ -490,6 +516,7 @@
                             [
                                 'class' => 'form-control',
                                 'x-model' => 'courseId',
+                                ':readonly' => 'isShow',
                             ],
                         ) !!}
                         <template x-if="courseId == 0 && courseId !== 'null' ">
@@ -503,6 +530,7 @@
                                     'class' => 'form-control',
                                     'placeholder' => 'Contoh: Penelitian Disertasi',
                                     'x-model' => 'associatedInfo',
+                                    ':readonly' => 'isShow',
                                 ]) !!}
                                 <template x-if="!associatedInfo && (courseId == null || courseId == 'null')">
                                     <p class="tx-danger tx-12 tx-bold mg-t-10 ">Info Kegiatan harus diisi!</p>
@@ -519,7 +547,7 @@
                         'type_model',
                         ['0' => 'Pilih Tipe Pengunjung', '1' => 'Perorangan', '2' => 'Berkelompok'],
                         null,
-                        ['class' => 'form-control', 'x-model' => 'typeModel'],
+                        ['class' => 'form-control', 'x-model' => 'typeModel', ':readonly' => 'isShow'],
                     ) !!}
 
                     <template x-if="typeModel == 0">
@@ -537,6 +565,7 @@
                                 {!! Form::select('group_id', ['0' => 'Pilih Grup'] + $groups->pluck('name', 'id')->toArray(), null, [
                                     'class' => 'form-control',
                                     'x-model' => 'groupId',
+                                    ':readonly' => 'isShow',
                                 ]) !!}
                                 <template x-if="groupId == 0">
                                     <p class="tx-danger tx-12 tx-bold mg-t-10 ">Silahkan pilih grup!</p>
@@ -568,6 +597,7 @@
                             'x-model' => 'startTime',
                             ':min' => 'operationalHours.start',
                             ':max' => 'operationalHours.end',
+                            ':readonly' => 'isShow',
                         ]) !!}
 
                         {!! Form::label('end_schedule', 'Waktu Selesai:', ['class' => 'mt-3']) !!}
@@ -576,8 +606,23 @@
                             'x-model' => 'endTime',
                             ':min' => 'operationalHours.start',
                             ':max' => 'operationalHours.end',
+                            ':readonly' => 'isShow',
                         ]) !!}
                     </div>
+
+                    @if (!Auth::user()->hasRole('administrator') && !Auth::user()->hasRole('laborant'))
+                        <div>
+                            {!! Form::label('cover_letter', 'Surat Pengantar:', ['class' => 'mt-3']) !!}
+                            {!! Form::file('cover_letter', ['class' => 'form-control', 'x-model' => 'coverLetter']) !!}
+                        </div>
+                    @else
+                    <template x-if="isShow">
+                        <div>
+                            {!! Form::label('cover_letter', 'Surat Pengantar:', ['class' => 'mt-3']) !!}
+                            
+                        </div>
+                    @endif
+
                 </div>
             </div>
             <div class="modal-footer">

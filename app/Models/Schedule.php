@@ -28,7 +28,7 @@ class Schedule extends Model
 {
 
     public $table = 'schedules';
-    
+
     const CREATED_AT = 'created_at';
     const UPDATED_AT = 'updated_at';
 
@@ -61,72 +61,93 @@ class Schedule extends Model
      *
      * @var array
      */
-    public static $rules = [
-        
-    ];
+    public static $rules = [];
 
-    public function getTableColumns() {
+    public function getTableColumns()
+    {
         return $this->getConnection()->getSchemaBuilder()->getColumnListing($this->getTable());
     }
 
-    public function room() {
+    public function room()
+    {
         return $this->belongsTo('App\Models\Room');
     }
 
-    public function course() {
+    public function course()
+    {
         return $this->belongsTo('App\Models\Course');
     }
 
-    public function users() {
-        return $this->morphedByMany(User::class, 'scheduleable', 'scheduleables', 'schedule_id', 'scheduleable_id', 'id', 'id');
+
+    public function users()
+    {
+        return $this->morphedByMany(
+            User::class,
+            'scheduleable',
+            'scheduleables',
+            'schedule_id',
+            'scheduleable_id'
+        );
     }
 
-    public function groups() {
-        return $this->morphedByMany(Group::class, 'scheduleable', 'scheduleables', 'schedule_id', 'scheduleable_id', 'id', 'id');
+    public function groups()
+    {
+        return $this->morphedByMany(
+            Group::class,
+            'scheduleable',
+            'scheduleables',
+            'schedule_id',
+            'scheduleable_id'
+        );
     }
 
-    public function logBooks() {
+
+    public function logBooks()
+    {
         return $this->morphMany(LogBook::class, 'logbookable');
     }
 
-    public function getLogBookOutAttribute(){
+    public function getLogBookOutAttribute()
+    {
         /** @var User $user */
         $user = Auth::user();
         $userExist = $this->logBooks()
-        ->where('type', 'out')
-        ->whereHasMorph('userable', [User::class, Group::class], function ($query) use ($user) {
-            $query->when($query->getModel() instanceof User, function ($q) use ($user) {
-                $q->where('id', $user->id);
-            })->when($query->getModel() instanceof Group, function ($q) use ($user) {
-                $q->whereHas('users', function ($subQuery) use ($user) {
-                    $subQuery->where('users.id', $user->id);
+            ->where('type', 'out')
+            ->whereHasMorph('userable', [User::class, Group::class], function ($query) use ($user) {
+                $query->when($query->getModel() instanceof User, function ($q) use ($user) {
+                    $q->where('id', $user->id);
+                })->when($query->getModel() instanceof Group, function ($q) use ($user) {
+                    $q->whereHas('users', function ($subQuery) use ($user) {
+                        $subQuery->where('users.id', $user->id);
+                    });
                 });
-            });
-        })->exists();
+            })->exists();
 
         return $userExist;
     }
 
-    public function getLogBookInAttribute(){
+    public function getLogBookInAttribute()
+    {
         /** @var User $user */
         $user = Auth::user();
 
         $userExist = $this->logBooks()
-        ->where('type', 'in')
-        ->whereHasMorph('userable', [User::class, Group::class], function ($query) use ($user) {
-            $query->when($query->getModel() instanceof User, function ($q) use ($user) {
-                $q->where('id', $user->id);
-            })->when($query->getModel() instanceof Group, function ($q) use ($user) {
-                $q->whereHas('users', function ($subQuery) use ($user) {
-                    $subQuery->where('users.id', $user->id);
+            ->where('type', 'in')
+            ->whereHasMorph('userable', [User::class, Group::class], function ($query) use ($user) {
+                $query->when($query->getModel() instanceof User, function ($q) use ($user) {
+                    $q->where('id', $user->id);
+                })->when($query->getModel() instanceof Group, function ($q) use ($user) {
+                    $q->whereHas('users', function ($subQuery) use ($user) {
+                        $subQuery->where('users.id', $user->id);
+                    });
                 });
-            });
-        })->exists();
+            })->exists();
 
         return $userExist;
     }
 
-    public function getNotAllowedAttribute() {
+    public function getNotAllowedAttribute()
+    {
         $user = Auth::user();
         $groups = $this->groups()->whereHas('users', function ($query) use ($user) {
             $query->where('users.id', $user->id);
@@ -137,5 +158,20 @@ class Schedule extends Model
         return !$user && !$groups;
     }
 
-    
+    public function cover_letter(){
+        return $this->morphOne(CoverLetter::class, 'cover_letterable');
+    }
+
+    public function creator(){
+        return $this->belongsTo(User::class, 'creator_id');
+    }
+
+    public function getCreatorRoleAttribute(){
+
+        /** @var User $creator */
+        $creator = $this->creator;
+        return $creator?->roles()->first()?->name ?? null;
+    }
+
+
 }

@@ -183,7 +183,8 @@ class BorrowingController extends AppBaseController
             'userable_id' => $request->input('borrowerType') == 1 ? $user->id : $request->input('groupId'),
             'activity_name' => $request->input('activityName'),
             'description' => $request->input('description'),
-            'status' => 'pending'
+            'status' => 'pending',
+            'creator_id' => $user->id
         ]);
 
 
@@ -265,7 +266,7 @@ class BorrowingController extends AppBaseController
                 return $query->where('room_id', request('roomFilter'));
             })->when($request->has("statusFilter"), function ($query) {
                 return $query->where('status', request('statusFilter'));
-            })->with(['room', 'equipment'])->orderBy('start_date', 'desc')->orderBy('id', 'desc')->get()->append('logBookOut')->append('logBookIn');
+            })->with(['room', 'equipment'])->orderBy('start_date', 'desc')->orderBy('id', 'desc')->get()->append('logBookOut')->append('logBookIn')->append('NotAllowed')->append('creatorRole');
 
             return ResponseJson::make(ResponseCodeEnum::STATUS_OK, 'Borrowings found', $borrowings)->send();
         }
@@ -286,7 +287,7 @@ class BorrowingController extends AppBaseController
                     $subQuery->where('users.id', $user->id);
                 });
             });
-        })->with(['room', 'equipment'])->orderBY('start_date', 'desc')->orderBy('id', 'desc')->get()->append('logBookOut')->append('logBookIn');
+        })->with(['room', 'equipment'])->orderBY('start_date', 'desc')->orderBy('id', 'desc')->get()->append('logBookOut')->append('logBookIn')->append('NotAllowed')->append('creatorRole');
 
         if (empty($borrowings)) {
             return ResponseJson::make(ResponseCodeEnum::STATUS_NOT_FOUND, 'Borrowings not found')->send();

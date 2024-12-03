@@ -179,7 +179,7 @@ class ScheduleController extends AppBaseController
             return ResponseJson::make(ResponseCodeEnum::STATUS_BAD_REQUEST, 'Date is required')->send();
         }
         $schedules = $this->scheduleRepository->where('room_id', $room)->whereDate('start_schedule', $request->query('date'))
-            ->whereDate('end_schedule', $request->query('date'))->with('course')->with('groups')->with('users')->get()->append('logBookOut')->append('logBookIn')->append('NotAllowed');
+            ->whereDate('end_schedule', $request->query('date'))->with('course')->with('groups')->with('users')->get()->append('logBookOut')->append('logBookIn')->append('NotAllowed')->append('creatorRole');
 
         $schedules->each(function ($schedule) {
             $schedule->weeks = $this->scheduleRepository->where('grouped_schedule_code', $schedule->grouped_schedule_code)->whereNotNull('grouped_schedule_code')->count();
@@ -406,6 +406,7 @@ class ScheduleController extends AppBaseController
         $schedule->start_schedule = $start;
         $schedule->name = $input['name'];
         $schedule->end_schedule = $end;
+        $schedule->creator_id = Auth::user()->id;
 
         if (@$input['course_id'] && !($input['course_id'] == 'null') && !($input['course_id'] == '0')) {
             $schedule->course_id = $input['course_id'];

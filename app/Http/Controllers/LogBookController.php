@@ -78,8 +78,10 @@ class LogBookController extends AppBaseController
         //     Flash::warning('You have to be logged in as a user to create a log book.');
         //     return redirect(route('logBooks.index'));
         // }
-
+     
         $schedules = $user->allSchedules;
+
+
 
         $borrowings = $user->allBorrowings;
 
@@ -155,7 +157,7 @@ class LogBookController extends AppBaseController
             return back()->withInput();
         }
 
-        if($input['type'] == 2) {
+        if ($input['type'] == 2) {
             $logBookExists = $this->logBookRepository->where('userable_id', $userable->id)
                 ->where('userable_type', get_class($userable))
                 ->where('logbookable_id', $activity->id)
@@ -169,16 +171,15 @@ class LogBookController extends AppBaseController
             }
 
 
-            if($activity instanceof Borrowing && $activity->quantity < $request->input('quantity')) {
+            if ($activity instanceof Borrowing && $activity->quantity < $request->input('quantity')) {
                 Flash::error('You cannot return more than what you borrowed. You can only return ' . $activity->quantity);
                 return back()->withInput();
             }
 
-            if($activity instanceof Borrowing) {
+            if ($activity instanceof Borrowing) {
                 $activity->return_quantity = $request->input('quantity');
                 $activity->save();
             }
-
         }
 
 

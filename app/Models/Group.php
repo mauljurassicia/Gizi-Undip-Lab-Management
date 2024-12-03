@@ -40,7 +40,7 @@ class Group extends Model
 {
 
     public $table = 'groups';
-    
+
     const CREATED_AT = 'created_at';
     const UPDATED_AT = 'updated_at';
 
@@ -75,32 +75,36 @@ class Group extends Model
      *
      * @var array
      */
-    public static $rules = [
-        
-    ];
+    public static $rules = [];
 
-    public function getTableColumns() {
+    public function getTableColumns()
+    {
         return $this->getConnection()->getSchemaBuilder()->getColumnListing($this->getTable());
     }
 
-    public function course() {
+    public function course()
+    {
         return $this->belongsTo(Course::class, 'course_id');
     }
 
-    public function users(){
+    public function users()
+    {
         return $this->belongsToMany(User::class, 'users_groups', 'group_id', 'user_id');
     }
 
-    public function schedules(){
-        return $this->morphedByMany(Schedule::class, 'scheduleable', 'scheduleables', 'scheduleable_id', 'schedule_id' );
+    public function schedules()
+    {
+        return $this->morphToMany(Schedule::class, 'scheduleable', 'scheduleables', 'scheduleable_id', 'schedule_id');
     }
 
-    public function logBooks(){
+    public function logBooks()
+    {
         return $this->morphMany(LogBook::class, 'logbookable');
     }
 
 
-    public function borrowings(){
+    public function borrowings()
+    {
         return $this->morphMany(Borrowing::class, 'userable');
     }
 }

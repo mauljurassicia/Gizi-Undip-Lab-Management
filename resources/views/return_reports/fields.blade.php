@@ -34,7 +34,7 @@
 <!-- Return Date Field -->
 <div class="form-group col-sm-6">
     {!! Form::label('return_date', 'Tanggal Pengembalian:') !!}
-    {!! Form::date('return_date', $returnReport->return_date ? \Carbon\Carbon::parse($returnReport->return_date)->format('Y-m-d') : null, ['class' => 'form-control date']) !!}
+    {!! Form::date('return_date', @$returnReport?->return_date ? \Carbon\Carbon::parse($returnReport->return_date)->format('Y-m-d') : null, ['class' => 'form-control date']) !!}
 </div>
 
 <!-- Additional Field -->

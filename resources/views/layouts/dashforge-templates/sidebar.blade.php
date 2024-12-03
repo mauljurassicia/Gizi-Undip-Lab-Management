@@ -1,6 +1,6 @@
 <aside class="aside aside-fixed">
     <div class="aside-header">
-        <a href="{{ url('/home') }}">
+        <a href="{{ url('/dashboard') }}">
             <img src="{{ asset('S1-Gizi.png') }}" alt="logo" width="120">
         </a>
         <a href="" class="aside-menu-link">

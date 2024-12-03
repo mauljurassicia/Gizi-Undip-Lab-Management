@@ -85,8 +85,9 @@ class User extends Authenticatable
 
     public function schedules()
     {
-        return $this->morphedByMany(Schedule::class, 'scheduleable', 'scheduleables', 'scheduleable_id', 'schedule_id',);
+        return $this->morphToMany(Schedule::class, 'scheduleable', 'scheduleables', 'scheduleable_id', 'schedule_id');
     }
+    
 
     public function groupSchedules()
     {
@@ -107,17 +108,34 @@ class User extends Authenticatable
 
     public function allSchedules()
     {
-        $query = $this->schedules();
-
+        // Start with the schedules for the user
+        $query = $this->schedules()->select(
+            'schedules.id', 
+            'schedules.name', 
+            'scheduleables.scheduleable_id as pivot_scheduleable_id', 
+            'scheduleables.schedule_id as pivot_schedule_id', 
+            'scheduleables.scheduleable_type as pivot_scheduleable_type'
+        );
+    
         // Add schedules from all groups
         if ($this->groups->isNotEmpty()) {
             foreach ($this->groups as $group) {
-                $query = $query->union($group->schedules());
+                $query = $query->union(
+                    $group->schedules()->select(
+                        'schedules.id', 
+                        'schedules.name', 
+                        'scheduleables.scheduleable_id as pivot_scheduleable_id', 
+                        'scheduleables.schedule_id as pivot_schedule_id', 
+                        'scheduleables.scheduleable_type as pivot_scheduleable_type'
+                    )
+                );
             }
         }
-
+    
         return $query;
     }
+    
+    
 
     public function logBooks()
     {

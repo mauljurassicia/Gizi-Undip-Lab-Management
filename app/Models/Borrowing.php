@@ -170,7 +170,7 @@ class Borrowing extends Model
         $user = Auth::user();
 
         if ($user->hasRole('administrator') || $user->hasRole('laborant')) {
-            return false;
+            return true;
         }
 
         // Handle different userable types
@@ -183,5 +183,20 @@ class Borrowing extends Model
         }
 
         return true; // Not allowed if userable is invalid/null
+    }
+
+    public function cover_letter(){
+        return $this->morphOne(CoverLetter::class, 'cover_letterable');
+    }
+
+    public function creator(){
+        return $this->belongsTo(User::class, 'creator_id');
+    }
+
+    public function getCreatorRoleAttribute(){
+
+        /** @var User $creator */
+        $creator = $this->creator;
+        return $creator?->roles()->first()?->name ?? null;
     }
 }

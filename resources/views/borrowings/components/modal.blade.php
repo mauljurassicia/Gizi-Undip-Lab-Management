@@ -31,6 +31,7 @@
                 }
             },
             isEdit: false,
+            isShow: false,
             roomId: null,
             equipments: [],
             equipmentId: null,
@@ -236,8 +237,7 @@
                     this.description = "";
                 }, 500);
             },
-            editBorrowing(borrowing) {
-                this.isEdit = true;
+            openExistingModal(borrowing) {
                 this.id = borrowing.id;
                 this.roomId = borrowing.room_id;
                 setTimeout(() => {
@@ -253,7 +253,17 @@
                 }, 100);
                 this.activityName = borrowing.activity_name;
                 this.description = borrowing.description;
+            },
+            editBorrowing(borrowing) {
+                this.isEdit = true;
+                this.isShow = false;
+                this.openExistingModal(borrowing);
 
+            },
+            showBorrowing(borrowing) {
+                this.isShow = true;
+                this.isEdit = false;
+                this.openExistingModal(borrowing);
             },
             async updateBorrowing() {
                 if (!this.checkValidity()) return;
@@ -309,7 +319,7 @@
 </script>
 <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" data-backdrop="static"
     data-keyboard="false" x-data="modal()" x-effect="checkVisibilitySchedule()"
-    @edit-borrowing.window="editBorrowing($event.detail)">
+    @edit-borrowing.window="editBorrowing($event.detail)" x-on:show-borrowing.window="showBorrowing($event.detail)">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -326,11 +336,12 @@
                         'class' => 'form-control',
                         'required',
                         'x-model' => 'roomId',
+                        ':readonly' => 'isShow',
                     ]) !!}
                 </div>
                 <div class="form-group">
                     {!! Form::label('equipment_id', 'Alat :') !!}
-                    <select name="equipment_id" id="equipment_id" class="form-control" required x-model="equipmentId">
+                    <select name="equipment_id" id="equipment_id" class="form-control" required x-model="equipmentId" :readonly="isShow">
                         <option value="0">-- Pilih Alat --</option>
                         <template x-for="equipment in equipments">
                             <option x-text="equipment.name" :value="equipment.id"></option>
@@ -344,6 +355,7 @@
                         'class' => 'form-control',
                         'required',
                         'x-model' => 'activityName',
+                        ':readonly' => 'isShow',
                     ]) !!}
 
                     <template x-if="!activityName">
@@ -354,7 +366,7 @@
                 <div class="form-group">
                     <label for="borrower_type">Tipe</label>
                     <select name="borrower_type" id="borrower_type" class="form-control" required
-                        x-model="borrowerType">
+                        x-model="borrowerType" :readonly="isShow">
                         <option value="0">-- Pilih Tipe --</option>
                         <option value="1">Perorangan</option>
                         <option value="2">Kelompok</option>
@@ -389,7 +401,7 @@
                 <div class="form-group">
                     <label for="start_date">Tanggal Pinjam</label>
                     <input type="date" name="start_date" id="start_date" class="form-control mb-1" required
-                        x-model="startDate">
+                        :readonly="isShow" x-model="startDate">
                     <template x-if="startDate && endDate < startDate">
                         <span class="text-danger">Tanggal Kembali harus lebih besar dari tanggal
                             pinjam</span>
@@ -407,7 +419,7 @@
                 <div class="form-group">
                     <label for="end_date">Tanggal Kembali</label>
                     <input type="date" name="end_date" id="end_date" class="form-control mb-1" required
-                        x-model="endDate" :min="startDate">
+                        x-model="endDate" :min="startDate" :readonly="isShow">
                     <template x-if="endDate && startDate > endDate">
                         <span class="text-danger">Tanggal Kembali harus lebih besar dari tanggal
                             pinjam</span>
@@ -427,13 +439,17 @@
                             <label for="quantity">Jumlah</label>
                             <div class="input-group">
                                 <input type="number" name="quantity" id="quantity" class="form-control" required
-                                    min="0" x-model="quantity" :max="remainingQuantity">
+                                    min="0" x-model="quantity" :max="remainingQuantity" :readonly="isShow">
                                 <div class="input-group-append">
                                     <span class="input-group-text">Sisa :&nbsp;<span
                                             x-text="remainingQuantity"></span></span>
 
                                 </div>
                             </div>
+                        </div>
+                        <div class="form-group">
+                            {!! Form::label('cover_letter', 'Surat Pengantar : ') !!}
+                            {!! Form::file('cover_letter', ['class' => 'form-control', 'x-model' => 'coverLetter']) !!}
                         </div>
                         <div class="form-group">
                             {!! Form::label('description', 'Keterangan : ') !!}

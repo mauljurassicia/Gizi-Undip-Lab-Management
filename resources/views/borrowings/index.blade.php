@@ -61,6 +61,10 @@
 
                             this.$dispatch('edit-borrowing', borrowing);
                         },
+                        showBorrowing(borrowing) {
+                            $('#myModal').modal('show');
+                            this.$dispatch('show-borrowing', borrowing);
+                        },
                         approveBorrowing(borrowing) {
                             fetch("{{ route('borrowings.approved', ':id') }}".replace(':id', borrowing.id), {
                                 method: 'post',
@@ -244,7 +248,8 @@
                                                 'bg-warning text-dark': borrowing.status === 'pending',
                                                 'bg-success text-white': borrowing.status === 'approved',
                                                 'bg-info text-white': borrowing.status === 'returned',
-                                                 'bg-danger text-white': borrowing.status === 'rejected' || borrowing.status === 'cancelled'
+                                                'bg-danger text-white': borrowing.status === 'rejected' || borrowing
+                                                    .status === 'cancelled'
                                             }"
                                             x-text="borrowing.status">
 
@@ -268,11 +273,13 @@
                                         @endif
                                     </div>
                                     <div class="mt-2">
-                                        <button type="button" class="btn btn-success btn-sm" :disabled="borrowing.status !== 'approved' || borrowing.logBookIn"
-                                            @click="openLogBookModal(borrowing, true)" >
+                                        <button type="button" class="btn btn-success btn-sm mt-2"
+                                            :disabled="borrowing.status !== 'approved' || borrowing.logBookIn || borrowing.NotAllowed"
+                                            @click="openLogBookModal(borrowing, true)">
                                             <i class="fa fa-sign-in-alt"></i> Log Book In
                                         </button>
-                                        <button type="button" class="btn btn-danger btn-sm" :disabled="borrowing.status !== 'approved' || !borrowing.logBookIn || borrowing.logBookOut"
+                                        <button type="button" class="btn btn-danger btn-sm mt-2"
+                                            :disabled="borrowing.status !== 'approved' || !borrowing.logBookIn || borrowing.logBookOut || borrowing.NotAllowed"
                                             @click="openLogBookModal(borrowing, false)">
                                             <i class="fa fa-sign-out-alt"></i> Log Book Out
                                         </button>
@@ -281,12 +288,21 @@
                                 </div>
                                 <div class="card-footer">
                                     <div class="d-flex justify-content-between">
-                                        <button type="button" class="btn btn-primary btn-sm"
-                                            @click="editBorrowing(borrowing)" :disabled="borrowing.status !== 'pending'">
-                                            <i class="fa fa-edit"></i> Edit
-                                        </button>
+                                        @if (Auth::user()->hasRole('administrator') || Auth::user()->hasRole('laborant'))
+                                            <button type="button" class="btn btn-info btn-sm"
+                                                @click="showBorrowing(borrowing)">
+                                                <i class="fa fa-eye"></i> Lihat
+                                            </button>
+                                        @else
+                                            <button type="button" class="btn btn-primary btn-sm"
+                                                @click="editBorrowing(borrowing)"
+                                                :disabled="borrowing.status !== 'pending' || borrowing.NotAllowed">
+                                                <i class="fa fa-edit"></i> Edit
+                                            </button>
+                                        @endif
                                         <button type="button" class="btn btn-danger btn-sm"
-                                            @click="deleteBorrowing(borrowing)" :disabled="borrowing.status !== 'pending'">
+                                            @click="deleteBorrowing(borrowing)"
+                                            :disabled="borrowing.status !== 'pending' || borrowing.NotAllowed">
                                             <i class="fa fa-trash"></i> Hapus
                                         </button>
                                     </div>

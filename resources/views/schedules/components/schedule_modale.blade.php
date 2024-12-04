@@ -12,6 +12,7 @@
             startTime: null,
             endTime: null,
             weeks: 1,
+            dates: [],
             associatedInfo: "",
             isEdit: false,
             isShow: false,
@@ -20,7 +21,9 @@
             guests: [],
             groupId: 0,
             coverLetter: null,
-            checkStartTime() {
+            async checkStartTime() {
+                const actualStartTime = moment(this.$store.date.selectedDate).add(moment.duration(this.startTime));
+
                 if (this.startTime < this.operationalHours.start) {
                     this.startTime = this.operationalHours.start;
                     Swal.fire({
@@ -42,6 +45,13 @@
                         icon: 'error'
                     });
                     return false;
+                } else if (this.typeSchedules != 4 && actualStartTime.isBefore(moment())) {
+                    this.startTime = this.operationalHours.start;
+                    Swal.fire({
+                        title: 'Waktu mulai harus lebih dari waktu sekarang',
+                        icon: 'error'
+                    });
+                    return false;
                 } else if (!this.startTime) {
                     this.startTime = this.operationalHours.start;
                     Swal.fire({
@@ -50,6 +60,31 @@
                     });
                     return false;
                 }
+
+                if (this.typeSchedules == 4) {
+                    for (let i = 0; i < this.dates.length; i++) {
+                        let date = this.dates[i];
+                        let check = await this.fetchOperationalHours(date)
+                            .then(res => {
+                                if(this.startTime < res.data.start || this.startTime > res.data.end || this.endTime < res.data.start || this.endTime > res.data.end){
+                                    this.dates[i] = null;
+                                    Swal.fire({
+                                        title: 'Error!',
+                                        text: `Kegiatan Pada ${date} Tidak Valid`,
+                                        icon: 'error',
+                                        confirmButtonText: 'Ok'
+                                    })
+
+                                    return false;
+                                }
+                            })
+
+                        if (!check) {
+                            return false;
+                        }
+                    }
+                }
+
                 return true;
             },
 
@@ -122,7 +157,7 @@
                     return;
                 }
 
-                if (!this.weeks && (this.typeSchedules == 2 || this.typeSchedules == 3 || this.typeSchedules == 4)) {
+                if (!this.weeks && (this.typeSchedules == 2 || this.typeSchedules == 3)) {
                     Swal.fire({
                         title: 'Error!',
                         text: "Jumlah pertemuan harus diisi",
@@ -131,6 +166,27 @@
                     })
                     return;
                 }
+
+                if (this.dates.length == 0 && this.typeSchedules == 4) {
+                    Swal.fire({
+                        title: 'Error!',
+                        text: "Tanggal harus diisi",
+                        icon: 'error',
+                        confirmButtonText: 'Ok'
+                    })
+                    return;
+                }
+
+                if (this.dates.length > 0 && this.typeSchedules == 4 && this.dates.includes(null)) {
+                    Swal.fire({
+                        title: 'Error!',
+                        text: "Tanggal harus diisi",
+                        icon: 'error',
+                        confirmButtonText: 'Ok'
+                    })
+                    return;
+                }
+
 
                 if (this.courseId == '0') {
                     Swal.fire({
@@ -181,6 +237,18 @@
                     }
                 @endif
 
+                @if (!auth()->user()->hasRole('laborant') && !auth()->user()->hasRole('administrator'))
+                    if (this.coverLetter == null) {
+                        Swal.fire({
+                            title: 'Error!',
+                            text: "Cover letter harus diisi",
+                            icon: 'error',
+                            confirmButtonText: 'Ok'
+                        })
+                        return;
+                    }
+                @endif
+
                 if (!this.checkStartTime()) return;
                 if (!this.checkEndTime()) return;
                 fetch(`{{ route('schedules.adds', ['room' => $room->id]) }}?date=${this.$store.date.selectedDate?.format('YYYY-MM-DD') }`, {
@@ -199,7 +267,8 @@
                             weeks: this.weeks,
                             type_id: typeIds,
                             associated_info: this.associatedInfo,
-                            coverLetter: this.coverLetter
+                            coverLetter: this.coverLetter,
+                            dates: this.dates
 
                         }),
                     })
@@ -218,6 +287,7 @@
                             this.groups = [];
                             this.guests = [];
                             this.coverLetter = null;
+                            this.dates = [];
 
                             Swal.fire({
                                 title: res.message,
@@ -264,6 +334,7 @@
                     this.scheduleId = 0;
                     this.groupId = 0;
                     this.coverLetter = null;
+                    this.dates = [];
                 }, 500);
             },
             editModal(schedule) {
@@ -339,12 +410,12 @@
                             }
                         });
                     } else {
-                     Swal.fire({
-                         title: 'Error!',
-                         text: "File tidak valid",
-                         icon: 'error',
-                         confirmButtonText: 'Ok'
-                     })
+                        Swal.fire({
+                            title: 'Error!',
+                            text: "File tidak valid",
+                            icon: 'error',
+                            confirmButtonText: 'Ok'
+                        })
                     }
                 } else {
                     Swal.fire({
@@ -362,6 +433,41 @@
                 reader.onload = () => {
                     this.coverLetter = reader.result;
                 };
+            },
+            async inputDate(date, index) {
+
+                if (this.dates.filter((d, i) => i != index).includes(date)) {
+                    Swal.fire({
+                        title: 'Error!',
+                        text: "Tanggal sudah dipilih",
+                        icon: 'error',
+                        confirmButtonText: 'Ok'
+                    })
+                    this.dates[index] = null;
+                    return;
+                }
+
+                let operationalHours = await this.fetchOperationalHours(date);
+
+                if (operationalHours?.valid) {
+                    this.dates[index] = date;
+                } else {
+                    Swal.fire({
+                        title: 'Error!',
+                        text: "Tanggal tidak valid",
+                        icon: 'error',
+                        confirmButtonText: 'Ok'
+                    })
+                    this.dates[index] = null;
+                    return;
+                }
+
+
+            },
+            async fetchOperationalHours(date) {
+                return await fetch(
+                    `{{ route('schedules.operationalHours', ['room' => $room->id]) }}?date=${date}`
+                ).then(res => res.json());
             },
             updateSchedule() {
                 if (!this.name) {
@@ -549,20 +655,46 @@
                                 {!! Form::label('duration_weeks', 'Durasi Jadwal (Bulan):', ['class' => 'mt-3']) !!}
                             </template>
                             <template x-if="typeSchedules == 4 && !isEdit">
-                                {!! Form::label('duration_weeks', 'Durasi Jadwal (Hari):', ['class' => 'mt-3']) !!}
+                                <div class="w-100 mt-3">
+                                    <button type="button" class="btn btn-primary"
+                                        @click="dates.push(null);">
+                                        Tambah Tanggal
+                                    </button>
+                                    <template x-if="dates.length > 0">
+                                        <template x-for="(date, index) in dates">
+                                            <div class="input-group mt-2">
+                                                <input type="date" class="form-control" x-model="dates[index]"
+                                                    :min="moment().format('YYYY-MM-DD')"
+                                                    @change="inputDate($event.target.value, index)">
+                                                <div class="input-group-append">
+                                                    <button type="button" class="btn btn-danger"
+                                                        @click="dates.splice(index, 1)">
+                                                        <i class="fa fa-minus"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </template>
+                                    </template>
+                                    <template x-if="dates.length == 0">
+                                        <p class="tx-danger tx-12 tx-bold mg-t-10 ">Silahkan tambahkan tanggal!</p>
+                                    </template>
+
+                                </div>
                             </template>
                             <template x-if="isEdit">
                                 {!! Form::label('duration_weeks', 'Jumlah Pertemuan:', ['class' => 'mt-3']) !!}
                             </template>
-                            {!! Form::number('duration_weeks', null, [
-                                'class' => 'form-control',
-                                'min' => '1',
-                                'placeholder' => 'Jumlah Minggu',
-                                'x-model' => 'weeks',
-                                'required',
-                                ':disabled' => 'isEdit',
-                                ':readonly' => 'isShow',
-                            ]) !!}
+                            <template x-if="typeSchedules != 4 && !isEdit">
+                                {!! Form::number('duration_weeks', null, [
+                                    'class' => 'form-control',
+                                    'min' => '1',
+                                    'placeholder' => 'Jumlah Minggu',
+                                    'x-model' => 'weeks',
+                                    'required',
+                                    ':disabled' => 'isEdit',
+                                    ':readonly' => 'isShow',
+                                ]) !!}
+                            </template>
                             <template x-if="!weeks || weeks <= 0">
                                 <p class="tx-danger tx-12 tx-bold mg-t-10 ">Durasi Jadwal harus diisi!</p>
                             </template>
@@ -701,10 +833,10 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" @click.prevent="closeModal">Close</button>
-                <template x-if="isEdit">
+                <template x-if="isEdit && !isShow">
                     <button type="button" class="btn btn-primary" @click.prevent="updateSchedule">Update</button>
                 </template>
-                <template x-if="!isEdit">
+                <template x-if="!isEdit && !isShow">
                     <button type="button" class="btn btn-primary" @click.prevent="saveChanges">Save changes</button>
                 </template>
             </div>

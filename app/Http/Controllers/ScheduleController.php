@@ -231,7 +231,7 @@ class ScheduleController extends AppBaseController
         $successAssigns = 0;
 
 
-        if($input['coverLetter']){
+        if ($input['coverLetter']) {
             $input['coverLetter'] = $this->saveFileService->setImage(base64ToFile($input['coverLetter']))->setStorage('coverLetter')->handle();
         }
 
@@ -303,19 +303,16 @@ class ScheduleController extends AppBaseController
                 $dates[] = $date->copy()->addMonths($i);
             }
         } else if ($input['type_schedule'] == 4) {
-            if (!$input['weeks']) {
-                return ResponseJson::make(ResponseCodeEnum::STATUS_BAD_REQUEST, 'Jumlah hari harus diisi')->send();
+            if (count($input['dates']) == 0) {
+                return ResponseJson::make(ResponseCodeEnum::STATUS_BAD_REQUEST, 'Pilih tanggal harus diisi')->send();
             }
 
             $scheduleType = 'series';
 
-            $dates = [];
-            $weeks = $input['weeks'];
-            $date = Carbon::createFromFormat('Y-m-d', $input['date']);
-
-            for ($i = 0; $i < $weeks; $i++) {
-                $dates[] = $date->copy()->addDays($i);
-            }
+            $dates = array_map(function($date) {
+                return Carbon::createFromFormat('Y-m-d', $date);
+            }, $input['dates']);
+            
         } else {
             return ResponseJson::make(ResponseCodeEnum::STATUS_BAD_REQUEST, 'Tipe Kunjungan harus diisi')->send();
         }
@@ -446,7 +443,7 @@ class ScheduleController extends AppBaseController
             $schedule->groups()->sync($typeId);
         }
 
-        if($input['coverLetter']){
+        if ($input['coverLetter']) {
             $schedule->coverLetter()->create([
                 'image' => $input['coverLetter']
             ]);
@@ -482,13 +479,13 @@ class ScheduleController extends AppBaseController
             return ResponseJson::make(ResponseCodeEnum::STATUS_NOT_FOUND, 'Schedule not found')->send();
         }
 
-        if (!is_null($request->query('group') && $request->query('group') == '1')) {
+        if (!is_null($request->query('group')) && ($request->query('group') == '1')) {
 
             $schedules = $this->scheduleRepository->where('grouped_schedule_code', $schedule->grouped_schedule_code)->whereNotNull('grouped_schedule_code')->get();
 
             foreach ($schedules as $schedule) {
                 $schedule->logBooks()->delete();
-                $schedule->coverLetter()->delete(); 
+                $schedule->coverLetter()->delete();
             }
             $this->scheduleRepository->where('grouped_schedule_code', $schedule->grouped_schedule_code)->whereNotNull('grouped_schedule_code')->delete();
         } else {

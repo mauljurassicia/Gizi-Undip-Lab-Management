@@ -98,6 +98,8 @@ class HomeController extends AppBaseController
         $brokenEquipmentCount = $this->brokenEquipmentRepository->getBrokenEquipmentCount();
         $returnReportCount = $this->returnReportRepository->getReturnReportCount();
 
+        
+
 
         return view('home')
             ->with('scheduleWeek', $scheduleWeek)

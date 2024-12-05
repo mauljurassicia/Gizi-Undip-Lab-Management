@@ -19,16 +19,24 @@ class BrokenEquipmentDataTable extends DataTable
         $dataTable = new EloquentDataTable($query);
 
         return $dataTable->addColumn('action', 'broken_equipments.datatables_actions')
-        ->editColumn('broken_date', function ($data) {
-            return date('d F Y', strtotime($data->broken_date));
-        })
-        ->editColumn('return_date', function ($data) {
-            if($data->return_date == null){
-                return '-';
-            }
-            return date('d F Y', strtotime($data->return_date));
-        })
-        ->rawColumns(['action']);
+            ->editColumn('broken_date', function ($data) {
+                return date('d F Y', strtotime($data->broken_date));
+            })
+            ->editColumn('return_date', function ($data) {
+                if ($data->return_date == null) {
+                    return '-';
+                }
+                return date('d F Y', strtotime($data->return_date));
+            })
+            ->editColumn('returnReport.status', function ($data) {
+                if ($data->returnReport == null) {
+                    return '-';
+                }
+                return $data->returnReport->status == 'pending' ?
+                    '<span class="badge badge-warning">Pending</span>' : ($data->returnReport->status == 'approved' ?
+                        '<span class="badge badge-success">Approved</span>' : '<span class="badge badge-danger">Rejected</span>');
+            })
+            ->rawColumns(['action', 'returnReport.status']);
     }
 
     /**
@@ -39,7 +47,7 @@ class BrokenEquipmentDataTable extends DataTable
      */
     public function query(BrokenEquipment $model)
     {
-        return $model->newQuery()->with(['room', 'equipment', 'user']);
+        return $model->newQuery()->with(['room', 'equipment', 'user', 'returnReport']);
     }
 
     /**
@@ -56,8 +64,7 @@ class BrokenEquipmentDataTable extends DataTable
             ->parameters([
                 'dom'     => 'Bfrtip',
                 'order'   => [[0, 'desc']],
-                'buttons' => [
-                ],
+                'buttons' => [],
                 'initComplete' => "function() {
                     this.api().columns().every(function() {
                         var column = this;
@@ -87,6 +94,7 @@ class BrokenEquipmentDataTable extends DataTable
             'quantity' => ['name' => 'quantity', 'title' => 'Jumlah', 'data' => 'quantity'],
             'broken_date' => ['name' => 'broken_date', 'title' => 'Tgl. Rusak', 'data' => 'broken_date'],
             'return_date' => ['name' => 'return_date', 'title' => 'Tgl. Kembali', 'data' => 'return_date'],
+            'returnReport.status' => ['name' => 'returnReport.status', 'title' => 'Status', 'data' => 'returnReport.status'],
         ];
     }
 
@@ -95,7 +103,7 @@ class BrokenEquipmentDataTable extends DataTable
      *
      * @return string
      */
-    protected function filename():string
+    protected function filename(): string
     {
         return 'broken_equipmentsdatatable_' . time();
     }

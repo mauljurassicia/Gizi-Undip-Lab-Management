@@ -27,6 +27,9 @@ class ReturnReportDataTable extends DataTable
         ->addColumn('brokenEquipment', function ($data) {
             return $data->brokenEquipment->room->name . ' - ' . $data->brokenEquipment->equipment->name;
         })
+        ->editColumn('return_date', function ($data) {
+            return date('d F Y', strtotime($data->return_date));
+        })
         ->editColumn('price', function ($data) { return 'Rp. ' . number_format($data->price, 0, ',', '.'); })->rawColumns(['status', 'action']);
     }
 

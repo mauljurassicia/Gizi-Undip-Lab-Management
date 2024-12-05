@@ -1,54 +1,45 @@
-<!-- Id Field -->
-<div class="form-group">
-    {!! Form::label('id', 'Id:') !!}
-    <p>{!! $brokenEquipment->id !!}</p>
-</div>
-
-<!-- Room Id Field -->
-<div class="form-group">
-    {!! Form::label('room_id', 'Room Id:') !!}
-    <p>{!! $brokenEquipment->room_id !!}</p>
-</div>
-
-<!-- User Id Field -->
-<div class="form-group">
-    {!! Form::label('user_id', 'User Id:') !!}
-    <p>{!! $brokenEquipment->user_id !!}</p>
-</div>
-
-<!-- Equipment Id Field -->
-<div class="form-group">
-    {!! Form::label('equipment_id', 'Equipment Id:') !!}
-    <p>{!! $brokenEquipment->equipment_id !!}</p>
-</div>
-
-<!-- Quantity Field -->
-<div class="form-group">
-    {!! Form::label('quantity', 'Quantity:') !!}
-    <p>{!! $brokenEquipment->quantity !!}</p>
-</div>
-
-<!-- Broken Date Field -->
-<div class="form-group">
-    {!! Form::label('broken_date', 'Broken Date:') !!}
-    <p>{!! $brokenEquipment->broken_date !!}</p>
-</div>
-
-<!-- Return Date Field -->
-<div class="form-group">
-    {!! Form::label('return_date', 'Return Date:') !!}
-    <p>{!! $brokenEquipment->return_date !!}</p>
-</div>
-
-<!-- Created At Field -->
-<div class="form-group">
-    {!! Form::label('created_at', 'Created At:') !!}
-    <p>{!! $brokenEquipment->created_at !!}</p>
-</div>
-
-<!-- Updated At Field -->
-<div class="form-group">
-    {!! Form::label('updated_at', 'Updated At:') !!}
-    <p>{!! $brokenEquipment->updated_at !!}</p>
+<div class="row">
+    <div class="col-md-4 col-sm-6">
+        <div class="form-group">
+            <label class="text-muted">ID</label>
+            <p class="font-weight-bold">{{ $brokenEquipment->id }}</p>
+        </div>
+    </div>
+    <div class="col-md-4 col-sm-6">
+        <div class="form-group">
+            <label class="text-muted">Room ID</label>
+            <p class="font-weight-bold">{{ $brokenEquipment->room?->name }}</p>
+        </div>
+    </div>
+    <div class="col-md-4 col-sm-6">
+        <div class="form-group">
+            <label class="text-muted">User ID</label>
+            <p class="font-weight-bold">{{ $brokenEquipment->user?->name }}</p>
+        </div>
+    </div>
+    <div class="col-md-4 col-sm-6">
+        <div class="form-group">
+            <label class="text-muted">Equipment ID</label>
+            <p class="font-weight-bold">{{ $brokenEquipment->equipment?->name }}</p>
+        </div>
+    </div>
+    <div class="col-md-4 col-sm-6">
+        <div class="form-group">
+            <label class="text-muted">Jumlah</label>
+            <p class="font-weight-bold">{{ $brokenEquipment->quantity }}</p>
+        </div>
+    </div>
+    <div class="col-md-4 col-sm-6">
+        <div class="form-group">
+            <label class="text-muted">Tanggal Kerusakan</label>
+            <p class="font-weight-bold">{{ date('d F Y', strtotime($brokenEquipment->broken_date)) ?? '-' }}</p>
+        </div>
+    </div>
+    <div class="col-md-4 col-sm-6">
+        <div class="form-group">
+            <label class="text-muted">Return Date</label>
+            <p class="font-weight-bold">{{ $brokenEquipment->return_date ? date('d F Y', strtotime($brokenEquipment->return_date)) : '-' }}</p>
+        </div>
+    </div>
 </div>
 

@@ -110,4 +110,5 @@ Route::resource('brokenEquipments', 'BrokenEquipmentController');
 // Route::post('importBrokenEquipment', 'BrokenEquipmentController@import');
 
 Route::resource('returnReports', 'ReturnReportController');
+Route::patch('returnReports/{id}/changeStatus', 'ReturnReportController@changeStatus')->name('returnReports.changeStatus');
 // Route::post('importReturnReport', 'ReturnReportController@import');

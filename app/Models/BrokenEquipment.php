@@ -79,5 +79,9 @@ class BrokenEquipment extends Model
         return $this->belongsTo(User::class, 'user_id');
     }
 
+    public function returnReport(){
+        return $this->hasOne(ReturnReport::class, 'broken_equipment_id');
+    }
+
     
 }

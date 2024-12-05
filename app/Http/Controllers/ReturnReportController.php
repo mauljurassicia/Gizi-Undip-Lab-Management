@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\DataTables\ReturnReportDataTable;
+use App\Enums\ResponseCodeEnum;
+use App\Helpers\ResponseJson;
 use App\Http\Requests\CreateReturnReportRequest;
 use App\Http\Requests\UpdateReturnReportRequest;
 use App\Repositories\ReturnReportRepository;
@@ -65,9 +67,9 @@ class ReturnReportController extends AppBaseController
         $user = Auth::user();
 
         if ($user->hasRole('administrator')) {
-            $brokenEquipments = $this->brokenEquipmentRepository->whereNull('return_date')->get();
+            $brokenEquipments = $this->brokenEquipmentRepository->whereNull('return_date')->whereDoesntHave('returnReport')->get();
         } else {
-            $brokenEquipments = $this->brokenEquipmentRepository->where('user_id', $user->id)->whereNull('return_date')->get();
+            $brokenEquipments = $this->brokenEquipmentRepository->where('user_id', $user->id)->whereNull('return_date')->whereDoesntHave('returnReport')->get();
         }
 
 
@@ -98,7 +100,10 @@ class ReturnReportController extends AppBaseController
             return redirect(route('returnReports.index'));
         }
 
-        if ($brokenEquipment->user_id != Auth::user()->id) {
+        /** @var User $user */
+        $user = Auth::user();
+
+        if ($brokenEquipment->user_id != $user->id && !$user->hasRole('laborant') && !$user->hasRole('administrator')) {
             Flash::error('Anda tidak memiliki akses untuk laporan peralatan ini');
             return redirect(route('returnReports.index'));
         }
@@ -108,6 +113,13 @@ class ReturnReportController extends AppBaseController
         }
 
         $returnReport = $this->returnReportRepository->create($input);
+        $this->brokenEquipmentRepository->where('id', $returnReport->broken_equipment_id)->update(['return_date' => $returnReport->return_date]);
+
+        if ($user->hasRole('laborant') || $user->hasRole('administrator')) {
+            $returnReport->update(['status' => 'approved']);
+        }
+
+
 
         Flash::success('Return Report saved successfully.');
         return redirect(route('returnReports.index'));
@@ -141,20 +153,22 @@ class ReturnReportController extends AppBaseController
      */
     public function edit($id)
     {
-         /** @var User $user */
-         $user = Auth::user();
+        /** @var User $user */
+        $user = Auth::user();
 
-         if ($user->hasRole('administrator')) {
-             $brokenEquipments = $this->brokenEquipmentRepository->whereNull('return_date')->get();
-         } else {
-             $brokenEquipments = $this->brokenEquipmentRepository->where('user_id', $user->id)->whereNull('return_date')->get();
-         }
- 
- 
-         if ($brokenEquipments->isEmpty()) {
-             Flash::error('Anda tidak memiliki laporan peralatan rusak');
-             return redirect(route('returnReports.index'));
-         }
+        if ($user->hasRole('administrator')) {
+            $brokenEquipments = $this->brokenEquipmentRepository->whereNull('return_date')->whereDoesntHave('returnReport')->get();
+
+        } else {
+            $brokenEquipments = $this->brokenEquipmentRepository->where('user_id', $user->id)->whereNull('return_date')->whereDoesntHave('returnReport')->get();
+            
+        }
+
+
+        if ($brokenEquipments->isEmpty()) {
+            Flash::error('Anda tidak memiliki laporan peralatan rusak');
+            return redirect(route('returnReports.index'));
+        }
 
 
         $returnReport = $this->returnReportRepository->findWithoutFail($id);
@@ -195,7 +209,10 @@ class ReturnReportController extends AppBaseController
             return redirect(route('returnReports.index'));
         }
 
-        if ($brokenEquipment->user_id != Auth::user()->id) {
+        /** @var User $user */
+        $user = Auth::user();
+
+        if ($brokenEquipment->user_id != $user->id && !$user->hasRole('laborant') && !$user->hasRole('administrator')) {
             Flash::error('Anda tidak memiliki akses untuk laporan peralatan ini');
             return redirect(route('returnReports.index'));
         }
@@ -205,6 +222,11 @@ class ReturnReportController extends AppBaseController
         }
 
         $returnReport = $this->returnReportRepository->update($input, $id);
+        $this->brokenEquipmentRepository->where('id', $returnReport->broken_equipment_id)->update(['return_date' => $returnReport->return_date]);
+
+        if ($user->hasRole('laborant') || $user->hasRole('administrator')) {
+            $returnReport->update(['status' => 'approved']);
+        }
 
         Flash::success('Return Report updated successfully.');
         return redirect(route('returnReports.index'));
@@ -227,27 +249,33 @@ class ReturnReportController extends AppBaseController
         }
 
         $this->returnReportRepository->delete($id);
+        $this->brokenEquipmentRepository->where('id', $returnReport->broken_equipment_id)->update(['return_date' => null]);
 
         Flash::success('Return Report deleted successfully.');
         return redirect(route('returnReports.index'));
     }
 
-    /**
-     * Store data ReturnReport from an excel file in storage.
-     *
-     * @param Request $request
-     *
-     * @return Response
-     */
-    public function import(Request $request)
+    public function changeStatus(Request $request, $id)
     {
-        Excel::load($request->file('file'), function ($reader) {
-            $reader->each(function ($item) {
-                $returnReport = $this->returnReportRepository->create($item->toArray());
-            });
-        });
 
-        Flash::success('Return Report saved successfully.');
-        return redirect(route('returnReports.index'));
+        /** @var User $user */
+        $user = Auth::user();
+
+        if (!$user->hasRole('administrator') && !$user->hasRole('laborant')) {
+            return ResponseJson::make(ResponseCodeEnum::STATUS_UNATENTICATED, 'Unauthorized')->send();
+        }
+
+        $returnReport = $this->returnReportRepository->findWithoutFail($id);
+
+        if (empty($returnReport)) {
+            return ResponseJson::make(ResponseCodeEnum::STATUS_NOT_FOUND, 'Return Report not found')->send();
+        }
+
+        $returnReport->status = $request->status;
+        $returnReport->save();
+
+        $this->brokenEquipmentRepository->where('id', $returnReport->broken_equipment_id)->update(['return_date' => $returnReport->return_date]);
+
+        return ResponseJson::make(ResponseCodeEnum::STATUS_OK, 'Return Report updated successfully')->send();
     }
 }

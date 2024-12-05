@@ -185,7 +185,7 @@ class Borrowing extends Model
         return true; // Not allowed if userable is invalid/null
     }
 
-    public function cover_letter(){
+    public function coverLetter(){
         return $this->morphOne(CoverLetter::class, 'cover_letterable');
     }
 

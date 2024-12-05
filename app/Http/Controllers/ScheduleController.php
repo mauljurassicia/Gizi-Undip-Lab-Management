@@ -309,10 +309,9 @@ class ScheduleController extends AppBaseController
 
             $scheduleType = 'series';
 
-            $dates = array_map(function($date) {
+            $dates = array_map(function ($date) {
                 return Carbon::createFromFormat('Y-m-d', $date);
             }, $input['dates']);
-            
         } else {
             return ResponseJson::make(ResponseCodeEnum::STATUS_BAD_REQUEST, 'Tipe Kunjungan harus diisi')->send();
         }
@@ -556,6 +555,15 @@ class ScheduleController extends AppBaseController
             $schedule->users()->detach();
             $schedule->groups()->detach();
             $schedule->groups()->attach($typeId);
+        }
+
+        if ($input['coverLetter']) {
+            $schedule->coverLetter()->update([
+                'image' => $this->saveFileService
+                    ->setImage(base64ToFile($input['coverLetter']))
+                    ->setModel($schedule->coverLetter->image)
+                    ->setStorage('coverLetter')->handle()
+            ]);
         }
 
         return ResponseJson::make(ResponseCodeEnum::STATUS_OK, 'Schedule updated successfully')->send();

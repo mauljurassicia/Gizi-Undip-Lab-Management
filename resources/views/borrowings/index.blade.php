@@ -55,6 +55,7 @@
                                 .statusFilter ? '&statusFilter=' + this.statusFilter : '')).then(response => response
                                 .json()).then(
                                 data => data.data).finally(() => this.borrowingLoading = false);
+
                         },
                         editBorrowing(borrowing) {
                             $('#myModal').modal('show');
@@ -274,12 +275,14 @@
                                     </div>
                                     <div class="mt-2">
                                         <button type="button" class="btn btn-success btn-sm mt-2"
-                                            :disabled="borrowing.status !== 'approved' || borrowing.logBookIn || borrowing.NotAllowed"
+                                            :disabled="borrowing.status !== 'approved' || borrowing.logBookIn || borrowing
+                                                .NotAllowed"
                                             @click="openLogBookModal(borrowing, true)">
                                             <i class="fa fa-sign-in-alt"></i> Log Book In
                                         </button>
                                         <button type="button" class="btn btn-danger btn-sm mt-2"
-                                            :disabled="borrowing.status !== 'approved' || !borrowing.logBookIn || borrowing.logBookOut || borrowing.NotAllowed"
+                                            :disabled="borrowing.status !== 'approved' || !borrowing.logBookIn || borrowing
+                                                .logBookOut || borrowing.NotAllowed"
                                             @click="openLogBookModal(borrowing, false)">
                                             <i class="fa fa-sign-out-alt"></i> Log Book Out
                                         </button>

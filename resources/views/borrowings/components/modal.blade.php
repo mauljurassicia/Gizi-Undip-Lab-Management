@@ -47,6 +47,7 @@
             groups: [],
             groupLoading: false,
             activityName: '',
+            coverLetter: null,
             id: null,
             async fetchCurrentEquipmentQuantity() {
                 this.quantityLoading = true;
@@ -162,9 +163,68 @@
                     return false;
                 }
 
-                return true;
-            },
+                if (!this.isEdit && !this.coverLetter) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops...',
+                        text: 'Tolong upload cover letter !',
+                    });
 
+                    return false;
+                }
+
+                return true;
+
+
+            },
+            uploadCoverLetter(event) {
+                this.coverLetter = event.target.files[0];
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    this.coverLetter = e.target.result;
+                };
+                reader.readAsDataURL(this.coverLetter);
+            },
+            showCoverLetter() {
+                if (this.coverLetter !== null) {
+                    if (this.coverLetter.includes('data:image')) {
+                        $.fancybox.open({
+                            src: this.coverLetter,
+                            type: 'image',
+                            opts: {
+                                afterLoad: () => {
+                                    $('.fancybox-image').css('max-height', '100vh');
+                                }
+                            }
+                        });
+                    } else if (this.coverLetter.includes('data:application/pdf')) {
+                        $.fancybox.open({
+                            src: this.coverLetter,
+                            type: 'iframe',
+                            opts: {
+                                iframe: {
+                                    attr: {
+                                        scrolling: 'no'
+                                    }
+                                }
+                            }
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Oops...',
+                            text: 'Surat pengantar harus berupa gambar atau pdf !',
+                        });
+                    }
+
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops...',
+                        text: 'Surat pengantar belum diupload !',
+                    });
+                }
+            },
             async addBorrowing() {
                 if (!this.checkValidity()) return;
 
@@ -183,7 +243,8 @@
                         description: this.description,
                         borrowerType: this.borrowerType,
                         groupId: this.groupId,
-                        activityName: this.activityName
+                        activityName: this.activityName,
+                        coverLetter: this.coverLetter
                     })
                 }).then(response => response.json()).then(data => {
                     if (data.valid) {
@@ -195,7 +256,9 @@
                             timer: 1500
                         });
 
-                        this.$dispatch('update-table');
+                        setTimeout(() => {
+                            this.$dispatch('update-table');
+                        }, 500);
                         this.closeModal();
                     } else {
                         Swal.fire({
@@ -235,6 +298,7 @@
                     this.groupLoading = false;
                     this.activityName = "";
                     this.description = "";
+                    this.coverLetter = null;
                 }, 500);
             },
             openExistingModal(borrowing) {
@@ -260,10 +324,19 @@
                 this.openExistingModal(borrowing);
 
             },
-            showBorrowing(borrowing) {
+            async showBorrowing(borrowing) {
                 this.isShow = true;
                 this.isEdit = false;
                 this.openExistingModal(borrowing);
+                const response = await fetch(`/${borrowing.cover_letter?.image}`);
+                const blob = await response.blob();
+                const reader = new FileReader();
+                reader.readAsDataURL(blob);
+                reader.onload = e => {
+                    this.coverLetter = e.target.result;
+                }
+
+                console.log(this.coverLetter);
             },
             async updateBorrowing() {
                 if (!this.checkValidity()) return;
@@ -285,7 +358,8 @@
                         description: this.description,
                         borrowerType: this.borrowerType,
                         groupId: this.groupId,
-                        activityName: this.activityName
+                        activityName: this.activityName,
+                        coverLetter: this.coverLetter
                     })
                 }).then(response => response.json()).then(data => {
                     if (data.valid) {
@@ -297,7 +371,9 @@
                             timer: 1500
                         });
 
-                        this.$dispatch('update-table');
+                        setTimeout(() => {
+                            this.$dispatch('update-table');
+                        }, 500);
                         this.closeModal();
                     } else {
                         Swal.fire({
@@ -341,7 +417,8 @@
                 </div>
                 <div class="form-group">
                     {!! Form::label('equipment_id', 'Alat :') !!}
-                    <select name="equipment_id" id="equipment_id" class="form-control" required x-model="equipmentId" :readonly="isShow">
+                    <select name="equipment_id" id="equipment_id" class="form-control" required x-model="equipmentId"
+                        :readonly="isShow">
                         <option value="0">-- Pilih Alat --</option>
                         <template x-for="equipment in equipments">
                             <option x-text="equipment.name" :value="equipment.id"></option>
@@ -365,8 +442,8 @@
 
                 <div class="form-group">
                     <label for="borrower_type">Tipe</label>
-                    <select name="borrower_type" id="borrower_type" class="form-control" required
-                        x-model="borrowerType" :readonly="isShow">
+                    <select name="borrower_type" id="borrower_type" class="form-control" required x-model="borrowerType"
+                        :readonly="isShow">
                         <option value="0">-- Pilih Tipe --</option>
                         <option value="1">Perorangan</option>
                         <option value="2">Kelompok</option>
@@ -449,7 +526,18 @@
                         </div>
                         <div class="form-group">
                             {!! Form::label('cover_letter', 'Surat Pengantar : ') !!}
-                            {!! Form::file('cover_letter', ['class' => 'form-control', 'x-model' => 'coverLetter']) !!}
+                            <template x-if="!isShow">
+                                {!! Form::file('cover_letter', [
+                                    'class' => 'form-control',
+                                    '@change' => 'uploadCoverLetter($event)',
+                                    'accept' => 'application/pdf,image/*',
+                                ]) !!}
+                            </template>
+                            <template x-if="isShow">
+                                <button type="button" class="btn btn-primary d-block w-100"
+                                    @click.prevent="showCoverLetter">
+                                    <i class="fa fa-eye"></i> Lihat Surat Pengantar</button>
+                            </template>
                         </div>
                         <div class="form-group">
                             {!! Form::label('description', 'Keterangan : ') !!}
@@ -473,10 +561,10 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" @click.prevent="closeModal">Batal</button>
-                <template x-if="isEdit">
+                <template x-if="isEdit && !isShow">
                     <button type="submit" class="btn btn-primary" @click.prevent="updateBorrowing">Perbarui</button>
                 </template>
-                <template x-if="!isEdit">
+                <template x-if="!isEdit && !isShow">
                     <button type="submit" class="btn btn-primary" @click.prevent="addBorrowing">Pinjam</button>
                 </template>
             </div>

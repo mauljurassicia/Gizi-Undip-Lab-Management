@@ -173,7 +173,9 @@ class BorrowingController extends AppBaseController
 
 
 
-        $this->borrowingRepository->create([
+
+
+        $borrowing = $this->borrowingRepository->create([
             'room_id' => $room->id,
             'equipment_id' => $equipment->id,
             'start_date' => $startDate,
@@ -184,8 +186,21 @@ class BorrowingController extends AppBaseController
             'activity_name' => $request->input('activityName'),
             'description' => $request->input('description'),
             'status' => 'pending',
-            'creator_id' => $user->id
+            'creator_id' => $user->id,
+
         ]);
+
+        if ($request->input('coverLetter')) {
+            $borrowing->coverLetter()->create(
+                [
+                    'image' => $this->saveFileService
+                        ->setImage(base64ToFile($request->input('coverLetter')))
+                        ->setStorage('coverLetter')->handle()
+                ]
+            );
+        }
+
+
 
 
         return ResponseJson::make(ResponseCodeEnum::STATUS_OK, 'Borrowing added')->send();
@@ -232,7 +247,7 @@ class BorrowingController extends AppBaseController
 
 
 
-        $this->borrowingRepository->update([
+        $borrowing = $this->borrowingRepository->update([
             'room_id' => $room->id,
             'equipment_id' => $equipment->id,
             'start_date' => $startDate,
@@ -244,6 +259,15 @@ class BorrowingController extends AppBaseController
             'description' => $request->input('description'),
             'status' => 'pending'
         ], $id);
+
+        if($request->input('coverLetter')) {
+            $borrowing->coverLetter()->update([
+                'image' => $this->saveFileService
+                    ->setImage(base64ToFile($request->input('coverLetter')))
+                    ->setStorage('coverLetter')
+                    ->setModel($borrowing->coverLetter->image)->handle()
+            ]);
+        }
 
         return ResponseJson::make(ResponseCodeEnum::STATUS_OK, 'Borrowing updated')->send();
     }
@@ -266,7 +290,7 @@ class BorrowingController extends AppBaseController
                 return $query->where('room_id', request('roomFilter'));
             })->when($request->has("statusFilter"), function ($query) {
                 return $query->where('status', request('statusFilter'));
-            })->with(['room', 'equipment'])->orderBy('start_date', 'desc')->orderBy('id', 'desc')->get()->append('logBookOut')->append('logBookIn')->append('NotAllowed')->append('creatorRole');
+            })->with(['room', 'equipment', 'coverLetter'])->orderBy('start_date', 'desc')->orderBy('id', 'desc')->get()->append('logBookOut')->append('logBookIn')->append('NotAllowed')->append('creatorRole');
 
             return ResponseJson::make(ResponseCodeEnum::STATUS_OK, 'Borrowings found', $borrowings)->send();
         }
@@ -287,7 +311,7 @@ class BorrowingController extends AppBaseController
                     $subQuery->where('users.id', $user->id);
                 });
             });
-        })->with(['room', 'equipment'])->orderBY('start_date', 'desc')->orderBy('id', 'desc')->get()->append('logBookOut')->append('logBookIn')->append('NotAllowed')->append('creatorRole');
+        })->with(['room', 'equipment', 'coverLetter'])->orderBY('start_date', 'desc')->orderBy('id', 'desc')->get()->append('logBookOut')->append('logBookIn')->append('NotAllowed')->append('creatorRole');
 
         if (empty($borrowings)) {
             return ResponseJson::make(ResponseCodeEnum::STATUS_NOT_FOUND, 'Borrowings not found')->send();
@@ -541,6 +565,7 @@ class BorrowingController extends AppBaseController
         }
 
         $borrowing->logBooks()->delete();
+        $borrowing->coverLetter()->delete();
 
         $this->borrowingRepository->delete($id);
 

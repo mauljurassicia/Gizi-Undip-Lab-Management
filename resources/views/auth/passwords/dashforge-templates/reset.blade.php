@@ -14,7 +14,7 @@
     {{-- <link rel="manifest" href="site.webmanifest"> --}}
 
 
-    <title>Webcore - Web Backend Generate</title>
+    <title>Lab Management - Management System</title>
 
     <!-- vendor css -->
     <link href="{{ asset('vendor/dashforge/lib/@fortawesome/fontawesome-free/css/all.min.css') }}" rel="stylesheet">
@@ -30,7 +30,7 @@
       <a href="" id="mainMenuOpen" class="burger-menu"><i data-feather="menu"></i></a>
       <div class="navbar-brand">
         <a href=" {{ url('/') }} " class="df-logo">
-          <img src="{{ asset('webcore-logo.png') }}" alt="Webcore" width="120">
+          <img src="{{ asset('S1-Gizi.png') }}" alt="Logo Gizi Undip" width="120">
         </a>
       </div>
     </header>
@@ -86,8 +86,8 @@
 
     <footer class="footer">
       <div>
-        <span>&copy; 2019 Webcore v1.0.0. </span>
-        <span>Created by <a href="javascript:void(0)">Redtech</a></span>
+        <span>&copy; 2024 Lab Management v1.0.0. </span>
+        <span>Created by <a href="javascript:void(0)">Muhamad Maulana Ihsan</a></span>
       </div>
       <div>
         <nav class="nav">

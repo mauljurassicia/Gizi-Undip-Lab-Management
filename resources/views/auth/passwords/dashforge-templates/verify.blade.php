@@ -1,38 +1,39 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+
+<head>
 
     <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
     <!-- Twitter -->
-    <meta name="twitter:site" content="@redtech">
-    <meta name="twitter:creator" content="@redtech">
+    <meta name="twitter:site" content="@maulihsan">
+    <meta name="twitter:creator" content="@maulihsan">
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Webcore">
+    <meta name="twitter:title" content="Lab Management">
     <meta name="twitter:description" content="Responsive Bootstrap 4 Dashboard Template">
-    <meta name="twitter:image" content="https://via.placeholder.com/1260x950?text=Webcore">
+    <meta name="twitter:image" content="https://via.placeholder.com/1260x950?text=Lab Management">
 
     <!-- Facebook -->
     <meta property="og:url" content="https://dandisy.github.io">
-    <meta property="og:title" content="Webcore">
-    <meta property="og:description" content="Webcore - Web Backend Generate">
+    <meta property="og:title" content="Lab Management">
+    <meta property="og:description" content="Lab Management - Management System">
 
-    <meta property="og:image" content="https://via.placeholder.com/1260x950?text=Webcore">
-    <meta property="og:image:secure_url" content="https://via.placeholder.com/1260x950?text=Webcore">
+    <meta property="og:image" content="https://via.placeholder.com/1260x950?text=Lab Management">
+    <meta property="og:image:secure_url" content="https://via.placeholder.com/1260x950?text=Lab Management">
     <meta property="og:image:type" content="image/png">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="600">
 
     <!-- Meta -->
-    <meta name="description" content="Webcore - Web Backend Generate">
-    <meta name="author" content="Redtech">
+    <meta name="description" content="Lab App - Web Backend Generate">
+    <meta name="author" content="Maulihsan">
 
     <!-- Favicon -->
     <link rel="shortcut icon" type="image/x-icon" href="{{ asset('favicon.png') }}">
 
-    <title>Webcore - Web Backend Generate</title>
+    <title>Lab App - Web Backend Generate</title>
 
     <!-- vendor css -->
     <link href="{{ asset('vendor/dashforge/lib/@fortawesome/fontawesome-free/css/all.min.css') }}" rel="stylesheet">
@@ -43,22 +44,23 @@
     <link rel="stylesheet" href="{{ asset('vendor/dashforge/assets/css/dashforge.auth.css') }}">
 
     <style>
-    .df-settings {
-      display: none;
-    }
+        .df-settings {
+            display: none;
+        }
     </style>
-  </head>
-  <body>
+</head>
+
+<body>
 
     <header class="navbar navbar-header navbar-header-fixed">
-      <a href="" id="mainMenuOpen" class="burger-menu"><i data-feather="menu"></i></a>
-      <div class="navbar-brand">
-        <a href=" {{ url('/') }} " class="df-logo">
-          <!-- web<span>core</span> -->        
-          <img src="{{ asset('webcore-logo.png') }}" alt="Webcore" width="120">
-        </a>
-      </div><!-- navbar-brand -->
-      {{--<div id="navbarMenu" class="navbar-menu-wrapper">
+        <a href="" id="mainMenuOpen" class="burger-menu"><i data-feather="menu"></i></a>
+        <div class="navbar-brand">
+            <a href=" {{ url('/') }} " class="df-logo">
+                <!-- web<span>core</span> -->
+                <img src="{{ asset('Lab App-logo.png') }}" alt="Lab App" width="120">
+            </a>
+        </div><!-- navbar-brand -->
+        {{-- <div id="navbarMenu" class="navbar-menu-wrapper">
         <div class="navbar-menu-header">
           <a href="../../index.html" class="df-logo">web<span>app</span></a>
           <a id="mainMenuClose" href=""><i data-feather="x"></i></a>
@@ -118,42 +120,45 @@
           <li class="nav-item"><a href="../../components/" class="nav-link"><i data-feather="box"></i> Components</a></li>
           <li class="nav-item"><a href="../../collections/" class="nav-link"><i data-feather="archive"></i> Collections</a></li>
         </ul>
-      </div><!-- navbar-menu-wrapper -->--}}
-      {{--<div class="navbar-right">
+      </div><!-- navbar-menu-wrapper --> --}}
+        {{-- <div class="navbar-right">
         <a href="http://dribbble.com/themepixels" class="btn btn-social"><i class="fab fa-dribbble"></i></a>
         <a href="https://github.com/themepixels" class="btn btn-social"><i class="fab fa-github"></i></a>
         <a href="https://twitter.com/themepixels" class="btn btn-social"><i class="fab fa-twitter"></i></a>
         <a href="https://themeforest.net/item/azia-responsive-bootstrap-4-dashboard-template/22983790" class="btn btn-buy"><i data-feather="shopping-bag"></i> <span>Buy Now</span></a>
-      </div><!-- navbar-right -->--}}
+      </div><!-- navbar-right --> --}}
     </header><!-- navbar -->
 
     <div class="content content-fixed content-auth-alt">
-      <div class="container ht-100p">
-        <div class="ht-100p d-flex flex-column align-items-center justify-content-center">
-          <div class="wd-150 wd-sm-250 mg-b-30"><img src="https://source.unsplash.com/250x190/?tech,software" class="img-fluid" alt=""></div>
-          <h4 class="tx-20 tx-sm-24">Verify your email address</h4>
-          <p class="tx-color-03 mg-b-40">Please check your email and click the verify button or link to verify your account.</p>
-          <div class="tx-13 tx-lg-14 mg-b-40">
-            <a href="" class="btn btn-brand-02 d-inline-flex align-items-center">Resend Verification</a>
-            <a href="" class="btn btn-white d-inline-flex align-items-center mg-l-5">Contact Support</a>
-          </div>
-          <span class="tx-12 tx-color-03">Simple embedding for <a href="https://source.unsplash.com" target="_blank">unsplash (source.unsplash.com) photos</a></span>
-        </div>
-      </div><!-- container -->
+        <div class="container ht-100p">
+            <div class="ht-100p d-flex flex-column align-items-center justify-content-center">
+                <div class="wd-150 wd-sm-250 mg-b-30"><img src="https://source.unsplash.com/250x190/?tech,software"
+                        class="img-fluid" alt=""></div>
+                <h4 class="tx-20 tx-sm-24">Verify your email address</h4>
+                <p class="tx-color-03 mg-b-40">Please check your email and click the verify button or link to verify
+                    your account.</p>
+                <div class="tx-13 tx-lg-14 mg-b-40">
+                    <a href="" class="btn btn-brand-02 d-inline-flex align-items-center">Resend Verification</a>
+                    <a href="" class="btn btn-white d-inline-flex align-items-center mg-l-5">Contact Support</a>
+                </div>
+                <span class="tx-12 tx-color-03">Simple embedding for <a href="https://source.unsplash.com"
+                        target="_blank">unsplash (source.unsplash.com) photos</a></span>
+            </div>
+        </div><!-- container -->
     </div><!-- content -->
 
     <footer class="footer">
-      <div>
-        <span>&copy; 2019 Webcore v1.0.0. </span>
-        <span>Created by <a href="javascript:void(0)">Redtech</a></span>
-      </div>
-      <div>
-        <nav class="nav">
-          <a href="javascript:void(0)" class="nav-link">Licenses</a>
-          <a href="javascript:void(0)" class="nav-link">Change Log</a>
-          <a href="javascript:void(0)" class="nav-link">Get Help</a>
-        </nav>
-      </div>
+        <div>
+            <span>&copy; 2019 Lab App v1.0.0. </span>
+            <span>Created by <a href="javascript:void(0)">Maulihsan</a></span>
+        </div>
+        <div>
+            <nav class="nav">
+                <a href="javascript:void(0)" class="nav-link">Licenses</a>
+                <a href="javascript:void(0)" class="nav-link">Change Log</a>
+                <a href="javascript:void(0)" class="nav-link">Get Help</a>
+            </nav>
+        </div>
     </footer>
 
     <script src="{{ asset('vendor/dashforge/lib/jquery/jquery.min.js') }}"></script>
@@ -167,5 +172,6 @@
     <script src="{{ asset('vendor/dashforge/lib/js-cookie/js.cookie.js') }}"></script>
     <script src="{{ asset('vendor/dashforge/assets/js/dashforge.settings.js') }}"></script>
 
-  </body>
+</body>
+
 </html>

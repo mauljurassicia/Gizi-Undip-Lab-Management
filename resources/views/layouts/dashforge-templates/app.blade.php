@@ -10,8 +10,8 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <!-- Meta -->
-    <meta name="description" content="Webcore - Web Backend Generate">
-    <meta name="author" content="Redtech">
+    <meta name="description" content="Lab App - Web Backend Generate">
+    <meta name="author" content="Maulihsan">
 
     <!-- Favicon -->
     <link rel="apple-touch-icon" sizes="180x180" href="{{ asset('undip.png') }}">

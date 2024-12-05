@@ -1,19 +1,19 @@
 @extends('layouts.app')
 
 @section('contents')
-    {{--<section class="content-header">
+    {{-- <section class="content-header">
         <h1>
             Permissiongroup
-        </h1>--}}
-        
-        {{--@include('webcore.permissiongroups.version')--}}
-    {{--</section>--}}
+        </h1> --}}
+
+    {{-- @include('Lab App.permissiongroups.version') --}}
+    {{-- </section> --}}
     <div class="content">
         <h4 class="mg-b-30">Permissiongroup</h4>
 
         <div class="box box-primary">
             <div class="box-body">
-                @include('permissiongroups.show_fields')                
+                @include('permissiongroups.show_fields')
 
                 <div class="clearfix"></div>
                 <hr>

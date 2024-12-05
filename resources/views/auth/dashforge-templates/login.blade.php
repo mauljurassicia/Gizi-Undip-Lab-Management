@@ -50,7 +50,7 @@
         <a href="#" id="mainMenuOpen" class="burger-menu"><i data-feather="menu"></i></a>
         <div class="navbar-brand ">
             <a href=" {{ url('/') }} " class="df-logo">
-                <img src="{{ asset('S1-Gizi.png') }}" alt="Webcore" width="120">
+                <img src="{{ asset('S1-Gizi.png') }}" alt="Logo Gizi Undip" width="120">
             </a>
         </div>
     </header>
@@ -102,8 +102,8 @@
 
     <footer class="footer">
         <div>
-            <span>&copy; {{ date('Y') }} Webcore v1.1.0. </span>
-            <span>Created by <a href="https://redtech.co.id">Redtech</a></span>
+            <span>&copy; {{ date('Y') }} Lab Management v1.1.0. </span>
+            <span>Created by <a href="https://github.com/jurassicia">Muhamad Maulana Ihsan</a></span>
         </div>
         <div>
             <nav class="nav">
